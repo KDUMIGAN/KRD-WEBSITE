@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRD Engineering & Management — Engineering & Project Services</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/logos/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logos/favicon-180.png">
+<style>
+  :root{
+    --grey:#414142;
+    --grey-soft:#5c5c5e;
+    --lime:#e3e421;
+    --paper:#fafaf8;
+    --panel:#ffffff;
+    --line:#e4e3dd;
+    --muted:#79787a;
+    --font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--grey);
+    font-family:var(--font);
+    line-height:1.5;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* NAV */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    transition:box-shadow 0.2s ease;
+  }
+  nav.scrolled{box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+  .nav-inner{
+    max-width:1080px;margin:0 auto;padding:16px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .logo-mark{
+    display:flex;align-items:center;gap:10px;
+    text-decoration:none;
+  }
+  .logo-icon{height:40px;width:40px;display:block;flex-shrink:0;}
+  .logo-text{font-size:12px;font-weight:500;line-height:1.3;color:var(--grey-soft);}
+  .logo-plus{color:var(--lime);}
+  .nav-links{display:flex;gap:32px;font-size:14px;font-weight:500;}
+  .nav-links a{text-decoration:none;color:var(--grey-soft);position:relative;padding-bottom:4px;}
+  .nav-links a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--lime);transition:width 0.2s ease;}
+  .nav-links a:hover{color:var(--grey);}
+  .nav-links a:hover::after{width:100%;}
+  .nav-cta{
+    background:var(--grey);color:var(--paper);
+    padding:9px 18px;font-size:13px;font-weight:600;
+    text-decoration:none;transition:transform 0.15s ease,background 0.15s ease,color 0.15s ease;
+    display:inline-block;
+  }
+  .nav-cta:hover{background:var(--lime);color:var(--grey);transform:translateY(-2px);}
+  @media (max-width:720px){.nav-links{display:none;}.nav-cta{display:none;}}
+  .nav-burger{
+    display:none;flex-direction:column;justify-content:center;gap:5px;
+    width:34px;height:34px;background:none;border:none;cursor:pointer;padding:0;
+  }
+  .nav-burger span{display:block;width:100%;height:2px;background:var(--grey);transition:transform 0.2s ease,opacity 0.2s ease;}
+  @media (max-width:720px){.nav-burger{display:flex;}}
+  .nav-overlay{
+    position:fixed;inset:0;z-index:100;background:var(--grey);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+    opacity:0;pointer-events:none;transition:opacity 0.25s ease;
+  }
+  .nav-overlay.open{opacity:1;pointer-events:auto;}
+  .nav-overlay a{color:var(--paper);text-decoration:none;font-size:24px;font-weight:600;}
+  .nav-overlay a:hover{color:var(--lime);}
+  .nav-overlay-close{
+    position:absolute;top:20px;right:20px;
+    background:none;border:none;color:var(--paper);font-size:32px;line-height:1;cursor:pointer;
+  }
+  .nav-overlay-cta{
+    margin-top:8px;background:var(--lime);color:var(--grey);
+    padding:12px 26px;font-size:14px;font-weight:700;text-decoration:none;
+  }
+
+  /* HERO */
+  .hero{
+    padding:56px 0 64px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.15fr 0.85fr;
+    gap:40px;
+    align-items:center;
+  }
+  @media (max-width:800px){.hero-grid{grid-template-columns:1fr;}.hero-visual{display:none;}}
+  .hero-visual{
+    position:relative;
+    aspect-ratio:1/1;
+    overflow:hidden;
+  }
+  .hero-visual img{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .hero-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--grey-soft);margin-bottom:22px;
+  }
+  .hero-eyebrow::before{
+    content:'';width:22px;height:3px;background:var(--lime);display:inline-block;
+  }
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity 0.6s ease,transform 0.6s ease;}
+  .reveal.shown{opacity:1;transform:translateY(0);}
+  h1{
+    font-size:clamp(34px,5.4vw,58px);
+    font-weight:700;
+    letter-spacing:-0.015em;
+    margin:0 0 22px;
+    max-width:16ch;
+    line-height:1.05;
+  }
+  .hero-lead{
+    font-size:18px;
+    color:var(--grey-soft);
+    max-width:56ch;
+    margin:0 0 36px;
+  }
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--grey);color:var(--paper);
+    padding:14px 26px;font-size:14px;font-weight:600;
+    text-decoration:none;border:1px solid var(--grey);
+    transition:transform 0.15s ease,background 0.15s ease,color 0.15s ease;
+    display:inline-block;
+  }
+  .btn-primary:hover{background:var(--lime);color:var(--grey);border-color:var(--lime);transform:translateY(-3px);}
+  .btn-ghost{
+    padding:14px 26px;font-size:14px;font-weight:600;
+    text-decoration:none;color:var(--grey);border:1px solid var(--grey);
+    transition:transform 0.15s ease,background 0.15s ease,color 0.15s ease;
+    display:inline-block;
+  }
+  .btn-ghost:hover{background:var(--grey);color:var(--paper);transform:translateY(-3px);}
+
+  .hero-industries{
+    margin-top:56px;
+    display:flex;gap:10px;flex-wrap:wrap;
+  }
+  .industry-chip{
+    font-size:12.5px;font-weight:600;
+    color:var(--grey-soft);
+    border:1px solid var(--line);
+    padding:7px 14px;
+    background:var(--panel);
+  }
+
+  /* SECTION SHARED */
+  section{padding:56px 0;}
+  .section-head{max-width:640px;margin-bottom:36px;}
+  .eyebrow{
+    font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--grey-soft);margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:'';width:16px;height:2px;background:var(--lime);}
+  h2{font-size:clamp(26px,3.2vw,34px);font-weight:700;letter-spacing:-0.01em;margin:0 0 14px;}
+  .section-lead{color:var(--grey-soft);font-size:16px;max-width:60ch;}
+
+  /* ABOUT */
+  .about{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .about p{font-size:16.5px;color:var(--grey-soft);max-width:68ch;margin:0 0 18px;}
+  .about p:last-child{margin-bottom:0;}
+
+  /* CAPABILITIES — desktop overlapping row */
+  .cap-row{display:flex;height:280px;margin-top:8px;}
+  @media (max-width:800px){.cap-row{display:none;}}
+  .cap-tile{
+    position:relative;flex:1;z-index:1;
+    overflow:hidden;padding:26px 22px;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    transition:flex 0.25s ease,transform 0.25s ease;
+    cursor:pointer;
+  }
+  .cap-tile + .cap-tile{margin-left:-14px;}
+  .cap-tile.cap-dark{background:var(--grey);color:var(--paper);}
+  .cap-tile.cap-lime{background:var(--lime);color:var(--grey);}
+  .cap-tile .cap-index{
+    font-size:12px;font-weight:700;letter-spacing:.08em;
+    margin-bottom:auto;opacity:0.7;
+  }
+  .cap-tile h3{font-size:16.5px;margin:0 0 10px;font-weight:700;line-height:1.25;}
+  .cap-tile ul{
+    margin:0;padding:0;list-style:none;
+    max-height:0;opacity:0;overflow:hidden;
+    transition:max-height 0.25s ease,opacity 0.2s ease;
+  }
+  .cap-tile.active ul{max-height:150px;opacity:1;}
+  .cap-tile li{font-size:13px;padding:4px 0 4px 14px;position:relative;}
+  .cap-tile.cap-dark li::before{content:'';position:absolute;left:0;top:11px;width:5px;height:5px;background:var(--lime);}
+  .cap-tile.cap-lime li::before{content:'';position:absolute;left:0;top:11px;width:5px;height:5px;background:var(--grey);}
+
+  /* CAPABILITIES — mobile tap-to-expand accordion */
+  .cap-mobile{display:none;}
+  @media (max-width:800px){.cap-mobile{display:block;margin-top:8px;}}
+  .cap-acc{background:var(--grey);padding:8px 24px;}
+  .cap-acc-row{border-top:1px solid rgba(255,255,255,0.14);}
+  .cap-acc-row:last-child{border-bottom:1px solid rgba(255,255,255,0.14);}
+  .cap-acc-head{
+    width:100%;text-align:left;background:none;border:none;
+    color:var(--lime);font-size:14.5px;font-weight:700;font-family:inherit;
+    padding:16px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  }
+  .cap-acc-head::after{content:'+';color:#c8c8c8;font-size:18px;font-weight:400;transition:transform 0.2s ease;}
+  .cap-acc-row.active .cap-acc-head::after{transform:rotate(45deg);}
+  .cap-acc-body{max-height:0;overflow:hidden;transition:max-height 0.25s ease;}
+  .cap-acc-row.active .cap-acc-body{max-height:160px;}
+  .cap-acc-body p{color:#c8c8c8;font-size:13px;margin:0 0 16px;line-height:1.5;}
+
+  /* EXPERTISE — brick layout */
+  .expertise{background:var(--grey);color:var(--paper);}
+  .expertise .eyebrow{color:#c8c8c8;}
+  .expertise .eyebrow::before{background:var(--lime);}
+  .expertise h2{color:var(--paper);}
+  .expertise .section-lead{color:#b9b9ba;}
+  .brick-grid{margin-top:40px;}
+  .brick-row{display:flex;gap:3px;margin-bottom:3px;}
+  .brick-row:last-child{margin-bottom:0;}
+  .brick{
+    background:#5c5c5e;color:var(--paper);
+    font-size:13px;font-weight:600;
+    padding:16px 16px;
+    transition:background 0.15s ease,color 0.15s ease;
+    cursor:default;
+  }
+  .brick:hover{background:var(--lime);color:var(--grey);}
+  @media (max-width:640px){
+    .brick-row{flex-wrap:wrap;}
+    .brick{flex:1 1 100% !important;}
+  }
+
+  /* WHY */
+  .why-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:36px;
+    margin-top:8px;
+  }
+  @media (max-width:560px){.why-grid{grid-template-columns:1fr;}}
+  .why-card{border-top:3px solid var(--lime);padding-top:18px;}
+  .why-card h3{font-size:17px;margin:0 0 10px;font-weight:700;}
+  .why-card p{font-size:14.5px;color:var(--grey-soft);margin:0;}
+
+  /* CONTACT */
+  .contact{
+    background:var(--panel);
+    border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .contact-inner{
+    max-width:640px;margin:0 auto;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .contact .eyebrow{justify-content:center;}
+  .contact h2{margin-bottom:10px;}
+  .contact .section-lead{margin:0 auto 28px;}
+  footer{
+    padding:32px 0;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--muted);
+  }
+  .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+</style>
+</head>
+<body>
+
+<nav id="siteNav">
+  <div class="nav-inner">
+    <a href="#" class="logo-mark">
+      <img src="assets/logos/nav-mark.png" alt="KRD" class="logo-icon">
+      <span class="logo-text">Engineering <span class="logo-plus">+</span><br>Management</span>
+    </a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#expertise">Expertise</a>
+      <a href="#why">Why KRD</a>
+      <a href="portfolio.html">Portfolio</a>
+    </div>
+    <a href="#contact" class="nav-cta">Get in touch</a>
+    <button class="nav-burger" id="navBurger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="nav-overlay" id="navOverlay">
+  <button class="nav-overlay-close" id="navOverlayClose" aria-label="Close menu">&times;</button>
+  <a href="#about">About</a>
+  <a href="#capabilities">Capabilities</a>
+  <a href="#expertise">Expertise</a>
+  <a href="#why">Why KRD</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="#contact" class="nav-overlay-cta">Get in touch</a>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow reveal">Engineering &amp; Project Services</div>
+        <h1 class="reveal">Practical engineering, from concept through to implementation.</h1>
+        <p class="hero-lead reveal">KRD Group is an Australian engineering consultancy delivering practical engineering, project management, and technical solutions to the mining, industrial, manufacturing, and infrastructure sectors.</p>
+        <div class="hero-actions reveal">
+          <a href="#capabilities" class="btn-primary">View capabilities</a>
+          <a href="#contact" class="btn-ghost">Get in touch</a>
+        </div>
+        <div class="hero-industries reveal">
+          <span class="industry-chip">Mining</span>
+          <span class="industry-chip">Industrial</span>
+          <span class="industry-chip">Manufacturing</span>
+          <span class="industry-chip">Infrastructure</span>
+          <span class="industry-chip">Energy</span>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <img src="assets/logos/symbol-grey-hero.png" alt="KRD symbol">
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="about" id="about">
+  <div class="wrap">
+    <div class="eyebrow">About</div>
+    <h2>Concept through implementation</h2>
+    <p>Combining engineering design, project delivery experience, automation capability, and rapid prototyping, KRD Group helps clients solve technical challenges, improve existing assets, and develop innovative solutions from concept through to implementation.</p>
+    <p>We provide flexible support throughout the project lifecycle — from concept development and design through to documentation, site support, commissioning, and continuous improvement.</p>
+  </div>
+</section>
+
+<section id="capabilities">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Core Capabilities</div>
+      <h2>What we deliver</h2>
+      <p class="section-lead">Five capability areas covering the full span of a project — design, delivery, prototyping, automation, and ongoing asset improvement.</p>
+    </div>
+    <div class="cap-row" id="capRow">
+      <div class="cap-tile cap-dark" data-i="0">
+        <div class="cap-index">01</div>
+        <h3>Engineering Design &amp; Documentation</h3>
+        <ul>
+          <li>Engineering drawings and technical documentation</li>
+          <li>AutoCAD drafting and Autodesk Inventor 3D modelling</li>
+          <li>Design improvements and modifications</li>
+          <li>Engineering calculations and design support</li>
+        </ul>
+      </div>
+      <div class="cap-tile cap-lime" data-i="1">
+        <div class="cap-index">02</div>
+        <h3>Project Management &amp; Technical Support</h3>
+        <ul>
+          <li>Project planning and coordination</li>
+          <li>Stakeholder and contractor communication</li>
+          <li>Project documentation and reporting</li>
+          <li>Site support and technical assistance</li>
+        </ul>
+      </div>
+      <div class="cap-tile cap-dark" data-i="2">
+        <div class="cap-index">03</div>
+        <h3>Prototyping &amp; Product Development</h3>
+        <ul>
+          <li>Concept development and design refinement</li>
+          <li>3D modelling and prototype development</li>
+          <li>Design verification and testing support</li>
+          <li>Software development and technical solutions</li>
+          <li>Product improvement and iteration</li>
+        </ul>
+      </div>
+      <div class="cap-tile cap-lime" data-i="3">
+        <div class="cap-index">04</div>
+        <h3>Automation &amp; Control Systems</h3>
+        <ul>
+          <li>PLC programming and industrial automation support</li>
+          <li>Control system development and integration</li>
+          <li>Electrical and instrumentation support</li>
+          <li>Commissioning assistance</li>
+        </ul>
+      </div>
+      <div class="cap-tile cap-dark" data-i="4">
+        <div class="cap-index">05</div>
+        <h3>Asset Improvement &amp; Optimisation</h3>
+        <ul>
+          <li>Equipment improvement solutions</li>
+          <li>Reliability and maintenance improvements</li>
+          <li>Reverse engineering and modifications</li>
+          <li>Practical solutions for operational challenges</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cap-mobile">
+      <div class="cap-acc" id="capAcc">
+        <div class="cap-acc-row active" data-i="0">
+          <button class="cap-acc-head" type="button">Engineering Design &amp; Documentation</button>
+          <div class="cap-acc-body"><p>Engineering drawings, AutoCAD and Inventor 3D modelling, design improvements and calculations.</p></div>
+        </div>
+        <div class="cap-acc-row" data-i="1">
+          <button class="cap-acc-head" type="button">Project Management &amp; Technical Support</button>
+          <div class="cap-acc-body"><p>Planning, coordination, stakeholder communication, reporting and site support.</p></div>
+        </div>
+        <div class="cap-acc-row" data-i="2">
+          <button class="cap-acc-head" type="button">Prototyping &amp; Product Development</button>
+          <div class="cap-acc-body"><p>Concept development, 3D modelling, testing support and product iteration.</p></div>
+        </div>
+        <div class="cap-acc-row" data-i="3">
+          <button class="cap-acc-head" type="button">Automation &amp; Control Systems</button>
+          <div class="cap-acc-body"><p>PLC programming, control system integration, electrical support and commissioning.</p></div>
+        </div>
+        <div class="cap-acc-row" data-i="4">
+          <button class="cap-acc-head" type="button">Asset Improvement &amp; Optimisation</button>
+          <div class="cap-acc-body"><p>Equipment improvement, reliability upgrades, reverse engineering and practical fixes.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="expertise" id="expertise">
+  <div class="wrap">
+    <div class="eyebrow">Technical Expertise</div>
+    <h2>Tools and skills we work with</h2>
+    <p class="section-lead">The software and technical foundations behind every project.</p>
+    <div class="brick-grid">
+      <div class="brick-row">
+        <div class="brick" style="flex:2;">Autodesk AutoCAD</div>
+        <div class="brick" style="flex:2;">Autodesk Inventor</div>
+        <div class="brick" style="flex:2;">Microsoft Project</div>
+      </div>
+      <div class="brick-row">
+        <div class="brick" style="flex:2;">Microsoft 365</div>
+        <div class="brick" style="flex:3;">Mechanical &amp; electrical design support</div>
+        <div class="brick" style="flex:3;">CAD modelling and drafting</div>
+      </div>
+      <div class="brick-row">
+        <div class="brick" style="flex:3;">Industrial control systems</div>
+        <div class="brick" style="flex:2;">PLC programming</div>
+        <div class="brick" style="flex:3;">Technical problem solving</div>
+      </div>
+      <div class="brick-row">
+        <div class="brick" style="flex:3;">Prototype development</div>
+        <div class="brick" style="flex:4;">Software development and programming</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Why KRD Group</div>
+      <h2>Built for practical delivery</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card">
+        <h3>Practical Engineering Solutions</h3>
+        <p>Delivering technically sound solutions focused on reliability, functionality, and real-world implementation.</p>
+      </div>
+      <div class="why-card">
+        <h3>Flexible Project Support</h3>
+        <p>Providing scalable assistance from short-term technical support through to ongoing project involvement.</p>
+      </div>
+      <div class="why-card">
+        <h3>Concept Through Implementation</h3>
+        <p>Bridging the gap between ideas and outcomes through design, documentation, prototyping, automation, and project delivery.</p>
+      </div>
+      <div class="why-card">
+        <h3>Regional &amp; Australia-Wide Support</h3>
+        <p>Supporting clients locally, remotely, and across Australia with flexible engineering services.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="contact-inner">
+      <div class="eyebrow">Get in touch</div>
+      <h2>Let's talk about your project</h2>
+      <p class="section-lead">Reach out to discuss engineering design, project support, or a technical challenge you're working through.</p>
+      <a href="mailto:info@krdgroup.com.au" class="btn-primary">info@krdgroup.com.au</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>&copy; 2026 KRD Engineering &amp; Management</span>
+    <span>KRD Group — Mining · Industrial · Manufacturing · Infrastructure · Energy</span>
+  </div>
+</footer>
+
+<script>
+  // Desktop: overlapping tile row that breathes on hover
+  (function(){
+    var tiles = Array.prototype.slice.call(document.querySelectorAll('#capRow .cap-tile'));
+    tiles.forEach(function(el, i){
+      el.addEventListener('mouseenter', function(){
+        tiles.forEach(function(t, j){
+          var dist = Math.abs(j - i);
+          t.style.flex = j === i ? '2.6' : (dist === 1 ? '0.85' : '0.65');
+          t.style.transform = j === i ? 'translateY(-10px)' : 'translateY(0)';
+          t.style.zIndex = j === i ? '5' : '1';
+          t.classList.toggle('active', j === i);
+        });
+      });
+    });
+    var row = document.getElementById('capRow');
+    if (row) {
+      row.addEventListener('mouseleave', function(){
+        tiles.forEach(function(t){
+          t.style.flex = '1';
+          t.style.transform = 'translateY(0)';
+          t.style.zIndex = '1';
+          t.classList.remove('active');
+        });
+      });
+    }
+  })();
+
+  // Mobile: tap-to-expand capability accordion
+  (function(){
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#capAcc .cap-acc-row'));
+    rows.forEach(function(row){
+      var head = row.querySelector('.cap-acc-head');
+      head.addEventListener('click', function(){
+        var wasActive = row.classList.contains('active');
+        rows.forEach(function(r){ r.classList.remove('active'); });
+        if (!wasActive) { row.classList.add('active'); }
+      });
+    });
+  })();
+
+  // Mobile nav: hamburger opens full-screen overlay
+  (function(){
+    var burger = document.getElementById('navBurger');
+    var overlay = document.getElementById('navOverlay');
+    var closeBtn = document.getElementById('navOverlayClose');
+    if (!burger || !overlay) return;
+    function open(){ overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function close(){ overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    burger.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    overlay.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
+  })();
+
+  // Nav: shadow once scrolled past hero
+  (function(){
+    var nav = document.getElementById('siteNav');
+    if (!nav) return;
+    function onScroll(){
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  // Hero: staggered entrance animation on load
+  (function(){
+    var els = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+    els.forEach(function(el, i){
+      setTimeout(function(){ el.classList.add('shown'); }, i * 110 + 60);
+    });
+  })();
+</script>
+</body>
+</html>
