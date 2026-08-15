@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page not found — KRD Engineering & Management</title>
+<link rel="icon" type="image/svg+xml" href="assets/logos/symbol-grey.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/logos/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logos/favicon-180.png">
+<style>
+  :root{
+    --grey:#414142;
+    --grey-soft:#5c5c5e;
+    --lime:#e3e421;
+    --paper:#fafaf8;
+    --line:#e4e3dd;
+    --font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--paper);color:var(--grey);font-family:var(--font);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;
+  }
+  .logo-mark{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:48px;}
+  .logo-icon{height:40px;width:40px;display:block;}
+  .logo-text{font-size:12px;font-weight:500;line-height:1.3;color:var(--grey-soft);text-align:left;}
+  .logo-plus{color:var(--lime);}
+  .eyebrow{
+    font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--grey-soft);margin-bottom:14px;display:flex;align-items:center;gap:8px;justify-content:center;
+  }
+  .eyebrow::before{content:'';width:16px;height:2px;background:var(--lime);}
+  h1{font-size:clamp(48px,9vw,96px);font-weight:700;margin:0;line-height:1;}
+  p{color:var(--grey-soft);font-size:16.5px;max-width:46ch;margin:16px 0 32px;}
+  .btn-primary{
+    background:var(--grey);color:var(--paper);
+    padding:14px 26px;font-size:14px;font-weight:600;
+    text-decoration:none;border:1px solid var(--grey);
+    transition:transform 0.15s ease,background 0.15s ease,color 0.15s ease;
+    display:inline-block;
+  }
+  .btn-primary:hover{background:var(--lime);color:var(--grey);border-color:var(--grey);transform:translateY(-3px);}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="logo-mark">
+  <img src="assets/logos/symbol-grey.svg" alt="KRD" class="logo-icon">
+  <span class="logo-text">Engineering <span class="logo-plus">+</span><br>Management</span>
+</a>
+
+<div class="eyebrow">Page not found</div>
+<h1>404</h1>
+<p>The page you're looking for doesn't exist, or may have moved.</p>
+<a href="index.html" class="btn-primary">Back to homepage</a>
+
+</body>
+</html>

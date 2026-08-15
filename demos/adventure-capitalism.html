@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adventure Capitalism</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    /* ── THEME: light is default ── */
+    :root {
+        --bg:#f5f6f8;--panel:#ffffff;--panel-alt:#eef0f3;
+        --border:#d8dce3;--text:#1b1f27;--text-dim:#6b7280;
+        --green:#1a9850;--red:#c0392b;--gold:#b8860b;
+        --console-bg:#e8eaed;--console-text:#3a4050;
+    }
+    body.dark-theme {
+        --bg:#0b0e11;--panel:#12161c;--panel-alt:#171c24;
+        --border:#262c36;--text:#e6e9ef;--text-dim:#7c8494;
+        --green:#2ecc71;--red:#e5533d;--gold:#f0b429;
+        --console-bg:#08090b;--console-text:#2ecc71;
+    }
+
+    *{box-sizing:border-box;}
+    body{
+        font-family:'JetBrains Mono',monospace;font-size:14px;
+        background:var(--bg);color:var(--text);
+        margin:0;padding:0;
+        transition:background .15s,color .15s;
+    }
+    @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+    h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+    p{margin:3px 0;line-height:1.35;}
+
+    button{
+        font-family:'JetBrains Mono',monospace;background:var(--panel-alt);
+        color:var(--text);border:1px solid var(--border);border-radius:3px;
+        padding:6px 10px;margin-top:5px;margin-right:5px;cursor:pointer;font-size:13px;
+    }
+    button:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
+    button:disabled{opacity:.35;cursor:not-allowed;}
+    button:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
+    button.active-speed{border-color:var(--gold);color:var(--gold);background:var(--panel);}
+
+    hr{border:none;border-top:1px solid var(--border);margin:6px 0;}
+    .stat-label{color:var(--text-dim);}
+    .up{color:var(--green);}.down{color:var(--red);}.gold{color:var(--gold);}
+    input[type="range"]{accent-color:var(--gold);width:100%;vertical-align:middle;}
+
+    /* ── CONSOLE (top bar) ── */
+    #console{
+        position:fixed;top:0;left:0;width:100%;height:52px;
+        background:var(--console-bg);color:var(--console-text);
+        border-bottom:1px solid var(--border);
+        padding:4px 14px;font-family:'JetBrains Mono',monospace;
+        z-index:100;display:flex;align-items:center;gap:12px;
+    }
+    #console h3{
+        color:var(--text-dim);font-size:11px;text-transform:uppercase;
+        letter-spacing:1px;white-space:nowrap;flex-shrink:0;
+    }
+    #consoleOutput{
+        font-size:12px;overflow:hidden;white-space:nowrap;
+        text-overflow:ellipsis;flex:1;
+    }
+    .story-log{color:var(--gold);}
+
+    /* ── MAIN SCROLL AREA ── */
+    #mainContent{
+        padding:62px 16px 16px 16px; /* 62px clears the fixed console */
+    }
+
+    /* ── HEADER ── */
+    .header-row{
+        display:flex;align-items:center;justify-content:space-between;
+        margin-bottom:6px;flex-wrap:wrap;gap:8px;
+    }
+    h1{font-size:18px;font-weight:700;letter-spacing:.5px;}
+    h1 .tick{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;margin-left:6px;color:var(--text-dim);}
+
+    .header-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+
+    #themeToggle{
+        background:var(--panel-alt);border:1px solid var(--border);
+        border-radius:20px;padding:4px 10px;cursor:pointer;color:var(--text);font-size:12px;
+        margin:0;
+    }
+
+    /* Speed buttons inline in header */
+    .speed-group{display:flex;gap:3px;align-items:center;}
+    .speed-group span{font-size:11px;color:var(--text-dim);margin-right:2px;}
+    .speed-group button{
+        padding:4px 8px;font-size:12px;margin:0;
+        border-radius:3px;
+    }
+
+    /* ── PLAYER PANEL ── */
+    #playerPanel{
+        display:flex;gap:16px;flex-wrap:wrap;
+        background:var(--panel);border:1px solid var(--border);
+        border-radius:6px;padding:8px 14px;margin-bottom:10px;
+    }
+    #playerPanel .stat-block .label{color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:1px;}
+    #playerPanel .stat-block .value{font-size:15px;font-weight:700;color:var(--gold);}
+
+    /* ── GAME LAYOUT ── */
+    #game{display:flex;gap:14px;align-items:flex-start;}
+
+    /* ── SIDEBAR: full on wide screens ── */
+    #companyList{
+        width:230px;flex-shrink:0;
+        display:flex;flex-direction:column;gap:5px;
+    }
+    .company-row{
+        display:block;width:100%;text-align:left;
+        background:var(--panel);border:1px solid var(--border);
+        border-left:3px solid var(--border);border-radius:4px;
+        padding:7px 9px;cursor:pointer;color:var(--text);
+    }
+    .company-row:hover{border-left-color:var(--gold);}
+    .company-row.selected{border-left-color:var(--gold);background:var(--panel-alt);}
+    .company-row.locked{opacity:.6;}
+    .company-row.affordable{opacity:1;border-left-color:var(--green);}
+    .company-row .row-name{
+        font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;
+        display:flex;justify-content:space-between;
+    }
+    .can-buy-dot{color:var(--green);font-size:10px;}
+    .company-row .row-sub{font-size:11px;color:var(--text-dim);margin-top:2px;}
+    .progress-bar{height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden;}
+    .progress-fill{height:100%;background:var(--green);}
+
+    /* ── SIDEBAR: emoji-only strip on small screens ── */
+    #companyListEmoji{
+        display:none;
+        flex-direction:column;gap:4px;
+        width:44px;flex-shrink:0;
+    }
+    .emoji-row{
+        width:40px;height:40px;
+        display:flex;align-items:center;justify-content:center;
+        font-size:20px;border-radius:6px;cursor:pointer;
+        border:2px solid var(--border);background:var(--panel);
+        position:relative;
+    }
+    .emoji-row.selected{border-color:var(--gold);}
+    .emoji-row.locked{opacity:.45;}
+    .emoji-row.affordable{border-color:var(--green);}
+    .emoji-row .emoji-dot{
+        position:absolute;top:2px;right:2px;
+        width:7px;height:7px;border-radius:50%;
+        background:var(--green);
+    }
+
+    @media(max-width:680px){
+        #companyList{display:none;}
+        #companyListEmoji{display:flex;}
+    }
+
+    /* ── DETAIL PANEL ── */
+    #companyDetails{
+        flex:1;background:var(--panel);border:1px solid var(--border);
+        border-radius:6px;padding:14px 18px;min-width:0;
+    }
+    #companyDetails h2{font-size:17px;}
+    .locked-panel{padding:24px 10px;text-align:center;color:var(--text-dim);}
+    .locked-panel .lock-icon{font-size:28px;margin-bottom:6px;}
+    .locked-panel .progress-bar{max-width:260px;margin:10px auto;height:6px;}
+    .section-label{
+        text-transform:uppercase;letter-spacing:1px;font-size:11px;
+        color:var(--text-dim);margin:6px 0 2px 0;
+    }
+    .upgrade-card{
+        border:1px solid var(--border);border-radius:4px;
+        padding:5px 8px;background:var(--panel-alt);margin-bottom:4px;
+    }
+    .upgrade-card button{width:100%;text-align:left;margin:4px 0 0 0;}
+    .upgrade-desc{font-size:11px;color:var(--text-dim);margin-top:3px;}
+    .owner-card{
+        border:1px solid var(--border);border-radius:4px;
+        padding:5px 8px;background:var(--panel-alt);margin-bottom:5px;
+    }
+    .owner-flavour{font-size:11px;color:var(--text-dim);margin-top:3px;font-style:italic;}
+    .markup-row{display:flex;align-items:center;gap:6px;}
+    .markup-row input[type="range"]{flex:1;}
+
+    /* ── DEV TOOLS ── */
+    #developerTools{margin-top:16px;padding-top:10px;border-top:1px dashed var(--border);}
+    #developerTools h3{color:var(--text-dim);font-size:12px;text-transform:uppercase;letter-spacing:1px;}
+    .dev-group{margin-bottom:6px;}
+    .dev-group .dev-label{color:var(--text-dim);font-size:11px;margin-right:4px;}
+</style>
+</head>
+<body>
+
+<!-- Fixed console strip at top -->
+<div id="console">
+    <h3>Log</h3>
+    <div id="consoleOutput"></div>
+</div>
+
+<div id="mainContent">
+
+    <div class="header-row">
+        <h1>Adventure Capitalism <span class="tick">// investor terminal</span></h1>
+        <div class="header-controls">
+            <div class="speed-group">
+                <span>Speed:</span>
+                <button id="speed-1"  onclick="setGameSpeed(1)">1x</button>
+                <button id="speed-2"  onclick="setGameSpeed(2)">2x</button>
+                <button id="speed-5"  onclick="setGameSpeed(5)">5x</button>
+            </div>
+            <button id="themeToggle" onclick="toggleTheme()">🌙 Dark</button>
+            <button onclick="clearSave()" style="border-color:#e5533d;color:#e5533d;margin:0;">🗑 Reset</button>
+        </div>
+    </div>
+    <div style="color:var(--text-dim);font-size:12px;margin-bottom:8px;">Buy out your neighbours. Build an empire.</div>
+
+    <div id="playerPanel">
+        <div class="stat-block"><div class="label">Cash</div><div class="value">$<span id="playerCash">0</span></div></div>
+        <div class="stat-block"><div class="label">Net Worth</div><div class="value">$<span id="netWorth">0</span></div></div>
+        <div class="stat-block"><div class="label">Income/sec</div><div class="value">$<span id="playerIncome">0</span></div></div>
+        <div class="stat-block"><div class="label">Dividends</div><div class="value">$<span id="dividends">0</span></div></div>
+    </div>
+
+    <div id="game">
+        <!-- Full sidebar (wide screens) -->
+        <div id="companyList"></div>
+        <!-- Emoji sidebar (narrow screens) -->
+        <div id="companyListEmoji"></div>
+        <div id="companyDetails"></div>
+    </div>
+
+    <div id="developerTools">
+        <h3>Developer Tools</h3>
+        <div class="dev-group">
+            <span class="dev-label">Cash:</span>
+            <button onclick="addCash(100)">+$100</button>
+            <button onclick="addCash(10000)">+$10k</button>
+            <button onclick="addCash(1000000)">+$1M</button>
+            <button onclick="addCash(100000000)">+$100M</button>
+            <button onclick="devUnlockAll()">Unlock All</button>
+            <button onclick="devMaxUpgrades()">Max Upgrades</button>
+        </div>
+    </div>
+
+</div><!-- /mainContent -->
+
+<script>
+// ─────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────
+const developerMode = false;
+const PE_MULTIPLIER = 8000;
+const MARKUP_MIN = 1, MARKUP_MAX = 20;
+const SAVE_KEY = "adventureCapSave";
+
+const player = { cash: 0, totalDividends: 0, income: 0 };
+
+// ─────────────────────────────────────────────
+//  COMPANY DEFINITIONS
+// ─────────────────────────────────────────────
+const COMPANY_DEFS = [
+  {
+    id:"lemonade",name:"Lemonade Stand",emoji:"🍋",factor:1,
+    tagline:"Your mum's stand on the front porch. Humble beginnings.",
+    owners:[
+      {name:"You",       shares:25,  flavour:"Your 25% is already yours. Keep buying out the others.",buyoutLine:""},
+      {name:"Jake",      shares:15,  flavour:"Your best friend. Invested his birthday money when you were both twelve.",buyoutLine:"Jake cashes out and immediately buys a new skateboard. Fair enough."},
+      {name:"Auntie Carol",shares:27.5,flavour:"Your auntie helped build the sign after Sunday lunch one year.",buyoutLine:"Carol insists you keep the original hand-painted sign. You agree."},
+      {name:"Mum",       shares:32.5,flavour:"She started this stand when you were six. Still makes the recipe herself.",buyoutLine:"Mum hugs you and says she's proud. She keeps a 10% royalty on lemons forever."},
+    ],
+    upgrades:[
+      {name:"Chalkboard Sign",      cost:30,   desc:"A proper sign by the kerb. Customers can actually find you.",           demandMult:1.15},
+      {name:"Fresh Lemons",         cost:80,   desc:"Ditch the bottled stuff. Real fruit makes a real difference.",          demandMult:1.20,costMult:0.95},
+      {name:"Hand Squeezer",        cost:180,  desc:"A proper citrus press. Less effort, more juice, happier customers.",    demandMult:1.10,costMult:0.90},
+      {name:"Paper Cups",           cost:350,  desc:"Branded paper cups instead of plastic. Customers love the aesthetic.",  demandMult:1.12},
+      {name:"Ice Machine",          cost:600,  desc:"A second-hand ice machine from a closing diner. Cold drinks, hot sales.",demandMult:1.18},
+      {name:"Branded Cups",         cost:900,  desc:"Your logo on every cup. People carry them away like little billboards.",demandMult:1.20},
+      {name:"Bulk Lemon Order",     cost:1400, desc:"Wholesale deal with the fruit market. Costs drop significantly.",       costMult:0.80},
+      {name:"Lemon Press Pro",      cost:2200, desc:"Commercial-grade press. Output doubles, arms don't.",                  demandMult:1.25,costMult:0.88},
+      {name:"Pop-Up Gazebo",        cost:3500, desc:"A proper gazebo with your name on it. Rain or shine, you're open.",    demandMult:1.30},
+      {name:"Social Media Account", cost:5500, desc:"A TikTok of the sign goes mildly viral. Summer rush is real.",         demandMult:1.40},
+    ]
+  },
+  {
+    id:"coffee",name:"Coffee Shop",emoji:"☕",factor:2.2,
+    tagline:"A tiny shopfront two streets over. Old regulars, new potential.",
+    owners:[
+      {name:"You",         shares:1,  flavour:"You bought a single share after one too many good coffees.",buyoutLine:""},
+      {name:"Tim",         shares:3,  flavour:"A regular who bought in as a joke after his third flat white. Forgot he owned shares.",buyoutLine:"Tim is shocked he made money. He immediately spends it on coffee."},
+      {name:"Delivery Guy",shares:5,  flavour:"Has delivered beans here for years. Took shares instead of a tip once.",buyoutLine:"He nods, pockets the cash, and is back the next morning with a delivery."},
+      {name:"Sandra",      shares:24, flavour:"Mr Patel's daughter. Works in accounting and hates early starts.",buyoutLine:"Sandra visibly relaxes. She never liked opening at 6am."},
+      {name:"Mr Patel",    shares:67, flavour:"Ran the place for 20 years. Ready to retire to his allotment.",buyoutLine:"Mr Patel shakes your hand for a long time and gives you his secret chai blend recipe."},
+    ],
+    upgrades:[
+      {name:"Deep Clean",             cost:60,   desc:"The place needed it. First impressions matter.",                        demandMult:1.15},
+      {name:"Bean Upgrade",           cost:150,  desc:"Switch from supermarket bags to a local roaster.",                     demandMult:1.20,costMult:0.96},
+      {name:"Proper Grinder",         cost:320,  desc:"A burr grinder changes everything. Customers notice immediately.",      demandMult:1.18},
+      {name:"Milk Frother",           cost:550,  desc:"Flat whites and lattes. The margins on espresso drinks are glorious.",  demandMult:1.22,costMult:0.94},
+      {name:"Loyalty Card System",    cost:850,  desc:"Stamp cards. Old-school but effective. Repeat customers up.",           demandMult:1.15},
+      {name:"Pastry Cabinet",         cost:1300, desc:"Partner with the bakery down the road. Cross-sell, cross-profit.",      demandMult:1.25},
+      {name:"Wifi & Plug Sockets",    cost:2000, desc:"Freelancers flood in. They nurse one coffee for hours — but there are a lot of them.",demandMult:1.30},
+      {name:"Espresso Machine Upgrade",cost:3200,desc:"A La Marzocca machine. Baristas brag to their friends.",               demandMult:1.35,costMult:0.90},
+      {name:"Staff Training Course",  cost:5000, desc:"Your baristas do a latte art course. Instagram traffic triples.",       demandMult:1.28},
+      {name:"Weekend Brunch Menu",    cost:7500, desc:"Avocado toast and eggs Benedict. Friday to Sunday revenue jumps hard.", demandMult:1.45},
+    ]
+  },
+  {
+    id:"bakery",name:"Bakery",emoji:"🥐",factor:4.8,
+    tagline:"A family bakery that's been on this street since 1987.",
+    owners:[
+      {name:"You",        shares:1,  flavour:"You invested after eating one of their pies. Best business decision you've made.",buyoutLine:""},
+      {name:"Local Paper",shares:2,  flavour:"The local newspaper took shares in lieu of advertising payment back in 2003. Nobody remembered until now.",buyoutLine:"The editor is baffled. He runs a story about it."},
+      {name:"Flour Rep",  shares:4,  flavour:"A sales rep who did a deal with Old Marge decades ago. Completely forgot.",buyoutLine:"He checks his records three times before believing it. Then buys a boat."},
+      {name:"Keith",      shares:28, flavour:"Head baker. Technically co-owner, practically a professional worrier.",buyoutLine:"Keith stays on as head baker. He just didn't want the stress of ownership."},
+      {name:"Old Marge",  shares:65, flavour:"Started the bakery with her late husband. Wants to move to the coast.",buyoutLine:"Marge leaves you the recipe book, wrapped in brown paper. You promise to keep the sausage rolls."},
+    ],
+    upgrades:[
+      {name:"New Bread Tins",       cost:140,  desc:"The old ones were rusting. Output and consistency improve overnight.",   demandMult:1.12,costMult:0.96},
+      {name:"Sourdough Starter",    cost:300,  desc:"Keith nurtures it like a child. Worth it — word spreads fast.",         demandMult:1.20},
+      {name:"Display Cabinet",      cost:580,  desc:"Proper lit cabinet. Items look twice as good.",                         demandMult:1.18},
+      {name:"Commercial Mixer",     cost:900,  desc:"A 20-litre Hobart mixer. Triple batch size, same effort.",              costMult:0.82,demandMult:1.10},
+      {name:"Vegan Line",           cost:1400, desc:"Three vegan pastries. Opens a whole new customer group.",              demandMult:1.22},
+      {name:"Coffee Corner",        cost:2100, desc:"A small espresso setup. People stay longer, spend more.",              demandMult:1.20},
+      {name:"Wholesale Flour Deal", cost:3200, desc:"Direct from the mill. Costs drop on every loaf.",                      costMult:0.78},
+      {name:"Cake Personalisation", cost:4800, desc:"Custom birthday and wedding cakes. High margin, high touch.",           demandMult:1.30},
+      {name:"Early Morning Delivery",cost:7000,desc:"Fresh bread at local café doors by 6am. B2B revenue stream.",           demandMult:1.35},
+      {name:"Artisan Pastry Range", cost:10000,desc:"Croissants, danishes, kouign-amman. Saturday queues form before you open.",demandMult:1.40},
+    ]
+  },
+  {
+    id:"pizza",name:"Pizza Place",emoji:"🍕",factor:10.6,
+    tagline:"A neighbourhood joint with a wood-fired oven and a loyal fanbase.",
+    owners:[
+      {name:"You",         shares:1,  flavour:"You got in early. Now it's time to get in further.",buyoutLine:""},
+      {name:"Danny",       shares:4,  flavour:"Tony's son. More interested in his band than pizza. Actively wants out.",buyoutLine:"Danny buys a new bass amp. You wish him luck."},
+      {name:"Old Supplier",shares:6,  flavour:"A tomato supplier who took shares in a lean year. Has no idea what they're worth now.",buyoutLine:"He reinvests straight back into tomatoes. Respect."},
+      {name:"Rosa",        shares:26, flavour:"Tony's wife. She handles the books. The books are terrifying.",buyoutLine:"Rosa immediately books a holiday to Naples. She's been putting it off for eleven years."},
+      {name:"Tony",        shares:63, flavour:"Third-generation Italian-Australian. The oven is older than he is.",buyoutLine:"Tony keeps the secret dough recipe — for now. He says you'll earn it."},
+    ],
+    upgrades:[
+      {name:"New Pizza Boxes",      cost:300,  desc:"Branded boxes. Delivery looks professional for the first time.",        demandMult:1.10},
+      {name:"Online Ordering",      cost:700,  desc:"Your own website, no third-party fees. Margins jump.",                  demandMult:1.25},
+      {name:"Mozzarella Upgrade",   cost:1200, desc:"Fresh buffalo mozzarella flown in twice a week. Reviewers notice.",     demandMult:1.22,costMult:0.97},
+      {name:"Wood Oven Restoration",cost:2000, desc:"The oven needed a full reline. It runs hotter and more evenly now.",   demandMult:1.18,costMult:0.92},
+      {name:"Delivery E-Bikes",     cost:3000, desc:"Two cargo e-bikes. Delivery radius doubles, costs drop.",              demandMult:1.30,costMult:0.88},
+      {name:"Dough Proofer",        cost:4500, desc:"Consistent 48-hour cold prove, every time. The base is now the talk of the area.",demandMult:1.25},
+      {name:"Antipasto Menu",       cost:6500, desc:"Starters and desserts. Average spend per table climbs.",                demandMult:1.28},
+      {name:"Dine-In Expansion",    cost:9500, desc:"Knock through to the unit next door. Seat 40, up from 16.",            demandMult:1.40},
+      {name:"Craft Beer Partnership",cost:14000,desc:"Local brewery, exclusive pouring deal. The combo brings in a Friday crowd.",demandMult:1.35},
+      {name:"Tony's Secret Dough",  cost:20000,desc:"He finally gives you the recipe. The pizza is now genuinely legendary.",demandMult:1.50,costMult:0.90},
+    ]
+  },
+  {
+    id:"carwash",name:"Car Wash",emoji:"🚗",factor:23,
+    tagline:"A hand-wash bay run by two brothers with a pressure washer and a dream.",
+    owners:[
+      {name:"You",         shares:1,  flavour:"You spotted the location. Good foot traffic, no competition for a mile.",buyoutLine:""},
+      {name:"Cousin Mick", shares:3,  flavour:"Lent Big Dave his pressure washer years ago and somehow ended up with shares.",buyoutLine:"Mick is delighted. He uses the money to buy a better pressure washer."},
+      {name:"The Landlord",shares:7,  flavour:"Took equity instead of a bond when they couldn't make rent in year one.",buyoutLine:"The landlord shrugs and raises the rent anyway."},
+      {name:"Little Dave", shares:26, flavour:"The younger brother. Does the books, hates confrontation.",buyoutLine:"Little Dave quietly sighs with relief and goes back to studying accounting."},
+      {name:"Big Dave",    shares:63, flavour:"The older brother. Incredibly strong, not incredibly organised.",buyoutLine:"Dave uses the money to buy a campervan and drives to Darwin. You get a postcard."},
+    ],
+    upgrades:[
+      {name:"Pressure Washer Upgrade",cost:650,  desc:"New 3000 PSI unit. Half the time, twice the finish.",                demandMult:1.15,costMult:0.92},
+      {name:"Signage & Flags",        cost:1300, desc:"Bright flags and a light-up sign. Now visible from the main road.",   demandMult:1.20},
+      {name:"Foam Cannon",            cost:2200, desc:"Thick pre-soak foam. Customers think it looks amazing.",              demandMult:1.18},
+      {name:"Vacuuming Service",      cost:3500, desc:"Interior vac included. Upsell premium packages.",                    demandMult:1.25},
+      {name:"Detail Bay",             cost:5500, desc:"A dedicated bay for full detail jobs. High margin work.",             demandMult:1.30},
+      {name:"Subscription Cards",     cost:8000, desc:"Monthly unlimited wash pass. Predictable recurring revenue.",         demandMult:1.35},
+      {name:"Ceramic Coating Service",cost:12000,desc:"Paint protection film and ceramic coats. Customers drive from suburbs.",demandMult:1.28,costMult:0.95},
+      {name:"Automated Wash Bay",     cost:18000,desc:"A proper tunnel wash unit. Volume triples, staff costs halve.",       demandMult:1.45,costMult:0.75},
+      {name:"Fleet Contract",         cost:26000,desc:"A local logistics company sends 20 vans a week. Steady B2B income.",  demandMult:1.40},
+      {name:"Second Location",        cost:40000,desc:"A second bay two suburbs over. You're running a chain now.",          demandMult:1.60},
+    ]
+  },
+  {
+    id:"gym",name:"Gym",emoji:"💪",factor:51,
+    tagline:"A 24-hour independent gym. Smells like ambition and chalk.",
+    owners:[
+      {name:"You",         shares:1,  flavour:"You joined as a member, then as an investor. Now you're the owner.",buyoutLine:""},
+      {name:"Phil",        shares:3,  flavour:"A personal trainer who took shares instead of a pay rise three years ago.",buyoutLine:"Phil uses the money to get his own PT studio. You quietly worry he'll be competition."},
+      {name:"Equipment Co",shares:6,  flavour:"A fitness equipment supplier who financed the treadmills and took equity.",buyoutLine:"They send a very formal letter of acknowledgement. And a catalogue."},
+      {name:"Jess",        shares:27, flavour:"Bren's business partner. Former events manager. Wants to pivot to wellness retreats.",buyoutLine:"Jess takes her share and starts a yoga retreat. She sends you a free voucher."},
+      {name:"Coach Bren",  shares:63, flavour:"Ex-rugby player. Built the gym himself. Treats it like a second family.",buyoutLine:"Bren stays on as head coach. He just wants to train people, not do spreadsheets."},
+    ],
+    upgrades:[
+      {name:"Equipment Service",    cost:1500, desc:"Service every treadmill and cable machine. No more out-of-order signs.", demandMult:1.15},
+      {name:"New Flooring",         cost:3000, desc:"Thick rubber tiles. Looks professional. Dropping plates sounds better.", demandMult:1.18},
+      {name:"Sauna Installation",   cost:5500, desc:"A dry sauna out back. Becomes its own selling point.",                  demandMult:1.25},
+      {name:"PT Booking App",       cost:8500, desc:"In-house PT booking. Revenue share with trainers, net positive.",       demandMult:1.22},
+      {name:"Supplement Bar",       cost:12000,desc:"Protein shakes, bars, and pre-workout at the front desk. High margin.", demandMult:1.20},
+      {name:"New Cardio Zone",      cost:18000,desc:"12 new treadmills and 8 bikes. Peak-hour crowding solved.",             demandMult:1.30},
+      {name:"Group Fitness Studio", cost:26000,desc:"Spin, HIIT, yoga. Classes fill up in minutes. Membership spikes.",     demandMult:1.35},
+      {name:"Recovery Room",        cost:36000,desc:"Ice bath, compression boots, infrared panels. Premium memberships sell themselves.",demandMult:1.28},
+      {name:"Corporate Memberships",cost:52000,desc:"Three local employers pay for staff memberships in bulk.",              demandMult:1.40},
+      {name:"Second Site Opened",   cost:78000,desc:"A second gym in the next suburb. The brand is real now.",              demandMult:1.55},
+    ]
+  },
+  {
+    id:"software",name:"Software Startup",emoji:"💻",factor:113,
+    tagline:"A scrappy SaaS startup out of a co-working space. Runway: uncertain.",
+    owners:[
+      {name:"You",          shares:1,  flavour:"You caught the pitch at a startup night and wrote the first cheque.",buyoutLine:""},
+      {name:"Co-work Space",shares:2,  flavour:"Took a tiny equity stake instead of three months desk fees. Forgot about it.",buyoutLine:"The co-working manager upgrades the coffee machine with the proceeds."},
+      {name:"Seed Fund",    shares:8,  flavour:"A small angel syndicate. They want their 5x exit.",buyoutLine:"The fund marks it as a return and moves on. Paperwork takes 3 weeks."},
+      {name:"Marcus",       shares:24, flavour:"Sales lead. 100% commission, 200% energy. Has opinions about everything.",buyoutLine:"Marcus takes a role at a VC firm. He'll be back as an investor someday, he says."},
+      {name:"Priya",        shares:65, flavour:"Technical co-founder. Built the whole thing in a weekend, allegedly.",buyoutLine:"Priya keeps 5% as an advisor. She'll be fine. She always lands on her feet."},
+    ],
+    upgrades:[
+      {name:"Fix the Onboarding",    cost:3000, desc:"The signup flow was broken. Now it isn't. Churn drops immediately.",   demandMult:1.20},
+      {name:"Customer Support Hire", cost:7000, desc:"A real human answers tickets. Reviews go from 2.8 to 4.1 stars.",      demandMult:1.18},
+      {name:"Landing Page Redesign", cost:13000,desc:"A proper copywriter and designer. Conversion rate up 40%.",            demandMult:1.30},
+      {name:"API Integrations",      cost:22000,desc:"Slack, Zapier, HubSpot. Enterprise customers start calling.",          demandMult:1.35},
+      {name:"Mobile App",            cost:35000,desc:"iOS and Android. Downloads spike. Engagement spikes more.",            demandMult:1.40},
+      {name:"Annual Plan Discount",  cost:52000,desc:"Pay-annually pricing. Cash flow improves enormously overnight.",       demandMult:1.25,costMult:0.88},
+      {name:"SOC2 Certification",    cost:75000,desc:"Security compliance. Enterprise sales gates open. Ticket size doubles.", demandMult:1.45},
+      {name:"AI Feature Launch",     cost:110000,desc:"A GPT-powered assistant baked in. Product goes viral on LinkedIn.",   demandMult:1.60},
+      {name:"Sales Team Expansion",  cost:160000,desc:"Five new AEs, a BDR team, and a proper CRM. Pipeline fills up.",     demandMult:1.50},
+      {name:"Series A Raised",       cost:230000,desc:"You led the round yourself. Now you own the majority. The team is real.",demandMult:1.70,costMult:0.85},
+    ]
+  },
+  {
+    id:"bank",name:"Bank",emoji:"🏦",factor:250,
+    tagline:"A regional bank. Old money, slow systems, and extraordinary margins.",
+    owners:[
+      {name:"You",            shares:1,  flavour:"You bought in via a secondary market deal. Barely noticed. Now very noticed.",buyoutLine:""},
+      {name:"Junior Partner", shares:3,  flavour:"A retired partner who inherited a sliver of shares and never sold.",buyoutLine:"He seems unsurprised. Old money rarely is."},
+      {name:"Pension Fund",   shares:10, flavour:"A mid-size pension fund that got in during a rights issue. Passive holder.",buyoutLine:"The fund rebalances the proceeds into index funds. Very on-brand."},
+      {name:"Whitmore Trust", shares:24, flavour:"A family trust that inherited the stake. Three lawyers manage it.",buyoutLine:"Three lawyers shake your hand for 45 minutes. Nothing happens quickly with trusts."},
+      {name:"Lord Ashworth",  shares:62, flavour:"An old establishment figure. 'The bank has been in the family since 1902.'",buyoutLine:"Ashworth sells reluctantly. He keeps a portrait of himself in the boardroom as a condition."},
+    ],
+    upgrades:[
+      {name:"Digital Banking App",    cost:7000,  desc:"Finally, a mobile app that doesn't look like it's from 2009.",       demandMult:1.20},
+      {name:"Mortgage Team Rebuild",  cost:16000, desc:"New underwriting team. Approvals faster, customers happier.",         demandMult:1.18},
+      {name:"SME Lending Desk",       cost:30000, desc:"Dedicated business banking. Small businesses stop going to the big four.",demandMult:1.25},
+      {name:"ATM Network Expansion",  cost:50000, desc:"40 new ATMs across the region. Brand visibility everywhere.",         demandMult:1.22},
+      {name:"Wealth Management Arm",  cost:80000, desc:"High-net-worth clients. Fees are extraordinary.",                    demandMult:1.30,costMult:0.95},
+      {name:"Core Banking Upgrade",   cost:130000,desc:"Replace the system from 1994. Staff stop crying at their desks.",    costMult:0.78,demandMult:1.15},
+      {name:"Buy a Fintech",          cost:200000,desc:"Acquire a small payments startup. Board calls it 'digital transformation'.",demandMult:1.40},
+      {name:"Green Bond Issuance",    cost:300000,desc:"ESG-labelled bonds. Institutional money flows in.",                  demandMult:1.35},
+      {name:"Regional Expansion",     cost:450000,desc:"Branches in three new cities. You are now a genuinely large bank.",  demandMult:1.50},
+      {name:"Central Bank Reserve Status",cost:700000,desc:"You are now too big to fail. Congratulations, and sorry.",      demandMult:1.80,costMult:0.80},
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+//  BUILD RUNTIME OBJECTS
+// ─────────────────────────────────────────────
+function buildCompany(def) {
+    let isLemonade = def.id === "lemonade";
+    let startShares = isLemonade ? 25 : 0;
+    return {
+        id:def.id, name:def.name, emoji:def.emoji, factor:def.factor, tagline:def.tagline,
+        baseMarketCap: Math.round(def.factor * 100000),
+        totalShares:100, ownedShares:startShares, cash:0,
+        productionCost:def.factor,
+        demand: Math.round(15 * Math.sqrt(def.factor)),
+        markup:2, dividendRate:1,
+        owners: def.owners.map(o => ({
+            ...o,
+            remainingShares: o.shares,
+            boughtOut: o.name === "You" && isLemonade
+        })),
+        upgrades: def.upgrades.map(u => ({...u, purchased:false})),
+        upgradeIndex:0
+    };
+}
+
+const companies = COMPANY_DEFS.map(buildCompany);
+let selectedCompany = companies[0];
+
+function isActive(c){ return c.ownedShares > 0; }
+
+// ─────────────────────────────────────────────
+//  SAVE / LOAD
+// ─────────────────────────────────────────────
+function saveGame() {
+    let data = {
+        player: { cash: player.cash, totalDividends: player.totalDividends },
+        companies: companies.map(c => ({
+            id: c.id,
+            ownedShares: c.ownedShares,
+            cash: c.cash,
+            markup: c.markup,
+            dividendRate: c.dividendRate,
+            upgradeIndex: c.upgradeIndex,
+            owners: c.owners.map(o => ({ name: o.name, remainingShares: o.remainingShares, boughtOut: o.boughtOut })),
+            upgrades: c.upgrades.map(u => ({ purchased: u.purchased }))
+        }))
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+}
+
+function loadGame() {
+    let raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    try {
+        let data = JSON.parse(raw);
+        player.cash = data.player.cash || 0;
+        player.totalDividends = data.player.totalDividends || 0;
+        data.companies.forEach(saved => {
+            let c = companies.find(x => x.id === saved.id);
+            if (!c) return;
+            c.ownedShares   = saved.ownedShares;
+            c.cash          = saved.cash;
+            c.markup        = saved.markup;
+            c.dividendRate  = saved.dividendRate;
+            c.upgradeIndex  = saved.upgradeIndex;
+            saved.owners.forEach((so, i) => {
+                if (c.owners[i]) {
+                    c.owners[i].remainingShares = so.remainingShares;
+                    c.owners[i].boughtOut       = so.boughtOut;
+                }
+            });
+            saved.upgrades.forEach((su, i) => {
+                if (c.upgrades[i]) c.upgrades[i].purchased = su.purchased;
+            });
+        });
+        return true;
+    } catch(e) {
+        console.warn("Save load failed", e);
+        return false;
+    }
+}
+
+// ─────────────────────────────────────────────
+//  CALCULATIONS
+// ─────────────────────────────────────────────
+function calcCompany(c) {
+    let costMult=1, demandMult=1;
+    c.upgrades.forEach(u => {
+        if (!u.purchased) return;
+        if (u.costMult)   costMult   *= u.costMult;
+        if (u.demandMult) demandMult *= u.demandMult;
+    });
+    let cost = c.productionCost * costMult;
+    let upgBought = c.upgrades.filter(u=>u.purchased).length;
+    let elasticity = Math.max(0.4, 1.6 - upgBought * 0.08);
+    let priceMod = Math.pow(1/c.markup, elasticity);
+    let demand   = c.demand * demandMult * priceMod;
+    let salePrice= c.productionCost * c.markup;
+    let revenue  = salePrice * demand;
+    let expenses = cost * demand;
+    let profit   = revenue - expenses;
+    return {cost, demand, salePrice, revenue, expenses, profit};
+}
+
+function calcMarketCap(c, stats) {
+    let s = stats || calcCompany(c);
+    return Math.max(c.baseMarketCap*0.5, c.baseMarketCap + Math.max(0,s.profit)*PE_MULTIPLIER);
+}
+function calcSharePrice(c, stats){ return calcMarketCap(c,stats)/c.totalShares; }
+function calcShareValue(c, stats){ return (c.ownedShares/c.totalShares)*calcMarketCap(c,stats); }
+
+function distributeProfit(c, amount) {
+    let div = amount * c.dividendRate * (c.ownedShares/c.totalShares);
+    player.cash += div; player.totalDividends += div;
+    c.cash += amount - div;
+    return div;
+}
+
+// ─────────────────────────────────────────────
+//  GAME LOOP
+// ─────────────────────────────────────────────
+let gameSpeed=1, loopId=null;
+
+function tick() {
+    let income=0;
+    companies.forEach(c => {
+        if (!isActive(c)) return;
+        income += distributeProfit(c, calcCompany(c).profit);
+    });
+    player.income = income;
+    saveGame();
+}
+
+let renderLoopId = null;
+function startRenderLoop() {
+    if (renderLoopId) clearInterval(renderLoopId);
+    renderLoopId = setInterval(render, 250);
+}
+
+function startLoop() {
+    if (loopId) clearInterval(loopId);
+    loopId = setInterval(tick, 1000/gameSpeed);
+}
+
+function setGameSpeed(mult) {
+    gameSpeed = mult; startLoop();
+    document.querySelectorAll("[id^='speed-']").forEach(b => b.classList.remove("active-speed"));
+    let btn = document.getElementById("speed-"+mult);
+    if (btn) btn.classList.add("active-speed");
+}
+
+// ─────────────────────────────────────────────
+//  THEME — light default
+// ─────────────────────────────────────────────
+function toggleTheme() {
+    let isDark = document.body.classList.toggle("dark-theme");
+    document.getElementById("themeToggle").textContent = isDark ? "☀️ Light" : "🌙 Dark";
+    localStorage.setItem("acTheme", isDark ? "dark" : "light");
+}
+
+function applyTheme() {
+    let saved = localStorage.getItem("acTheme");
+    // default is light; only add dark-theme class if explicitly saved as dark
+    if (saved === "dark") {
+        document.body.classList.add("dark-theme");
+        document.getElementById("themeToggle").textContent = "☀️ Light";
+    }
+}
+
+// ─────────────────────────────────────────────
+//  FORMAT / LOG
+// ─────────────────────────────────────────────
+function fmt(n) {
+    n=n||0; let a=Math.abs(n);
+    if(a>=1e12) return (n/1e12).toFixed(2)+"T";
+    if(a>=1e9)  return (n/1e9).toFixed(2)+"B";
+    if(a>=1e6)  return (n/1e6).toFixed(2)+"M";
+    if(a>=1e3)  return (n/1e3).toFixed(2)+"K";
+    return n.toFixed(2);
+}
+
+function gameLog(msg, isStory) {
+    let box  = document.getElementById("consoleOutput");
+    // Keep only last message visible in the slim bar
+    box.innerHTML = "";
+    let line = document.createElement("span");
+    line.textContent = "> " + msg;
+    if (isStory) line.classList.add("story-log");
+    box.appendChild(line);
+}
+
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
+function render() {
+    renderPanel();
+    renderList();
+    renderEmojiList();
+    renderDetail();
+    checkWin();
+}
+
+function checkWin() {
+    let banner = document.getElementById("winBanner");
+    let allDone = companies.every(c =>
+        c.ownedShares >= c.totalShares && c.upgrades.every(u => u.purchased)
+    );
+    if (allDone) {
+        if (!banner) {
+            let nw = player.cash + companies.reduce((s,c) => s + calcShareValue(c), 0);
+            let b = document.createElement("div");
+            b.id = "winBanner";
+            b.innerHTML = `
+                <button onclick="document.getElementById('winBanner').remove()"
+                    style="position:absolute;top:10px;right:14px;background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:3px 10px;cursor:pointer;font-size:13px;margin:0;">
+                    ✕ Close
+                </button>
+                <div style="font-size:28px;margin-bottom:6px;">🏆</div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px;">Empire Complete</div>
+                <div style="font-size:13px;opacity:0.9;">You own 100% of every business. Every upgrade bought. Every owner paid out.</div>
+                <div style="font-size:13px;margin-top:8px;">
+                    Final Net Worth: <strong>$${fmt(nw)}</strong> &nbsp;|&nbsp;
+                    Total Dividends: <strong>$${fmt(player.totalDividends)}</strong>
+                </div>
+                <div style="font-size:11px;opacity:0.6;margin-top:6px;">It started with a lemonade stand.</div>
+                <button onclick="clearSave()"
+                    style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:5px 14px;cursor:pointer;font-size:12px;">
+                    🗑 Reset &amp; Play Again
+                </button>
+            `;
+            b.style.cssText = "position:fixed;top:0;left:0;width:100%;background:linear-gradient(135deg,#1a3a1a,#0b2a0b);color:#fff;padding:20px 20px 18px;text-align:center;z-index:9999;border-bottom:3px solid #2ecc71;box-shadow:0 4px 20px rgba(0,0,0,0.5);";
+            document.body.prepend(b);
+        }
+    } else if (banner) {
+        banner.remove();
+    }
+}
+
+function clearSave() {
+    // confirm() can be blocked in some browser contexts — use inline prompt instead
+    let existing = document.getElementById("resetConfirm");
+    if (existing) { existing.remove(); return; }
+    let box = document.createElement("div");
+    box.id = "resetConfirm";
+    box.style.cssText = "position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid #e5533d;border-radius:6px;padding:14px 18px;z-index:10000;font-family:'JetBrains Mono',monospace;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,0.3);";
+    box.innerHTML = `
+        <div style="margin-bottom:10px;color:var(--text);">Reset all progress?</div>
+        <button onclick="localStorage.removeItem('adventureCapSave');location.reload();"
+            style="background:#e5533d;color:#fff;border:none;margin-right:6px;">Yes, reset</button>
+        <button onclick="document.getElementById('resetConfirm').remove()"
+            style="margin:0;">Cancel</button>
+    `;
+    document.body.appendChild(box);
+}
+
+function renderPanel() {
+    let nw = player.cash + companies.reduce((s,c)=>s+(isActive(c)?calcShareValue(c):0),0);
+    document.getElementById("playerCash").textContent   = fmt(player.cash);
+    document.getElementById("netWorth").textContent     = fmt(nw);
+    document.getElementById("playerIncome").textContent = fmt(player.income);
+    document.getElementById("dividends").textContent    = fmt(player.totalDividends);
+}
+
+function renderList() {
+    let list = document.getElementById("companyList");
+    list.innerHTML = "";
+    companies.forEach(c => {
+        let stats = calcCompany(c);
+        let price = calcSharePrice(c, stats);
+        let active = isActive(c);
+        let nextOwner = c.owners.find(o=>!o.boughtOut);
+        let ownerShareCost = nextOwner ? price : 0;
+        let affordable = !active && player.cash >= price;
+        let canBuyOwner = active && nextOwner && player.cash >= ownerShareCost;
+
+        let row = document.createElement("div");
+        row.className = "company-row"
+            +(c===selectedCompany?" selected":"")
+            +(!active?" locked":"")
+            +(affordable?" affordable":"");
+
+        if (active) {
+            row.innerHTML =
+                `<div class="row-name"><span>${c.emoji} ${c.name}</span>${canBuyOwner?'<span class="can-buy-dot">● buy</span>':''}</div>`+
+                `<div class="row-sub">${c.ownedShares}% &middot; ${stats.profit>=0?'<span class="up">+</span>':'<span class="down">-</span>'}$${fmt(Math.abs(stats.profit))}/s</div>`;
+        } else {
+            let pct = Math.min(100,(player.cash/price)*100);
+            row.innerHTML =
+                `<div class="row-name"><span>🔒 ${c.name}</span>${affordable?'<span class="can-buy-dot">● ready</span>':''}</div>`+
+                `<div class="row-sub">Buy in: $${fmt(price)}/share</div>`+
+                `<div class="progress-bar"><div class="progress-fill" style="width:${pct.toFixed(1)}%"></div></div>`;
+        }
+        row.addEventListener("click", ()=>handleRowClick(c));
+        list.appendChild(row);
+    });
+}
+
+function renderEmojiList() {
+    let list = document.getElementById("companyListEmoji");
+    list.innerHTML = "";
+    companies.forEach(c => {
+        let stats = calcCompany(c);
+        let price = calcSharePrice(c, stats);
+        let active = isActive(c);
+        let nextOwner = c.owners.find(o=>!o.boughtOut);
+        let affordable = !active && player.cash >= price;
+        let canBuyOwner = active && nextOwner && player.cash >= price;
+
+        let el = document.createElement("div");
+        el.className = "emoji-row"
+            +(c===selectedCompany?" selected":"")
+            +(!active?" locked":"")
+            +(affordable?" affordable":"");
+        el.title = c.name;
+        el.textContent = active ? c.emoji : "🔒";
+        if (canBuyOwner || affordable) {
+            let dot = document.createElement("div");
+            dot.className = "emoji-dot";
+            el.appendChild(dot);
+        }
+        el.addEventListener("click", ()=>handleRowClick(c));
+        list.appendChild(el);
+    });
+}
+
+function renderDetail() {
+    let el = document.getElementById("companyDetails");
+    let c  = selectedCompany;
+    let stats = calcCompany(c);
+    let price = calcSharePrice(c, stats);
+    let cap   = calcMarketCap(c, stats);
+
+    if (!isActive(c)) {
+        let pct = Math.min(100,(player.cash/price)*100);
+        el.innerHTML = `
+            <div class="locked-panel">
+                <div class="lock-icon">${c.emoji}</div>
+                <h2>${c.name}</h2>
+                <p style="font-style:italic;margin:6px 0;">${c.tagline}</p>
+                <p>Buy your first share to get started.</p>
+                <div class="progress-bar" style="max-width:260px;margin:10px auto;height:6px;">
+                    <div class="progress-fill" style="width:${pct.toFixed(1)}%"></div></div>
+                <p class="stat-label">$${fmt(player.cash)} / $${fmt(price)}</p>
+                <button onclick="doBuyFirstShare()" ${player.cash>=price?"":"disabled"}>
+                    Buy First Share — $${fmt(price)}
+                </button>
+            </div>`;
+        return;
+    }
+
+    // ── Shareholders ──
+    let ownerHtml = "";
+    let anyOwners = c.owners.some(o=>!o.boughtOut);
+    if (anyOwners) {
+        ownerHtml += `<div class="section-label">Shareholders</div>`;
+        c.owners.forEach((o,i) => {
+            if (o.boughtOut) return;
+            let costPerShare = price;
+            let buyOneCost   = Math.round(costPerShare);
+            let buyAllCost   = Math.round(o.remainingShares * costPerShare);
+            let canOne = player.cash >= buyOneCost;
+            let canAll = player.cash >= buyAllCost;
+            ownerHtml += `
+                <div class="owner-card">
+                    <div style="display:flex;align-items:center;white-space:nowrap;gap:8px;">
+                        <strong>${o.name}</strong>
+                        <span class="stat-label">${o.remainingShares} shares left</span>
+                        <button onclick="doBuyOneShare(${i})" ${canOne?"":"disabled"} style="margin:0;">Buy 1 — $${fmt(buyOneCost)}</button>
+                        <button onclick="doBuyAllShares(${i})" ${canAll?"":"disabled"} style="margin:0;">Buy All — $${fmt(buyAllCost)}</button>
+                    </div>
+                    <div class="owner-flavour">"${o.flavour}"</div>
+                </div>`;
+        });
+    }
+
+    // ── Upgrade ──
+    while (c.upgradeIndex < c.upgrades.length && c.upgrades[c.upgradeIndex].purchased) c.upgradeIndex++;
+    let upgradeHtml = "";
+    if (c.upgradeIndex >= c.upgrades.length) {
+        upgradeHtml = `<div class="upgrade-card"><button disabled>All upgrades complete 🎉</button></div>`;
+    } else {
+        let upg  = c.upgrades[c.upgradeIndex];
+        let cost = Math.round(upg.cost * c.factor);
+        let canBuy = c.cash >= cost;
+        upgradeHtml = `
+            <div class="upgrade-card">
+                <div class="stat-label">Next Upgrade (${c.upgradeIndex+1} / ${c.upgrades.length})</div>
+                <strong>${upg.name}</strong>
+                <div class="upgrade-desc">${upg.desc}</div>
+                <button onclick="doBuyUpgrade()" ${canBuy?"":"disabled"}>Purchase — $${fmt(cost)}</button>
+            </div>`;
+    }
+
+    let ownPct = (c.ownedShares/c.totalShares*100).toFixed(0);
+    let hustleAmt = Math.max(1, stats.profit*0.15);
+
+    el.innerHTML = `
+        <h2>${c.emoji} ${c.name}
+            <button onclick="doHustle()" style="font-size:12px;padding:3px 8px;margin-left:8px;">Hustle +$${fmt(hustleAmt)}</button>
+        </h2>
+        <p class="stat-label" style="font-style:italic;margin-bottom:4px;">${c.tagline}</p>
+        <p class="stat-label">Co. Cash: <span class="gold">$${fmt(c.cash)}</span> &nbsp;|&nbsp; Mkt Cap: <span class="gold">$${fmt(cap)}</span> &nbsp;|&nbsp; Share: <span class="gold">$${fmt(price)}</span></p>
+        <hr>
+        ${ownerHtml}
+        <div class="section-label">Your Stake — ${ownPct}% (${c.ownedShares} shares)</div>
+        <p>Dividend payout: <span class="gold">${(c.dividendRate*100).toFixed(0)}%</span>
+            <button onclick="changeDividend(0.05)">+</button>
+            <button onclick="changeDividend(-0.05)">-</button>
+        </p>
+        <hr>
+        <p class="stat-label">Demand: ${stats.demand.toFixed(2)}/sec &nbsp;|&nbsp; Cost: $${fmt(stats.cost)} &nbsp;|&nbsp; Sale: $${fmt(stats.salePrice)}</p>
+        <div class="section-label">Markup — ${c.markup*100}%</div>
+        <div class="markup-row">
+            <button onclick="doAdjustMarkup(-1)">−1</button>
+            <input type="range" min="${MARKUP_MIN}" max="${MARKUP_MAX}" step="1" value="${c.markup}" oninput="doSetMarkup(this.value)">
+            <button onclick="doAdjustMarkup(1)">+1</button>
+        </div>
+        <hr>
+        <p>Revenue/sec: <span class="up">$${fmt(stats.revenue)}</span> &nbsp; Expenses/sec: <span class="down">$${fmt(stats.expenses)}</span></p>
+        <p>Profit/sec: <strong class="${stats.profit>=0?'up':'down'}">$${fmt(stats.profit)}</strong></p>
+        <div class="section-label">Upgrades</div>
+        ${upgradeHtml}
+    `;
+}
+
+// ─────────────────────────────────────────────
+//  ACTIONS
+// ─────────────────────────────────────────────
+function handleRowClick(c) {
+    selectedCompany = c;
+    if (!isActive(c) && player.cash >= calcSharePrice(c)) {
+        doBuyFirstShare();
+    } else {
+        render();
+    }
+}
+
+function doBuyFirstShare() {
+    let c = selectedCompany;
+    let price = calcSharePrice(c);
+    if (player.cash < price) { gameLog("Not enough cash — need $"+fmt(price)); render(); return; }
+    player.cash -= price;
+    c.ownedShares += 1;
+    let yo = c.owners.find(o=>o.name==="You");
+    if (yo) { yo.boughtOut=true; yo.remainingShares=0; }
+    gameLog(`First share in ${c.name} — $${fmt(price)}`, true);
+    render();
+}
+
+// Buy exactly 1 share from a specific owner
+function doBuyOneShare(ownerIndex) {
+    let c = selectedCompany;
+    let o = c.owners[ownerIndex];
+    let price = calcSharePrice(c);
+    if (player.cash < price) { gameLog("Not enough cash."); render(); return; }
+    if (o.remainingShares <= 0) return;
+
+    player.cash    -= price;
+    c.ownedShares  += 1;
+    o.remainingShares -= 1;
+
+    if (o.remainingShares <= 0) {
+        o.boughtOut = true;
+        if (o.buyoutLine) gameLog(`${o.name}: ${o.buyoutLine}`, true);
+        else gameLog(`${o.name} fully bought out.`, true);
+        let allDone = c.owners.every(o2=>o2.boughtOut);
+        if (allDone) gameLog(`You now own 100% of ${c.name}.`, true);
+    } else {
+        gameLog(`Bought 1 share from ${o.name} — $${fmt(price)}. ${o.remainingShares} left.`);
+    }
+    render();
+}
+
+// Buy all remaining shares from a specific owner
+function doBuyAllShares(ownerIndex) {
+    let c = selectedCompany;
+    let o = c.owners[ownerIndex];
+    let price = calcSharePrice(c);
+    let total = Math.round(o.remainingShares * price);
+    if (player.cash < total) { gameLog("Not enough cash — need $"+fmt(total)); render(); return; }
+
+    player.cash   -= total;
+    c.ownedShares += o.remainingShares;
+    o.remainingShares = 0;
+    o.boughtOut = true;
+
+    if (o.buyoutLine) gameLog(`${o.name}: ${o.buyoutLine}`, true);
+    else gameLog(`${o.name} fully bought out for $${fmt(total)}.`, true);
+    let allDone = c.owners.every(o2=>o2.boughtOut);
+    if (allDone) gameLog(`You now own 100% of ${c.name}.`, true);
+    render();
+}
+
+function doBuyUpgrade() {
+    let c = selectedCompany;
+    while (c.upgradeIndex<c.upgrades.length && c.upgrades[c.upgradeIndex].purchased) c.upgradeIndex++;
+    if (c.upgradeIndex>=c.upgrades.length) { gameLog("All upgrades done."); return; }
+    let upg  = c.upgrades[c.upgradeIndex];
+    let cost = Math.round(upg.cost*c.factor);
+    if (c.cash<cost) { gameLog(`Need $${fmt(cost)} company cash. Have $${fmt(c.cash)}.`); return; }
+    c.cash -= cost; upg.purchased=true; c.upgradeIndex++;
+    gameLog(`${c.name}: "${upg.name}" — ${upg.desc}`, true);
+    render();
+}
+
+function doSetMarkup(val) {
+    selectedCompany.markup = Math.min(MARKUP_MAX,Math.max(MARKUP_MIN,Math.round(parseFloat(val))));
+    render();
+}
+function doAdjustMarkup(delta) {
+    selectedCompany.markup = Math.min(MARKUP_MAX,Math.max(MARKUP_MIN,Math.round(selectedCompany.markup)+delta));
+    render();
+}
+function changeDividend(delta) {
+    let c=selectedCompany;
+    c.dividendRate=Math.min(1,Math.max(0,Math.round((c.dividendRate+delta)*100)/100));
+    render();
+}
+function doHustle() {
+    let c=selectedCompany;
+    let amt=Math.max(1,calcCompany(c).profit*0.15);
+    let div=distributeProfit(c,amt);
+    gameLog(`Hustled $${fmt(amt)} at ${c.name}${div>0?` → $${fmt(div)} to you`:' → reinvested'}`);
+    render();
+}
+
+// ─────────────────────────────────────────────
+//  DEV TOOLS
+// ─────────────────────────────────────────────
+function addCash(n){ player.cash+=n; gameLog("Dev: +$"+fmt(n)); render(); }
+
+function devUnlockAll(){
+    companies.forEach(c=>{
+        if(!isActive(c)){
+            c.ownedShares=1;
+            let yo=c.owners.find(o=>o.name==="You");
+            if(yo){yo.boughtOut=true;yo.remainingShares=0;}
+        }
+    });
+    gameLog("Dev: unlocked all"); render();
+}
+
+function devMaxUpgrades(){
+    let c=selectedCompany;
+    c.upgrades.forEach(u=>u.purchased=true);
+    c.upgradeIndex=c.upgrades.length;
+    gameLog("Dev: maxed "+c.name); render();
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+if(!developerMode) document.getElementById("developerTools").style.display="none";
+applyTheme();
+loadGame();
+startLoop();
+startRenderLoop();
+setGameSpeed(1);
+render();
+</script>
+</body>
+</html>

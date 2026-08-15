@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portfolio & Tools — KRD Engineering & Management</title>
+<link rel="icon" type="image/svg+xml" href="assets/logos/symbol-grey.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/logos/favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/favicon-180.png">
@@ -57,7 +58,7 @@
   h1{font-size:clamp(30px,4.4vw,44px);font-weight:700;letter-spacing:-0.01em;margin:0 0 14px;}
   .page-lead{color:var(--grey-soft);font-size:16.5px;max-width:64ch;margin:0;}
 
-  section{padding:40px 0 56px;}
+  section{padding:24px 0 36px;}
   h2{font-size:22px;font-weight:700;margin:0 0 6px;}
   .sub-lead{color:var(--grey-soft);font-size:14.5px;margin:0 0 28px;}
 
@@ -65,6 +66,9 @@
   .tool-card{background:var(--panel);padding:24px;display:flex;flex-direction:column;gap:10px;}
   .tool-card h3{font-size:15.5px;margin:0;font-weight:700;}
   .status-pill{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;background:var(--line);color:var(--grey-soft);}
+  .status-pill.live{background:var(--lime);color:var(--grey);}
+  .tool-card.linked{text-decoration:none;color:var(--grey);transition:transform 0.15s ease;}
+  .tool-card.linked:hover{transform:translateY(-3px);}
 
   .site-list{display:flex;flex-direction:column;}
   .site-row{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-top:1px solid var(--line);text-decoration:none;color:var(--grey);}
@@ -81,7 +85,7 @@
 <nav id="siteNav">
   <div class="nav-inner">
     <a href="index.html" class="logo-mark">
-      <img src="assets/logos/nav-mark.png" alt="KRD" class="logo-icon">
+      <img src="assets/logos/symbol-grey.svg" alt="KRD" class="logo-icon">
       <span class="logo-text">Engineering <span class="logo-plus">+</span><br>Management</span>
     </a>
     <div class="nav-links">
@@ -157,35 +161,39 @@
   </div>
 </section>
 
-<section id="game">
+<section id="coding-examples">
   <div class="wrap">
-    <h2>Game &amp; trainer</h2>
-    <p class="sub-lead">A small game and a training tool, built as extra portfolio pieces.</p>
+    <h2>Coding Examples</h2>
+    <p class="sub-lead">Small standalone builds — working examples of code written outside of the core engineering tools.</p>
     <div class="card-grid">
-      <div class="tool-card">
-        <span class="status-pill">Planned</span>
-        <h3>Game</h3>
-      </div>
-      <div class="tool-card">
-        <span class="status-pill">Planned</span>
-        <h3>Trainer</h3>
-      </div>
+      <a href="demos/adventure-capitalism.html" class="tool-card linked" target="_blank" rel="noopener">
+        <span class="status-pill live">Live</span>
+        <h3>Adventure Capitalism</h3>
+      </a>
+      <a href="demos/lap-scoring-practice.html" class="tool-card linked" target="_blank" rel="noopener">
+        <span class="status-pill live">Live</span>
+        <h3>Lap Scoring Practice</h3>
+      </a>
     </div>
   </div>
 </section>
 
 <section id="other-sites">
   <div class="wrap">
-    <h2>Other websites built</h2>
-    <p class="sub-lead">Additional web projects delivered by KRD.</p>
+    <h2>Websites built by KRD</h2>
+    <p class="sub-lead">Beyond engineering, a look at broader design and development work.</p>
     <div class="site-list">
-      <a href="#" class="site-row">
-        <span>Project one</span>
-        <span>Link coming soon</span>
+      <a href="index.html" class="site-row">
+        <span>KRD Group</span>
+        <span>krdgroup.com.au</span>
       </a>
-      <a href="#" class="site-row">
-        <span>Project two</span>
-        <span>Link coming soon</span>
+      <a href="https://www.browcave.co/" class="site-row" target="_blank" rel="noopener">
+        <span>Browcave</span>
+        <span>browcave.co</span>
+      </a>
+      <a href="https://www.ilmaview.com/" class="site-row" target="_blank" rel="noopener">
+        <span>Ilma View Collective</span>
+        <span>ilmaview.com</span>
       </a>
     </div>
   </div>

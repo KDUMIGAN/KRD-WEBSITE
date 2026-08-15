@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KRD Engineering & Management — Engineering & Project Services</title>
+<link rel="icon" type="image/svg+xml" href="assets/logos/symbol-grey.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/logos/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/logos/favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/logos/favicon-180.png">
@@ -103,9 +104,32 @@
     aspect-ratio:1/1;
     overflow:hidden;
   }
-  .hero-visual img{
-    width:100%;height:100%;object-fit:cover;display:block;
+  .hero-visual svg{width:100%;height:100%;display:block;}
+  #heroBg{
+    transform-origin:540px 540px;opacity:0;transform:scale(0.85);
+    transition:transform 0.5s cubic-bezier(.2,.8,.3,1),opacity 0.5s ease;
   }
+  #heroK{
+    transform-origin:328px 741px;opacity:0;transform:translate(-380px,-260px) rotate(-30deg);
+    transition:transform 0.65s cubic-bezier(.34,1.56,.64,1) 0.35s,opacity 0.5s ease 0.35s;
+  }
+  #heroR{
+    transform-origin:540px 700px;opacity:0;transform:translate(0,-300px) rotate(10deg);
+    transition:transform 0.65s cubic-bezier(.34,1.56,.64,1) 0.5s,opacity 0.5s ease 0.5s;
+  }
+  #heroD{
+    transform-origin:713px 740px;opacity:0;transform:translate(380px,260px) rotate(30deg);
+    transition:transform 0.65s cubic-bezier(.34,1.56,.64,1) 0.65s,opacity 0.5s ease 0.65s;
+  }
+  #heroLogo.played #heroBg{opacity:1;transform:scale(1);}
+  #heroLogo.played #heroK,
+  #heroLogo.played #heroR,
+  #heroLogo.played #heroD{opacity:1;transform:translate(0,0) rotate(0deg);}
+  #heroLogo.no-anim #heroBg,
+  #heroLogo.no-anim #heroK,
+  #heroLogo.no-anim #heroR,
+  #heroLogo.no-anim #heroD{transition:none !important;}
+  .hero-visual svg{cursor:pointer;}
   .hero-eyebrow{
     display:inline-flex;align-items:center;gap:8px;
     font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
@@ -157,10 +181,16 @@
     border:1px solid var(--line);
     padding:7px 14px;
     background:var(--panel);
+    transition:transform 0.15s ease,background 0.15s ease,color 0.15s ease,border-color 0.15s ease;
+    cursor:default;
+  }
+  .industry-chip:hover{
+    background:var(--lime);color:var(--grey);border-color:var(--lime);
+    transform:translateY(-2px);
   }
 
   /* SECTION SHARED */
-  section{padding:56px 0;}
+  section{padding:36px 0;}
   .section-head{max-width:640px;margin-bottom:36px;}
   .eyebrow{
     font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
@@ -169,7 +199,7 @@
   }
   .eyebrow::before{content:'';width:16px;height:2px;background:var(--lime);}
   h2{font-size:clamp(26px,3.2vw,34px);font-weight:700;letter-spacing:-0.01em;margin:0 0 14px;}
-  .section-lead{color:var(--grey-soft);font-size:16px;max-width:60ch;}
+  .section-lead{color:var(--grey-soft);font-size:16px;max-width:60ch;margin:25px 0 0;}
 
   /* ABOUT */
   .about{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
@@ -234,7 +264,7 @@
     background:#5c5c5e;color:var(--paper);
     font-size:13px;font-weight:600;
     padding:16px 16px;
-    transition:background 0.15s ease,color 0.15s ease;
+    transition:background 0.15s ease,color 0.15s ease,flex 0.2s ease;
     cursor:default;
   }
   .brick:hover{background:var(--lime);color:var(--grey);}
@@ -265,7 +295,7 @@
   }
   .contact .eyebrow{justify-content:center;}
   .contact h2{margin-bottom:10px;}
-  .contact .section-lead{margin:0 auto 28px;}
+  .contact .section-lead{margin:25px auto 28px;}
   footer{
     padding:32px 0;border-top:1px solid var(--line);
     font-size:12.5px;color:var(--muted);
@@ -278,7 +308,7 @@
 <nav id="siteNav">
   <div class="nav-inner">
     <a href="#" class="logo-mark">
-      <img src="assets/logos/nav-mark.png" alt="KRD" class="logo-icon">
+      <img src="assets/logos/symbol-grey.svg" alt="KRD" class="logo-icon">
       <span class="logo-text">Engineering <span class="logo-plus">+</span><br>Management</span>
     </a>
     <div class="nav-links">
@@ -324,8 +354,19 @@
           <span class="industry-chip">Energy</span>
         </div>
       </div>
-      <div class="hero-visual reveal">
-        <img src="assets/logos/symbol-grey-hero.png" alt="KRD symbol">
+      <div class="hero-visual">
+        <svg id="heroLogo" viewBox="175.269 175.269 729.462 729.462" xmlns="http://www.w3.org/2000/svg">
+          <rect id="heroBg" x="175.269" y="175.269" width="729.462" height="729.462" fill="#414142"/>
+          <g id="heroK">
+            <polygon fill="#e3e421" points="436.297 859.885 317.1 740.686 436.019 621.764 374.03 621.764 263.951 731.84 263.951 621.763 220.115 621.763 220.115 792.395 263.707 749.287 374.307 859.885 436.297 859.885"/>
+          </g>
+          <g id="heroR">
+            <path fill="#e3e421" d="M651.269,859.437l-63.371-81.458c32.861-2.153,58.922-28.132,58.922-59.842v-36.002c0-33.115-28.402-60.057-63.31-60.057h-132.088v43.836h132.088c10.737,0,19.474,7.277,19.474,16.221v36.002c0,8.943-8.737,16.217-19.474,16.217h-132.088v43.836h79.418l63.207,81.247h57.222Z"/>
+          </g>
+          <g id="heroD">
+            <path fill="#e3e421" d="M759.451,622.172h-92.69v44.49h92.69c30.846,0,55.943,25.098,55.943,55.943v36.45c0,30.846-25.098,55.943-55.943,55.943h-92.69v44.49h92.69c55.379,0,100.433-45.054,100.433-100.433v-36.45c0-55.379-45.054-100.433-100.433-100.433Z"/>
+          </g>
+        </svg>
       </div>
     </div>
   </div>
@@ -434,24 +475,21 @@
     <h2>Tools and skills we work with</h2>
     <p class="section-lead">The software and technical foundations behind every project.</p>
     <div class="brick-grid">
-      <div class="brick-row">
-        <div class="brick" style="flex:2;">Autodesk AutoCAD</div>
-        <div class="brick" style="flex:2;">Autodesk Inventor</div>
-        <div class="brick" style="flex:2;">Microsoft Project</div>
+      <div class="brick-row" data-row>
+        <div class="brick" data-w="2" style="flex:2;">Autodesk AutoCAD</div>
+        <div class="brick" data-w="1" style="flex:1;">Inventor</div>
+        <div class="brick" data-w="2" style="flex:2;">Microsoft Project</div>
+        <div class="brick" data-w="1" style="flex:1;">MS 365</div>
       </div>
-      <div class="brick-row">
-        <div class="brick" style="flex:2;">Microsoft 365</div>
-        <div class="brick" style="flex:3;">Mechanical &amp; electrical design support</div>
-        <div class="brick" style="flex:3;">CAD modelling and drafting</div>
+      <div class="brick-row" data-row>
+        <div class="brick" data-w="1" style="flex:1;">PLC programming</div>
+        <div class="brick" data-w="2" style="flex:2;">Industrial control systems</div>
+        <div class="brick" data-w="1" style="flex:1;">CAD drafting</div>
       </div>
-      <div class="brick-row">
-        <div class="brick" style="flex:3;">Industrial control systems</div>
-        <div class="brick" style="flex:2;">PLC programming</div>
-        <div class="brick" style="flex:3;">Technical problem solving</div>
-      </div>
-      <div class="brick-row">
-        <div class="brick" style="flex:3;">Prototype development</div>
-        <div class="brick" style="flex:4;">Software development and programming</div>
+      <div class="brick-row" data-row>
+        <div class="brick" data-w="2" style="flex:2;">Technical problem solving</div>
+        <div class="brick" data-w="1" style="flex:1;">Prototyping</div>
+        <div class="brick" data-w="2" style="flex:2;">Software development</div>
       </div>
     </div>
   </div>
@@ -530,6 +568,24 @@
     }
   })();
 
+  // Technical Expertise: brick hover — active brick grows, its row reacts
+  (function(){
+    document.querySelectorAll('.brick-row').forEach(function(row){
+      var bricks = Array.prototype.slice.call(row.querySelectorAll('.brick'));
+      bricks.forEach(function(el){
+        el.addEventListener('mouseenter', function(){
+          bricks.forEach(function(b){
+            var w = parseFloat(b.dataset.w);
+            b.style.flex = b === el ? (w + 1.4) : Math.max(0.5, w - 0.35);
+          });
+        });
+      });
+      row.addEventListener('mouseleave', function(){
+        bricks.forEach(function(b){ b.style.flex = b.dataset.w; });
+      });
+    });
+  })();
+
   // Mobile: tap-to-expand capability accordion
   (function(){
     var rows = Array.prototype.slice.call(document.querySelectorAll('#capAcc .cap-acc-row'));
@@ -573,6 +629,25 @@
     els.forEach(function(el, i){
       setTimeout(function(){ el.classList.add('shown'); }, i * 110 + 60);
     });
+  })();
+
+  // Hero logo: assembly animation, plays once on load, click to replay
+  (function(){
+    var logo = document.getElementById('heroLogo');
+    if (!logo) return;
+    function play(){
+      logo.classList.add('no-anim');
+      logo.classList.remove('played');
+      void logo.getBoundingClientRect(); // force reflow so the reset actually commits
+      logo.classList.remove('no-anim');
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          logo.classList.add('played');
+        });
+      });
+    }
+    setTimeout(play, 250);
+    logo.addEventListener('click', play);
   })();
 </script>
 </body>

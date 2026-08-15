@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lap Scoring Practice</title>
+
+    <style>
+        #track {
+            position: absolute;
+            top: 280px;
+            left: 0;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        #finish {
+            position: absolute;
+            right: 20%;
+            height: 100%;
+            border-left: 5px solid black;
+        }
+
+        @keyframes moveNumber {
+            from {
+                transform: translateX(500px);
+            }
+            to {
+                transform: translateX(1500px);
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .rider {
+            position: absolute;
+            left: 0px;
+            top: 20px;
+            font-size: 50px;
+
+            will-change: transform;
+        }
+
+        #raceClock {
+            font-size: 30px;
+            margin: 20px;
+        }
+
+        #finishLine {
+            position: absolute;
+            left: 50%;
+            top: 280px;
+            height: 600px;
+            border-left: 3px solid black;
+        }
+
+        #debug {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 550px;
+            border: 2px solid black;
+            padding: 10px;
+            background: white;
+            text-align: left;
+        }
+
+        #debugOutput {
+            font-family: monospace;
+        }
+
+        #logOutput {
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 1px solid #ccc;
+            margin-top: 10px;
+            padding-top: 5px;
+        }
+
+        #settings input {
+            width: 60px;
+        }  
+        
+        #notifications {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 250px;
+        }
+
+        .notification {
+            background: white;
+            border: 2px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }        
+ 
+    </style>
+</head>
+
+<body>
+
+    <h1>Lap Scoring Trainer</h1>
+
+    <div id="settings">
+        <h3>Settings</h3>
+
+        <label>
+            Laps:
+            <input type="number" id="Laps" value="10">
+        </label>
+        <label>
+            # of Riders:
+            <input type="number" id="riderCount" value="20">
+        </label>
+        <label>
+            Avg Lap Time (s):
+            <input type="number" id="avgLapTime" value="60">
+        </label>
+        <label>
+            Lap Spread (&plusmn;s):
+            <input type="number" id="lapSpread" value="3">
+        </label>
+        <br><br>
+        <button onclick="startRace()">Start Race</button>
+        <button onclick="stopRace()">Stop Race</button>
+    </div>
+
+    <div id="raceClock">
+        Race Time: 00:00:00
+    </div>
+
+    <div id="track"></div>
+
+    <div id="finishLine"></div>
+
+    <div id="debug">
+        <button onclick="toggleDebug()">
+            Race Data
+        </button>
+        <label style="font-weight:normal; margin-left:10px;">
+            <input type="checkbox" id="consoleLogToggle" onchange="renderLog()">
+            Show console log
+        </label>
+        <pre id="debugOutput" style="display:none;">Loading...</pre>
+        <pre id="logOutput" style="display:none;"></pre>
+    </div>
+
+    <div id="notifications"></div>
+
+    <script>
+
+        // =======================
+        // USER SETTINGS
+        // =======================
+
+        let raceSettings = {
+            totalLaps: 10,             // number of laps
+            animationDuration: 5       // seconds for a rider to cross the screen
+        };
+
+        // =======================
+        // RIDERS
+        // =======================
+        let riders = [];
+ 
+        function createRiders() {
+            riders = [];
+
+            let count =
+                Number(document.getElementById("riderCount").value);
+
+            let avgLapTime =
+                Number(document.getElementById("avgLapTime").value) * 1000;
+            let lapSpread =
+                Number(document.getElementById("lapSpread").value) * 1000;
+
+            let usedNumbers = [];
+
+            for (let i = 0; i < count; i++) {
+                let number;
+                // Make unique numbers
+                do {
+                    number = Math.floor(Math.random() * 99) + 1;
+                }
+                while (usedNumbers.includes(number));
+                usedNumbers.push(number);
+                riders.push({
+                    number: number,
+                    lap: 0,
+
+                    // avgLapTime +/- lapSpread
+                    lapTime:
+                        avgLapTime + (Math.random() * 2 - 1) * lapSpread,
+                    nextCrossing: 0,
+                    finished: false,
+                    dnf: false,
+                    dnfLap: Math.random() < 0.05 ? Math.floor(Math.random() * 5) + 3 : null
+                });
+            }
+
+
+        }        
+
+        // =======================
+        // RACE TIMER
+        // =======================
+        let clockTimer;
+        let raceMilliseconds = 0;
+        let raceFinished = false;
+        let raceWinnerLap = false;
+        let raceOver = false;
+
+        let logLines = [];
+
+        function logMessage(...args) {
+            let line = args.join(" ");
+            logLines.push(line);
+            console.log(...args);
+            renderLog();
+        }
+
+        function renderLog() {
+            let output = document.getElementById("logOutput");
+            let checked = document.getElementById("consoleLogToggle").checked;
+
+            if (checked) {
+                output.style.display = "block";
+                output.innerHTML = logLines.join("\n");
+                // Auto-scroll to the latest line
+                output.scrollTop = output.scrollHeight;
+            }
+            else {
+                output.style.display = "none";
+            }
+        }
+
+        // =======================
+        // PROGRAM CODE
+        // =======================
+        // =======================
+        // CREATE RIDER
+        // =======================
+        function newRider(nextRider) {
+            // Once the leader has finished, every remaining rider is
+            // pulled/finished on their next crossing, regardless of
+            // what lap they're actually on. Report the ACTUAL lap
+            // they were on when pulled, not a fabricated lap+1.
+            if (raceWinnerLap && nextRider.lap < raceSettings.totalLaps) {
+
+                nextRider.lap++;
+                animateRider(nextRider);
+                nextRider.finished = true;
+
+                showNotification(
+                    "Rider " + nextRider.number +
+                    " finishes on lap " +
+                    nextRider.lap
+                );
+
+                updateDebug();
+                return;
+            }
+
+            if (nextRider.dnf) {
+                nextRider.finished = true;
+                logMessage(
+                    "Rider DNF:",
+                    nextRider.number
+                );
+                showNotification(
+                    "Rider " + nextRider.number + " DNF"
+                );
+                updateDebug();
+                return;
+            }   
+
+            // Rider crossed finish line
+            nextRider.lap++;
+
+            //DNF of rider
+            if (nextRider.dnfLap != null &&
+                nextRider.lap >= nextRider.dnfLap) {
+                nextRider.finished = true;
+                nextRider.dnf = true;
+
+                logMessage(
+                    "Rider DNF:",
+                    nextRider.number,
+                    "at lap",
+                    nextRider.lap
+                );
+
+                updateDebug();
+
+                return;
+            }            
+
+            // Schedule next lap
+            if (nextRider.lap < raceSettings.totalLaps) {
+                let variation = (Math.random() - 0.5) * 500;
+                nextRider.nextCrossing += 
+                    nextRider.lapTime + variation;
+            }
+
+            else {
+
+                nextRider.finished = true;
+
+                if (!raceFinished) {
+
+                    raceFinished = true;
+                    raceWinnerLap = true;
+
+                    showNotification(
+                        "Winner: Rider " + nextRider.number
+                    );
+                }
+            }
+
+            animateRider(nextRider);
+
+            // Finish rider
+            if (nextRider.lap >= raceSettings.totalLaps) {
+                nextRider.finished = true;
+                updateDebug();
+                return;
+            }
+
+            logMessage(
+                "Rider:",
+                nextRider.number,
+                "Lap:",
+                nextRider.lap,
+                "Finished:",
+                nextRider.finished,
+                "Total Laps",
+                raceSettings.totalLaps,
+                "Next Lap",
+                nextRider.nextCrossing
+            ); 
+
+            updateDebug();
+        }
+
+        // =======================
+        // DEBUG
+        // =======================
+        function updateDebug() {
+
+            let output = "";
+
+            for (let rider of riders) {
+                output +=
+                    "Rider: " + rider.number +
+                    " | Lap: " + rider.lap + 
+                    " | Next Lap: " + (rider.nextCrossing / 1000).toFixed(2) + " s" +
+                    " | DNF?: " + rider.dnf +
+                    " | DNF Lap: " + rider.dnfLap + "\n";
+            }
+
+            document.getElementById("debugOutput").innerHTML = output;
+        }        
+        
+
+        // =======================
+        // UPDATE CLOCK
+        // =======================
+        function updateClock() {
+
+            raceMilliseconds+=100;
+            let hours = Math.floor(raceMilliseconds / 3600000);
+            let minutes = Math.floor((raceMilliseconds % 3600000) / 60000);
+            let seconds = Math.floor((raceMilliseconds % 60000) / 1000);
+            let tenths = Math.floor((raceMilliseconds % 1000) / 100);
+
+            let time =
+                String(hours).padStart(2, "0") + ":" +
+                String(minutes).padStart(2, "0") + ":" +
+                String(seconds).padStart(2, "0") + "." +
+                tenths;
+
+            document.getElementById("raceClock").innerHTML =
+                "Race Time: " + time;
+
+            for (let rider of riders) {
+                if (!rider.finished &&
+                    rider.nextCrossing <= raceMilliseconds) {
+                    newRider(rider);
+                }
+            }
+
+            if (!raceOver && riders.length > 0 &&
+                riders.every(r => r.finished)) {
+                raceOver = true;
+                clearInterval(clockTimer);
+                showNotification("Race Finished");
+            }
+        }
+
+        // =======================
+        // START RACE
+        // =======================
+
+        function startRace() {
+            // Stop previous race
+            clearInterval(clockTimer);
+
+            // Reset clock
+            raceMilliseconds = 0;
+            updateClock();
+            raceFinished = false;
+            raceWinnerLap = false;
+            raceOver = false;
+            logLines = [];
+            renderLog();
+
+            raceSettings.totalLaps =
+                Number(document.getElementById("Laps").value);
+
+            createRiders();
+
+            // Reset riders
+            for (let rider of riders) {
+                rider.lap = 0;
+                rider.finished = false;
+                rider.nextCrossing = rider.lapTime;
+            }
+
+            updateDebug();  
+
+            // Clock timer
+            clockTimer = setInterval(
+                updateClock,
+                100
+            );
+        }
+
+        // =======================
+        // STOP RACE
+        // =======================
+        function stopRace() {
+            clearInterval(clockTimer);
+
+            document.getElementById("track").innerHTML = "";
+            document.getElementById("notifications").innerHTML = "";
+        }
+
+        function toggleDebug() {
+
+            let output = document.getElementById("debugOutput");
+
+            if (output.style.display === "none") {
+                output.style.display = "block";
+            }
+            else {
+                output.style.display = "none";
+            }
+        }        
+
+        function showNotification(message) {
+            let box = document.createElement("div");
+            box.className = "notification";
+            box.innerHTML = message;
+            document.getElementById("notifications")
+                .appendChild(box);
+
+            setTimeout(function() {
+
+                box.remove();
+            }, 5000);
+        }   
+        
+        function animateRider(rider) {
+
+            let roadWidth = 450;
+
+            let riderElement = document.createElement("div");
+
+            riderElement.style.top =
+                Math.random() * roadWidth + "px";
+
+            riderElement.className = "rider";
+
+            riderElement.innerHTML = rider.number;
+
+            riderElement.style.animation =
+                "moveNumber " + raceSettings.animationDuration + "s linear forwards";
+
+            document.getElementById("track")
+                .appendChild(riderElement);
+
+            riderElement.addEventListener("animationend", function () {
+                riderElement.remove();
+            });
+        }
+
+    </script>
+
+</body>
+</html>
