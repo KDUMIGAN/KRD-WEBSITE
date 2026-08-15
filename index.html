@@ -98,7 +98,10 @@
     gap:40px;
     align-items:center;
   }
-  @media (max-width:800px){.hero-grid{grid-template-columns:1fr;}.hero-visual{display:none;}}
+  @media (max-width:800px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero-visual{order:-1;max-width:220px;margin:0 auto 32px;}
+  }
   .hero-visual{
     position:relative;
     aspect-ratio:1/1;
