@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Flip Calculator — KRD</title>
+<style>
+  :root {
+    --grey: #414142;
+    --grey-dark: #232324;
+    --grey-darker: #1a1a1b;
+    --lime: #E3E421;
+    --lime-dim: #9a9b16;
+    --amber: #E3A521;
+    --text: #F2F2ED;
+    --text-mute: #A6A6A2;
+    --line: #58585a;
+    --neg: #E3573C;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--grey-darker);
+    color: var(--text);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  body {
+    padding: 32px 16px 80px;
+  }
+  .sheet {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .brand .mark {
+    width: 14px; height: 14px;
+    background: var(--lime);
+    flex-shrink: 0;
+  }
+  .brand span {
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--text-mute);
+    font-weight: 700;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 300;
+    margin: 6px 0 2px;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    color: var(--text-mute);
+    font-size: 14px;
+    margin: 0 0 32px;
+    max-width: 46ch;
+    line-height: 1.5;
+  }
+  .block {
+    border-top: 1px solid var(--line);
+    padding: 22px 0;
+  }
+  .block:last-of-type { border-bottom: 1px solid var(--line); }
+  .block-title {
+    font-size: 12px;
+    color: var(--lime);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin: 0 0 16px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+  }
+  .row label {
+    font-size: 14.5px;
+    color: var(--text);
+    flex: 1;
+  }
+  .row .hint {
+    display: block;
+    font-size: 12px;
+    color: var(--text-mute);
+    margin-top: 2px;
+  }
+  .field {
+    display: flex;
+    align-items: center;
+    background: var(--grey);
+    border: 1px solid var(--line);
+    min-width: 148px;
+  }
+  .field:focus-within {
+    border-color: var(--lime);
+  }
+  .field .prefix, .field .suffix {
+    font-size: 14px;
+    color: var(--text-mute);
+    padding: 0 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .field input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    padding: 9px 4px;
+    text-align: right;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .field input::-webkit-outer-spin-button,
+  .field input::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+  }
+  .toggle {
+    display: flex;
+    border: 1px solid var(--line);
+  }
+  .toggle button {
+    background: transparent;
+    border: 0;
+    color: var(--text-mute);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .toggle button.active {
+    background: var(--lime);
+    color: var(--grey-darker);
+    font-weight: 700;
+  }
+  .results {
+    background: var(--grey);
+    padding: 24px 20px;
+    margin-top: 8px;
+  }
+  .results-title {
+    font-size: 12px;
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin: 0 0 14px;
+  }
+  .r-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .r-row span:first-child { color: var(--text-mute); }
+  .r-row span:last-child { font-variant-numeric: tabular-nums; }
+  .headline {
+    margin-top: 18px;
+    padding-top: 4px;
+  }
+  .headline .lbl {
+    font-size: 13px;
+    color: var(--text-mute);
+    margin-bottom: 6px;
+  }
+  .headline .num {
+    font-size: 34px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    color: var(--lime);
+    letter-spacing: -0.01em;
+  }
+  .headline .num.neg { color: var(--neg); }
+  .headline .note {
+    font-size: 12.5px;
+    color: var(--text-mute);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .actions button {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 11px;
+    cursor: pointer;
+  }
+  .actions button:hover {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+  .foot {
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 11.5px;
+    margin-top: 28px;
+    letter-spacing: 0.02em;
+  }
+  details.info { margin: 0 0 16px; }
+  details.info summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  details.info summary::-webkit-details-marker { display: none; }
+  details.info summary .block-title { margin: 0; }
+  details.info summary .q {
+    width: 15px; height: 15px;
+    border: 1px solid var(--text-mute);
+    color: var(--text-mute);
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  details.info[open] summary .q { border-color: var(--lime); color: var(--lime); }
+  .estimate-btn {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--line);
+    color: var(--text-mute);
+    font-family: inherit;
+    font-size: 12.5px;
+    padding: 9px;
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+  .estimate-btn:hover { border-color: var(--lime); color: var(--lime); }
+  .rec {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    margin-bottom: 18px;
+  }
+  .rec.pass { border-color: var(--lime); }
+  .rec.marginal { border-color: var(--amber); }
+  .rec.fail { border-color: var(--neg); }
+  .rec .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: var(--text-mute); }
+  .rec.pass .dot { background: var(--lime); }
+  .rec.marginal .dot { background: var(--amber); }
+  .rec.fail .dot { background: var(--neg); }
+  .rec .txt { font-size: 13px; }
+  .rec .txt b { display: block; font-size: 14.5px; margin-bottom: 2px; }
+  .rec.pass .txt b { color: var(--lime); }
+  .rec.marginal .txt b { color: var(--amber); }
+  .rec.fail .txt b { color: var(--neg); }
+  .rec .txt span { color: var(--text-mute); font-size: 12px; }
+  .info-body {
+    font-size: 12.5px;
+    color: var(--text-mute);
+    line-height: 1.6;
+    margin: 8px 0 0;
+    padding-left: 22px;
+    border-left: 1px solid var(--line);
+  }
+  .info-body strong { color: var(--text); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="brand"><div class="mark"></div><span>KRD ENGINEERING &amp; MANAGEMENT</span></div>
+  <h1>Flip / renovation worksheet</h1>
+  <p class="sub">Purchase-to-sale numbers for a flip or live-in reno. All fields recalculate live — nothing is saved until you export.</p>
+
+  <div class="block">
+    <p class="block-title">PURCHASE</p>
+    <div class="row">
+      <label>Purchase price</label>
+      <div class="field"><span class="prefix">$</span><input type="number" id="price" value="450000" step="1000"></div>
+    </div>
+    <div class="row">
+      <label>Deposit</label>
+      <div class="field"><input type="number" id="deposit" value="45000" step="1000"><span class="suffix">$</span></div>
+    </div>
+    <div class="row">
+      <label>Loan amount<span class="hint">Auto-calculated</span></label>
+      <div class="field"><span class="prefix">$</span><input type="number" id="loanAmount" value="405000" readonly></div>
+    </div>
+    <div class="row">
+      <label>Interest rate (p.a.)</label>
+      <div class="field"><input type="number" id="rate" value="6.0" step="0.01"><span class="suffix">%</span></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <details class="info">
+      <summary><p class="block-title">RENOVATION</p><span class="q">?</span></summary>
+      <p class="info-body">
+        <strong>Contingency</strong> is a buffer, not a real cost yet — it covers what you can't see until you open the walls (hidden electrical, plumbing, structural issues, price rises, trades running over quote). 15-20% of the reno budget is the standard trade rule of thumb.<br><br>
+        <strong>Holding period</strong> can't be known for certain, only planned for — base it on trade timeframes plus a buffer for delays, and add typical days-on-market for the suburb (ask a local agent). Reno projects usually run longer than planned, so lean generous.<br><br>
+        The estimate button below fills these plus rates/insurance using rough rules of thumb based on price and reno budget — useful as a starting point, not a substitute for real quotes.
+      </p>
+    </details>
+    <div class="row">
+      <label>Reno budget</label>
+      <div class="field"><span class="prefix">$</span><input type="number" id="reno" value="35000" step="500"></div>
+    </div>
+    <div class="row">
+      <label>Contingency</label>
+      <div class="field"><input type="number" id="contingency" value="18" step="1"><span class="suffix">%</span></div>
+    </div>
+    <div class="row">
+      <label>Holding period<span class="hint">Purchase to sale</span></label>
+      <div class="field"><input type="number" id="months" value="8" step="1"><span class="suffix">mo</span></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <details class="info">
+      <summary><p class="block-title">HOLDING COSTS</p><span class="q">?</span></summary>
+      <p class="info-body">
+        <strong>Council rates</strong> — ask the agent for the current owner's rates notice, or check the council's website for an address-based estimate.<br><br>
+        <strong>Insurance</strong> — get an actual quote once you know the address: landlord/building cover while renovating, or home &amp; contents once you move in.
+      </p>
+    </details>
+    <button class="estimate-btn" onclick="estimateDefaults()">Estimate contingency, holding period &amp; rates/insurance ↓</button>
+    <div class="row">
+      <label>Rates + insurance</label>
+      <div class="field"><span class="prefix">$</span><input type="number" id="ratesIns" value="2600" step="100"><span class="suffix">/yr</span></div>
+    </div>
+    <div class="toggle-row">
+      <label>Main residence (CGT exempt)</label>
+      <div class="toggle">
+        <button id="mrYes" class="active" onclick="setMR(true)">Yes</button>
+        <button id="mrNo" onclick="setMR(false)">No</button>
+      </div>
+    </div>
+    <div class="row" id="taxRow" style="display:none;">
+      <label>Marginal tax rate<span class="hint">For CGT estimate, discounted 50% if held over 12mo</span></label>
+      <div class="field"><input type="number" id="taxRate" value="32" step="1"><span class="suffix">%</span></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <details class="info">
+      <summary><p class="block-title">SALE</p><span class="q">?</span></summary>
+      <p class="info-body">
+        <strong>Resale value</strong> is always a projection, never a certainty. Use recent <em>sold</em> prices (not listings) for comparable renovated properties nearby, or ask a local agent for a written appraisal based on your planned scope. Use the conservative end of the range, not the best case — overestimating resale is the most common way flip numbers go wrong.
+      </p>
+    </details>
+    <div class="row">
+      <label>Expected resale value</label>
+      <div class="field"><span class="prefix">$</span><input type="number" id="resale" value="560000" step="1000"></div>
+    </div>
+    <div class="row">
+      <label>Selling costs<span class="hint">Agent, marketing, legal</span></label>
+      <div class="field"><input type="number" id="sellPct" value="3" step="0.1"><span class="suffix">%</span></div>
+    </div>
+  </div>
+
+  <div class="results">
+    <p class="results-title">RESULT</p>
+    <div class="rec" id="outRec">
+      <div class="dot"></div>
+      <div class="txt"><b id="recLabel">—</b><span id="recReason">Fill in the numbers above.</span></div>
+    </div>
+    <div class="r-row"><span>Total cash in (deposit + reno + contingency + holding)</span><span id="outCashIn">—</span></div>
+    <div class="r-row"><span>Interest cost over hold period</span><span id="outInterest">—</span></div>
+    <div class="r-row"><span>Selling costs</span><span id="outSellCost">—</span></div>
+    <div class="r-row"><span>CGT (if applicable)</span><span id="outCGT">—</span></div>
+    <div class="r-row"><span>Breakeven sale price</span><span id="outBreakeven">—</span></div>
+    <div class="r-row"><span>Resale needed for 15% ROI</span><span id="outResaleROI">—</span></div>
+    <div class="r-row"><span>Resale needed for 70% rule</span><span id="outResale70">—</span></div>
+
+    <div class="headline">
+      <div class="lbl">Projected profit / loss at expected resale</div>
+      <div class="num" id="outProfit">$0</div>
+      <div class="note" id="outROI">ROI on cash in: —</div>
+      <div class="note">No fixed target, but many won't proceed below ~15-20% ROI on cash in — below that, the risk/effort rarely beats just investing the cash.</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button onclick="exportPDF()">Export to PDF</button>
+    <button onclick="resetForm()">Reset</button>
+  </div>
+
+  <p class="foot">Internal tool — KRD Engineering &amp; Management. Not financial advice.</p>
+</div>
+
+<script>
+let isMainResidence = true;
+
+function setMR(val) {
+  isMainResidence = val;
+  document.getElementById('mrYes').classList.toggle('active', val);
+  document.getElementById('mrNo').classList.toggle('active', !val);
+  document.getElementById('taxRow').style.display = val ? 'none' : 'flex';
+  calc();
+}
+
+function fmt(n) {
+  const sign = n < 0 ? '-' : '';
+  return sign + '$' + Math.abs(Math.round(n)).toLocaleString('en-AU');
+}
+
+function calc() {
+  const price = parseFloat(document.getElementById('price').value) || 0;
+  const deposit = parseFloat(document.getElementById('deposit').value) || 0;
+  const rate = parseFloat(document.getElementById('rate').value) || 0;
+  const reno = parseFloat(document.getElementById('reno').value) || 0;
+  const contingencyPct = parseFloat(document.getElementById('contingency').value) || 0;
+  const months = parseFloat(document.getElementById('months').value) || 0;
+  const ratesIns = parseFloat(document.getElementById('ratesIns').value) || 0;
+  const resale = parseFloat(document.getElementById('resale').value) || 0;
+  const sellPct = parseFloat(document.getElementById('sellPct').value) || 0;
+  const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+
+  const loanAmount = Math.max(price - deposit, 0);
+  document.getElementById('loanAmount').value = Math.round(loanAmount);
+
+  const contingencyAmt = reno * (contingencyPct / 100);
+  const renoTotal = reno + contingencyAmt;
+
+  const interestCost = loanAmount * (rate / 100) * (months / 12);
+  const ratesInsCost = ratesIns * (months / 12);
+  const holdingCost = interestCost + ratesInsCost;
+
+  const cashIn = deposit + renoTotal + holdingCost;
+
+  const sellCost = resale * (sellPct / 100);
+
+  let cgt = 0;
+  if (!isMainResidence) {
+    const gain = Math.max(resale - price - renoTotal - sellCost, 0);
+    const discountedGain = gain * 0.5;
+    cgt = discountedGain * (taxRate / 100);
+  }
+
+  const totalCostToSell = price + renoTotal + holdingCost + sellCost + cgt;
+  const breakeven = totalCostToSell;
+
+  const netProceeds = resale - sellCost - loanAmount - cgt;
+  const profit = netProceeds - cashIn;
+
+  document.getElementById('outCashIn').textContent = fmt(cashIn);
+  document.getElementById('outInterest').textContent = fmt(interestCost);
+  document.getElementById('outSellCost').textContent = fmt(sellCost);
+  document.getElementById('outCGT').textContent = isMainResidence ? 'Exempt' : fmt(cgt);
+  document.getElementById('outBreakeven').textContent = fmt(breakeven);
+
+  const s = sellPct / 100;
+  const netProceedsNeeded = cashIn * 1.15;
+  let resaleForROI;
+  if (isMainResidence || s >= 1) {
+    resaleForROI = (netProceedsNeeded + loanAmount) / (1 - s);
+  } else {
+    const t = taxRate / 100;
+    const R = (netProceedsNeeded + loanAmount - 0.5 * t * (price + renoTotal)) / (1 - 0.5 * t);
+    resaleForROI = R / (1 - s);
+  }
+  const resaleFor70 = (price + renoTotal) / 0.7;
+  document.getElementById('outResaleROI').textContent = isFinite(resaleForROI) ? fmt(resaleForROI) : '—';
+  document.getElementById('outResale70').textContent = isFinite(resaleFor70) ? fmt(resaleFor70) : '—';
+
+  const profitEl = document.getElementById('outProfit');
+  profitEl.textContent = fmt(profit);
+  profitEl.classList.toggle('neg', profit < 0);
+
+  const roi = cashIn > 0 ? (profit / cashIn) * 100 : 0;
+  document.getElementById('outROI').textContent = 'ROI on cash in: ' + roi.toFixed(1) + '%';
+
+  const rule70 = price <= (0.7 * resale - renoTotal);
+  const roiPass = roi >= 15;
+  const recEl = document.getElementById('outRec');
+  const recLabel = document.getElementById('recLabel');
+  const recReason = document.getElementById('recReason');
+
+  if (price === 0 || resale === 0) {
+    recEl.className = 'rec';
+    recLabel.textContent = '—';
+    recReason.textContent = 'Fill in the numbers above.';
+  } else if (profit <= 0) {
+    recEl.className = 'rec fail';
+    recLabel.textContent = 'Reconsider';
+    recReason.textContent = 'Projected result is a loss at this resale value.';
+  } else if (roiPass && rule70) {
+    recEl.className = 'rec pass';
+    recLabel.textContent = 'Looks solid';
+    recReason.textContent = 'Clears both the 15%+ ROI guide and the 70% purchase-price rule.';
+  } else if (roiPass || rule70) {
+    recEl.className = 'rec marginal';
+    recLabel.textContent = 'Marginal';
+    recReason.textContent = roiPass
+      ? 'ROI is healthy, but purchase price is high relative to resale (70% rule).'
+      : 'Purchase price fits the 70% rule, but ROI is under the 15% guide.';
+  } else {
+    recEl.className = 'rec fail';
+    recLabel.textContent = 'Reconsider';
+    recReason.textContent = 'Falls short of both the ROI guide and the 70% purchase-price rule.';
+  }
+}
+
+function estimateDefaults() {
+  const price = parseFloat(document.getElementById('price').value) || 0;
+  const reno = parseFloat(document.getElementById('reno').value) || 0;
+
+  let contingency;
+  if (reno < 20000) contingency = 20;
+  else if (reno < 60000) contingency = 15;
+  else contingency = 12;
+
+  const renoMonths = Math.max(Math.ceil(reno / 9000), 1);
+  const months = renoMonths + 2;
+
+  const ratesIns = Math.round(price * 0.005 + 1300);
+
+  document.getElementById('contingency').value = contingency;
+  document.getElementById('months').value = months;
+  document.getElementById('ratesIns').value = ratesIns;
+
+  calc();
+}
+
+function resetForm() {
+  document.querySelectorAll('input[type=number]:not([readonly])').forEach(el => {
+    el.value = el.defaultValue;
+  });
+  setMR(true);
+  calc();
+}
+
+function exportPDF() {
+  window.print();
+}
+
+document.querySelectorAll('input[type=number]').forEach(el => {
+  el.addEventListener('input', calc);
+});
+
+calc();
+</script>
+</body>
+</html>
