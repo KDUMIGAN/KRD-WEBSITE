@@ -21,7 +21,7 @@ header{background:var(--grey);color:#fff;position:sticky;top:0;z-index:1000;padd
 .brand small{color:#cfcfcf;font-size:12px}
 .brand small i{color:var(--lime);font-style:normal}
 nav.tabs{display:flex;border-top:1px solid #555}
-nav.tabs button{flex:1;background:none;border:0;color:#ddd;padding:10px 4px;font:inherit;font-size:14px;border-bottom:3px solid transparent;cursor:pointer}
+nav.tabs button{flex:1;background:none;border:0;color:#ddd;padding:10px 2px;font:inherit;font-size:13px;border-bottom:3px solid transparent;cursor:pointer}
 nav.tabs button.on{color:#fff;border-bottom-color:var(--lime)}
 main{max-width:880px;margin:0 auto;padding:14px 16px 60px}
 section[hidden]{display:none}
@@ -84,6 +84,35 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
 .empty{text-align:center;color:var(--muted);padding:30px 10px}
 .prog{height:4px;background:#ddd;border-radius:2px;overflow:hidden;margin-bottom:8px}
 .prog>div{height:100%;background:var(--lime);width:0}
+.locline{display:flex;align-items:center;gap:8px;font-size:14px}
+.locline b{font-weight:600}
+.results button{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:8px;margin-top:6px;font:inherit;font-size:13px;cursor:pointer}
+#routeMap{height:340px;border:1px solid var(--line);border-radius:6px;margin-bottom:10px}
+.stop{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.stop .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--grey);color:var(--lime);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
+.stop .n.home{background:var(--lime);color:var(--grey)}
+.stop .txt{flex:1;min-width:0}
+.stop .sub{font-size:12px;color:var(--muted)}
+.stop button{background:none;border:1px solid var(--line);border-radius:4px;padding:4px 8px;cursor:pointer;font-size:13px}
+.cand{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.cand .txt{flex:1;min-width:0;font-size:14px}
+.cand .sub{font-size:12px;color:var(--muted)}
+.totals{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;margin:6px 0}
+.totals b{font-size:18px}
+.komsum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.komsum div{background:#fafaf8;border:1px solid var(--line);border-radius:6px;padding:8px;text-align:center;font-size:12px;color:var(--muted)}
+.komsum b{display:block;font-size:20px;color:var(--ink)}
+.komrow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.komrow .txt{flex:1;min-width:0}
+.komrow .sub{font-size:12px;color:var(--muted)}
+.st{font-size:11px;font-weight:700;padding:3px 7px;border-radius:3px;white-space:nowrap}
+.st.held{background:var(--lime);color:var(--grey)}
+.st.check{background:var(--maybe);color:#fff}
+.st.refresh{background:#dfe6ee;color:#2b4460}
+.st.untracked{background:#e6e6e3;color:#666}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chips button{border:1px solid var(--grey);background:#fff;color:var(--grey);border-radius:14px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
+.chips button.on{background:var(--grey);color:#fff}
 </style>
 </head>
 <body>
@@ -94,7 +123,9 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
   </div>
   <nav class="tabs">
     <button data-tab="ride" class="on">Ride</button>
+    <button data-tab="route">Route</button>
     <button data-tab="map">Map</button>
+    <button data-tab="koms">KOMs</button>
     <button data-tab="settings">Settings</button>
     <button data-tab="setup">Setup</button>
   </nav>
@@ -104,11 +135,23 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
 <!-- ============ RIDE ============ -->
 <section id="tab-ride">
   <div class="card wind" id="windCard"><div>Loading wind…</div></div>
+  <details class="card" id="locBox"><summary class="locline">📍 Start: <b id="locName">not set</b></summary>
+    <label>Search address or suburb<input id="locQuery" placeholder="e.g. Devereux Creek QLD or 12 Smith St Mackay"></label>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn" id="locSearch">Search</button>
+      <button class="btn ghost" id="locPick">Pick on map</button>
+      <button class="btn ghost" id="locClear">Clear</button>
+    </div>
+    <div class="results" id="locResults"></div>
+  </details>
   <div class="controls">
     <label class="wide">Time<select id="timeSel"><option value="now">Now</option></select></label>
     <label>Rider<select id="riderSel"></select></label>
     <label>Type<select id="typeSel">
       <option value="all">All</option><option value="flat">Flat</option><option value="climb">Climbs</option><option value="descent">Descents</option>
+    </select></label>
+    <label class="wide">Sort<select id="sortSel">
+      <option value="best">Best KOM chance</option><option value="near">Nearest to start</option><option value="wind">Most wind help</option>
     </select></label>
   </div>
   <div class="actions">
@@ -126,8 +169,43 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
   <div id="list"></div>
 </section>
 
+<!-- ============ ROUTE ============ -->
+<section id="tab-route" hidden>
+  <div id="routeMap"></div>
+  <div class="card">
+    <h2>Route plan</h2>
+    <div class="totals" id="routeTotals"></div>
+    <div id="routeStops"></div>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn lime" id="routeFinish">Finish back at start</button>
+      <button class="btn ghost" id="routeUndo">Undo last</button>
+      <button class="btn ghost" id="routeClear">Clear route</button>
+    </div>
+    <p class="small">Legs between segments follow the roads (OpenStreetMap routing). They're for rough planning, not turn-by-turn. Legs marked "approx" are straight lines because routing wasn't available.</p>
+  </div>
+  <div class="card" id="candCard">
+    <h2 id="candTitle">Pick your next segment</h2>
+    <div class="small" id="candHint" style="margin-top:0"></div>
+    <div id="candList"></div>
+  </div>
+</section>
+
+<!-- ============ KOMS ============ -->
+<section id="tab-koms" hidden>
+  <div class="card">
+    <h2>KOM check</h2>
+    <label>Show KOMs for<select id="komWho"></select></label>
+    <div class="komsum" id="komSum"></div>
+    <div class="chips" id="komChips"></div>
+    <div class="actions"><button class="btn lime" id="komRefresh">Refresh KOM times for this list</button></div>
+    <div class="small" id="komHint"></div>
+    <div id="komRows"></div>
+  </div>
+</section>
+
 <!-- ============ MAP ============ -->
 <section id="tab-map" hidden>
+  <div class="card" id="mapHint" hidden style="background:var(--lime);border:0;color:var(--grey)"><b>Tap the map to set your start location.</b> <button class="btn ghost" id="pickCancel" style="margin-left:8px;padding:4px 8px">Cancel</button></div>
   <div id="map"></div>
   <div class="legend">
     <span><span class="sw" style="background:#E3E421"></span>Go</span>
@@ -189,7 +267,8 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
   <div class="card">
     <h2>Ignore KOMs held by</h2>
     <label>One name per line. Matched against KOM holders from imported KOM lists or typed on a segment.<textarea id="ignored" rows="3"></textarea></label>
-    <h2 style="margin-top:14px">Import someone's KOM list</h2>
+    <label style="margin-top:10px">My name (for my own KOM list)<input id="myName" placeholder="e.g. Kiah Dumigan"></label>
+    <h2 style="margin-top:14px">Import a KOM list (yours or a mate's)</h2>
     <p class="small" style="margin-top:0">On strava.com, open their profile's KOMs list, select the whole table, copy it and paste it here. You can paste several pages at once. Segments are matched by name and distance, including ones you import later.</p>
     <div class="grid2">
       <label>KOM holder's name<input id="klOwner" placeholder="e.g. Sam"></label>
@@ -320,11 +399,15 @@ function defaults() {
       windExposure: 0.75, gustWeight: 0.3, eff: 0.975, calib: 100,
       goPct: 100, maybePct: 105, windGoPct: 5, windMaybePct: 1.5,
       trafficDowngrade: true, hideMyKoms: false, showIgnored: false,
-      typeFilter: 'all', activityDays: 90, maxActivities: 60, areaFilter: true,
+      typeFilter: 'all', sortBy: 'best', activityDays: 90, maxActivities: 60, areaFilter: true,
       limit15: 180, limitDay: 1800, komMaxAgeDays: 7
     },
     doneActivities: [],
     komLists: {},  // owner -> {rows:[{name,key,km,timeS,date,type}], importedAt}
+    home: null,    // {name, lat, lng}
+    route: { stops: [], finished: false },
+    legCache: {},  // 'lat,lng>lat,lng' -> {d, poly, at}
+    myName: '',
     usage: { w15: 0, c15: 0, day: 0, cDay: 0 },
     weather: null,
     hourKey: 'now'
@@ -368,6 +451,7 @@ function parseTime(str) {
   if (!t) return null;
   return t.split(':').reduce((acc, v) => acc * 60 + (+v || 0), 0) || null;
 }
+const kmh = (m, s) => (m && s) ? (m / s * 3.6).toFixed(1) + ' km/h' : '–';
 function compassName(d) { return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(norm360(d) / 22.5) % 16]; }
 
 /* ---------------- Geometry ---------------- */
@@ -776,10 +860,14 @@ function computeRows() {
     else rank = gainPct >= st.windGoPct ? 2 : gainPct >= st.windMaybePct ? 1 : 0;
     const traffic = liveTrafficRating(seg, env) || rt.traffic || '';
     if (traffic === 'high' && st.trafficDowngrade) rank = Math.max(0, rank - 1);
-    rows.push({ seg, g, det, rt, kl, owner, type, tWind, tCalm, gainPct, tail, komS, pct, mine, traffic, ignored: isIgnored, tag: RANK[rank], rank });
+    const away = S.home && seg.start ? hav([S.home.lat, S.home.lng], seg.start) / 1000 : null;
+    rows.push({ seg, g, det, rt, kl, owner, away, type, tWind, tCalm, gainPct, tail, komS, pct, mine, traffic, ignored: isIgnored, tag: RANK[rank], rank });
   }
+  const sortBy = st.sortBy || 'best';
   rows.sort((a, b) => {
     if (a.ignored !== b.ignored) return a.ignored ? 1 : -1;
+    if (sortBy === 'near' && a.away != null && b.away != null) return a.away - b.away;
+    if (sortBy === 'wind') return b.gainPct - a.gainPct;
     if (b.rank !== a.rank) return b.rank - a.rank;
     if ((a.pct != null) !== (b.pct != null)) return a.pct != null ? -1 : 1;
     if (a.pct != null) return a.pct - b.pct;
@@ -856,8 +944,9 @@ function renderList() {
         : `<span class="badge">KOM: ${esc(r.kl.owner)}</span>`)
       : (r.rt.owner ? `<span class="badge">KOM: ${esc(r.rt.owner)}</span>` : '');
     const pred = r.komS
-      ? `Predicted <b>${fmtTime(r.tWind)}</b> vs ${tgt} ${fmtTime(r.komS)} · <b>${r.pct.toFixed(0)}%</b>`
-      : `Predicted <b>${fmtTime(r.tWind)}</b> · <span class="meta">no ${tgt} time yet</span>`;
+      ? `Predicted <b>${fmtTime(r.tWind)}</b> (${kmh(s.distance, r.tWind)}) vs ${tgt} ${fmtTime(r.komS)} (${kmh(s.distance, r.komS)}) · <b>${r.pct.toFixed(0)}%</b>`
+      : `Predicted <b>${fmtTime(r.tWind)}</b> (${kmh(s.distance, r.tWind)}) · <span class="meta">no ${tgt} time yet</span>`;
+    const away = r.away != null ? ` · ${r.away.toFixed(1)} km away` : '';
     const windTxt = env ? `${r.tail >= 0 ? 'Tail' : 'Head'}wind ${Math.abs(r.tail).toFixed(0)} km/h avg · wind ${r.gainPct >= 0 ? 'saves' : 'costs'} ${fmtTime(Math.abs(r.tCalm - r.tWind))} (${Math.abs(r.gainPct).toFixed(1)}%)` : 'No wind data';
     const dirTxt = r.g.dirs.map(x => `${compassName(x.brg)} ${(x.share * 100).toFixed(0)}%`).join(' / ');
     const detTxt = d
@@ -867,7 +956,7 @@ function renderList() {
       <div class="row1"><span class="pill ${r.tag}">${r.tag}</span><h3>${esc(s.name)}</h3></div>
       <div class="row2">${compassSVG(r.g.dirs, env)}
         <div class="facts">
-          <div class="meta">${((s.distance || 0) / 1000).toFixed(2)} km · ${(s.avg_grade || 0).toFixed(1)}% · ${typeLbl}${traffic}${mine}${holder}${ign}</div>
+          <div class="meta">${((s.distance || 0) / 1000).toFixed(2)} km · ${(s.avg_grade || 0).toFixed(1)}% · ${typeLbl}${away}${traffic}${mine}${holder}${ign}</div>
           <div class="pred">${pred}</div>
           <div class="windline">${windTxt}</div>
         </div>
@@ -903,6 +992,14 @@ function ensureMap() {
   segLayer = L.layerGroup().addTo(map); rectLayer = L.layerGroup().addTo(map);
   const Ctl = L.Control.extend({ onAdd() { const d = L.DomUtil.create('div', 'leaflet-control windctl'); return d; } });
   windCtl = new Ctl({ position: 'topright' }); windCtl.addTo(map);
+  map.on('click', async e => {
+    if (!pickMode) return;
+    pickMode = false; $('#mapHint').hidden = true;
+    const { lat, lng } = e.latlng;
+    setHome(lat, lng, null);
+    const nm = await geoName(lat, lng); if (nm) { S.home.name = nm; save(); renderLoc(); }
+    showTab('ride');
+  });
   return true;
 }
 function renderMap() {
@@ -912,6 +1009,7 @@ function renderMap() {
   rectLayer.clearLayers();
   L.rectangle([[b.s, b.w], [b.n, b.e]], { color: '#414142', weight: 1, dashArray: '4 4', fill: false, interactive: false }).addTo(rectLayer);
   segLayer.clearLayers(); polyById.clear();
+  if (S.home) L.circleMarker([S.home.lat, S.home.lng], { radius: 7, color: '#414142', weight: 2, fillColor: '#E3E421', fillOpacity: 1 }).bindPopup('Start: ' + esc(S.home.name)).addTo(segLayer);
   const col = { go: '#E3E421', maybe: '#ef9f32', skip: '#a2a2a5' };
   const rows = lastRows.slice().reverse(); // draw best last so it's on top
   for (const r of rows) {
@@ -919,7 +1017,7 @@ function renderMap() {
     const skip = r.tag === 'skip';
     L.polyline(r.g.pts, { color: '#414142', weight: skip ? 4 : 7, opacity: skip ? 0.25 : 0.85, interactive: false }).addTo(segLayer);
     const pl = L.polyline(r.g.pts, { color: col[r.tag], weight: skip ? 2 : 4, opacity: skip ? 0.6 : 1 });
-    const pctTxt = r.komS ? `${fmtTime(r.tWind)} vs ${fmtTime(r.komS)} (${r.pct.toFixed(0)}%)` : `Predicted ${fmtTime(r.tWind)}`;
+    const pctTxt = r.komS ? `${fmtTime(r.tWind)} (${kmh(r.seg.distance, r.tWind)}) vs ${fmtTime(r.komS)} (${kmh(r.seg.distance, r.komS)}) · ${r.pct.toFixed(0)}%` : `Predicted ${fmtTime(r.tWind)} (${kmh(r.seg.distance, r.tWind)})`;
     pl.bindPopup(`<b>${esc(r.seg.name)}</b><br>${r.tag.toUpperCase()} · ${pctTxt}<br>${((r.seg.distance || 0) / 1000).toFixed(2)} km · ${(r.seg.avg_grade || 0).toFixed(1)}%<br><a href="https://www.strava.com/segments/${r.seg.id}" target="_blank" rel="noopener">Open in Strava</a>`);
     pl.addTo(segLayer); polyById.set(String(r.seg.id), pl);
     L.circleMarker(r.g.pts[0], { radius: skip ? 2 : 4, color: '#414142', weight: 1, fillColor: col[r.tag], fillOpacity: 1, interactive: false }).addTo(segLayer);
@@ -929,6 +1027,285 @@ function focusSeg(id) {
   showTab('map');
   setTimeout(() => { const pl = polyById.get(String(id)); if (pl) { map.fitBounds(pl.getBounds(), { padding: [40, 40], maxZoom: 16 }); pl.openPopup(); } }, 60);
 }
+
+/* ---------------- Start location ---------------- */
+let pickMode = false;
+function renderLoc() {
+  $('#locName').textContent = S.home ? S.home.name : 'not set (tap to set)';
+}
+async function geoSearch(q) {
+  const b = S.bounds;
+  const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=au' +
+    `&viewbox=${b.w - 0.2},${b.n + 0.2},${b.e + 0.2},${b.s - 0.2}&q=` + encodeURIComponent(q);
+  const r = await fetch(url, { headers: { 'Accept-Language': 'en-AU' } });
+  if (!r.ok) throw new Error('Address search failed (' + r.status + ')');
+  return r.json();
+}
+async function geoName(lat, lng) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&lat=${lat}&lon=${lng}`, { headers: { 'Accept-Language': 'en-AU' } });
+    const j = await r.json(); const a = j.address || {};
+    return [a.house_number && a.road ? a.house_number + ' ' + a.road : a.road, a.suburb || a.town || a.city].filter(Boolean).join(', ') || null;
+  } catch (e) { return null; }
+}
+function setHome(lat, lng, name) {
+  S.home = { lat: +lat, lng: +lng, name: name || `${(+lat).toFixed(4)}, ${(+lng).toFixed(4)}` };
+  save(); renderLoc(); renderList(); renderMap(); if (!$('#tab-route').hidden) renderRoute();
+}
+$('#locSearch').onclick = async () => {
+  const q = $('#locQuery').value.trim(); const out = $('#locResults');
+  if (!q) return;
+  out.innerHTML = '<div class="small">Searching…</div>';
+  try {
+    const res = await geoSearch(q);
+    if (!res.length) { out.innerHTML = '<div class="small">No matches. Try adding the suburb, or use Pick on map.</div>'; return; }
+    out.innerHTML = res.map((x, i) => `<button data-i="${i}">${esc(x.display_name)}</button>`).join('');
+    out.querySelectorAll('button').forEach(btn => btn.onclick = () => {
+      const x = res[+btn.dataset.i];
+      const short = x.display_name.split(',').slice(0, 2).join(',').trim();
+      setHome(x.lat, x.lon, short); out.innerHTML = ''; $('#locQuery').value = ''; $('#locBox').open = false;
+    });
+  } catch (e) { out.innerHTML = `<div class="small">${esc(e.message)}</div>`; }
+};
+$('#locQuery').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#locSearch').click(); } });
+$('#locPick').onclick = () => { pickMode = true; showTab('map'); setStatus(''); $('#mapHint').hidden = false; };
+$('#pickCancel').onclick = () => { pickMode = false; $('#mapHint').hidden = true; showTab('ride'); };
+$('#locClear').onclick = () => { S.home = null; save(); renderLoc(); renderList(); renderMap(); };
+
+/* ---------------- Road routing for legs ---------------- */
+const legKey = (a, b) => `${a[0].toFixed(4)},${a[1].toFixed(4)}>${b[0].toFixed(4)},${b[1].toFixed(4)}`;
+const legPending = new Set();
+function getLeg(a, b) {
+  const k = legKey(a, b), c = S.legCache[k];
+  if (c) return c;
+  if (!legPending.has(k)) {
+    legPending.add(k);
+    fetchLeg(a, b).then(res => {
+      if (res) {
+        S.legCache[k] = { ...res, at: Date.now() };
+        const keys = Object.keys(S.legCache);
+        if (keys.length > 400) keys.sort((x, y) => S.legCache[x].at - S.legCache[y].at).slice(0, keys.length - 400).forEach(x => delete S.legCache[x]);
+        save();
+      }
+      legPending.delete(k);
+      scheduleRouteRender();
+    });
+  }
+  return { d: hav(a, b), poly: null, approx: true, pending: true };
+}
+async function fetchLeg(a, b) {
+  if (hav(a, b) < 30) return { d: hav(a, b), poly: null, approx: false };
+  try {
+    const url = `https://routing.openstreetmap.de/routed-bike/route/v1/driving/${a[1]},${a[0]};${b[1]},${b[0]}?overview=full&geometries=polyline`;
+    const r = await fetch(url); if (!r.ok) return null;
+    const j = await r.json(); const rt = j.routes && j.routes[0];
+    if (!rt) return null;
+    return { d: rt.distance, poly: rt.geometry, approx: false };
+  } catch (e) { return null; }
+}
+let routeRenderTimer = null;
+function scheduleRouteRender() { clearTimeout(routeRenderTimer); routeRenderTimer = setTimeout(() => { if (!$('#tab-route').hidden) renderRoute(); }, 250); }
+
+/* ---------------- Route builder ---------------- */
+let routeMap = null, routeLayer = null;
+function ensureRouteMap() {
+  if (routeMap) return true;
+  if (!window.L) { $('#routeMap').innerHTML = '<div class="empty">Map library did not load (offline?).</div>'; return false; }
+  routeMap = L.map('routeMap').setView([-21.12, 149.15], 12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(routeMap);
+  routeLayer = L.layerGroup().addTo(routeMap);
+  return true;
+}
+const segById = id => S.segments[id];
+function routePoints() {
+  // returns ordered list of {kind:'home'|'seg', ...}
+  return (S.route.stops || []).map(id => segById(id)).filter(Boolean);
+}
+function currentEnd() {
+  const segs = routePoints();
+  if (segs.length) { const g = getGeom(segs[segs.length - 1]); return g.pts.length ? g.pts[g.pts.length - 1] : segs[segs.length - 1].end; }
+  return S.home ? [S.home.lat, S.home.lng] : null;
+}
+function buildLegs() {
+  const segs = routePoints(), legs = [];
+  let at = S.home ? [S.home.lat, S.home.lng] : null;
+  for (const s of segs) {
+    const g = getGeom(s), st = g.pts[0] || s.start, en = g.pts[g.pts.length - 1] || s.end;
+    if (at && st) legs.push({ from: at, to: st, ...getLeg(at, st) });
+    else legs.push(null);
+    at = en;
+  }
+  let back = null;
+  if (S.route.finished && at && S.home) back = { from: at, to: [S.home.lat, S.home.lng], ...getLeg(at, [S.home.lat, S.home.lng]) };
+  return { segs, legs, back };
+}
+function renderRoute() {
+  const rowsById = new Map(computeRows().map(r => [String(r.seg.id), r]));
+  const { segs, legs, back } = buildLegs();
+  // ----- stops list -----
+  let html = '';
+  html += `<div class="stop"><div class="n home">S</div><div class="txt"><b>${esc(S.home ? S.home.name : 'No start location set')}</b>${S.home ? '' : '<div class="sub">Set one on the Ride tab (📍 Start) so legs can be worked out.</div>'}</div></div>`;
+  let legKm = 0, segKm = 0, segT = 0, approx = false;
+  segs.forEach((s, i) => {
+    const L1 = legs[i], r = rowsById.get(String(s.id));
+    if (L1) { legKm += L1.d / 1000; approx = approx || L1.approx; }
+    segKm += (s.distance || 0) / 1000; if (r) segT += r.tWind;
+    const legTxt = L1 ? `${(L1.d / 1000).toFixed(1)} km${L1.approx ? (L1.pending ? ' (routing…)' : ' approx') : ''} to get there` : '';
+    const pred = r ? `${fmtTime(r.tWind)} (${kmh(s.distance, r.tWind)})${r.komS ? ` vs KOM ${fmtTime(r.komS)} (${kmh(s.distance, r.komS)})` : ''}` : '';
+    html += `<div class="stop" data-i="${i}"><div class="n">${i + 1}</div>
+      <div class="txt"><b>${esc(s.name)}</b> ${r ? `<span class="pill ${r.tag}">${r.tag}</span>` : ''}
+        <div class="sub">${legTxt}${legTxt ? ' · ' : ''}${((s.distance || 0) / 1000).toFixed(2)} km segment · ${pred}</div></div>
+      <button data-mv="-1" ${i === 0 ? 'disabled' : ''}>↑</button><button data-mv="1" ${i === segs.length - 1 ? 'disabled' : ''}>↓</button><button data-rm="1">✕</button></div>`;
+  });
+  if (back) {
+    legKm += back.d / 1000; approx = approx || back.approx;
+    html += `<div class="stop"><div class="n home">S</div><div class="txt"><b>Back to start</b><div class="sub">${(back.d / 1000).toFixed(1)} km${back.approx ? (back.pending ? ' (routing…)' : ' approx') : ''}</div></div></div>`;
+  }
+  $('#routeStops').innerHTML = html;
+  $('#routeTotals').innerHTML = segs.length
+    ? `<div><b>${(legKm + segKm).toFixed(1)}</b> km total${approx ? ' (approx)' : ''}</div><div><b>${segs.length}</b> segment${segs.length === 1 ? '' : 's'} · ${segKm.toFixed(1)} km</div><div><b>${fmtTime(segT)}</b> on segments</div>`
+    : '<div class="small">No segments yet. Pick your first one below.</div>';
+  $('#routeFinish').disabled = !segs.length || S.route.finished || !S.home;
+  $('#routeUndo').disabled = !segs.length && !S.route.finished;
+  $('#routeClear').disabled = !segs.length && !S.route.finished;
+  // ----- candidates -----
+  const from = currentEnd(), used = new Set((S.route.stops || []).map(String));
+  if (S.route.finished) {
+    $('#candTitle').textContent = 'Route finished';
+    $('#candHint').textContent = 'Undo the finish to keep adding segments.';
+    $('#candList').innerHTML = '';
+  } else {
+    $('#candTitle').textContent = segs.length ? 'Pick your next segment' : 'Pick your first segment';
+    const cands = Array.from(rowsById.values()).filter(r => (r.tag === 'go' || r.tag === 'maybe') && !r.ignored && !used.has(String(r.seg.id)) && r.seg.start);
+    cands.forEach(r => r.from = from ? hav(from, r.seg.start) / 1000 : null);
+    cands.sort((a, b) => (a.from ?? 0) - (b.from ?? 0) || b.rank - a.rank);
+    $('#candHint').textContent = from ? `Nearest first from ${segs.length ? 'the end of ' + segs[segs.length - 1].name : 'your start'} (straight-line distance). Showing go and maybe segments.` : 'Set a start location on the Ride tab to sort these by distance.';
+    $('#candList').innerHTML = cands.length ? cands.slice(0, 25).map(r => `<div class="cand">
+      <span class="pill ${r.tag}">${r.tag}</span>
+      <div class="txt"><b>${esc(r.seg.name)}</b><div class="sub">${r.from != null ? r.from.toFixed(1) + ' km away · ' : ''}${((r.seg.distance || 0) / 1000).toFixed(2)} km · ${fmtTime(r.tWind)} (${kmh(r.seg.distance, r.tWind)})${r.komS ? ` vs KOM ${fmtTime(r.komS)} (${kmh(r.seg.distance, r.komS)}) · ${r.pct.toFixed(0)}%` : ''}</div></div>
+      <button class="btn" data-add="${r.seg.id}">Add</button></div>`).join('')
+      : '<div class="small">No go/maybe segments left for this time and wind.</div>';
+  }
+  // ----- map -----
+  if (!routeMap) return;
+  routeLayer.clearLayers();
+  const bnds = [];
+  const col = { go: '#E3E421', maybe: '#ef9f32', skip: '#a2a2a5' };
+  const drawLeg = Lg => {
+    if (!Lg) return;
+    const pts = Lg.poly ? decodePolyline(Lg.poly) : [Lg.from, Lg.to];
+    L.polyline(pts, { color: '#414142', weight: 3, opacity: 0.8, dashArray: Lg.approx ? '2 8' : '6 6' }).addTo(routeLayer);
+    pts.forEach(p => bnds.push(p));
+  };
+  legs.forEach(drawLeg); drawLeg(back);
+  segs.forEach((s, i) => {
+    const g = getGeom(s), r = rowsById.get(String(s.id)); if (g.pts.length < 2) return;
+    L.polyline(g.pts, { color: '#414142', weight: 8, opacity: 0.9 }).addTo(routeLayer);
+    L.polyline(g.pts, { color: col[r ? r.tag : 'go'], weight: 5 }).bindPopup(`<b>${i + 1}. ${esc(s.name)}</b>`).addTo(routeLayer);
+    L.marker(g.pts[0], { icon: L.divIcon({ className: '', html: `<div style="background:#414142;color:#E3E421;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font:700 12px Helvetica,Arial;border:2px solid #E3E421">${i + 1}</div>`, iconSize: [22, 22], iconAnchor: [11, 11] }) }).addTo(routeLayer);
+    g.pts.forEach(p => bnds.push(p));
+  });
+  if (S.home) {
+    L.marker([S.home.lat, S.home.lng], { icon: L.divIcon({ className: '', html: '<div style="background:#E3E421;color:#414142;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font:700 12px Helvetica,Arial;border:2px solid #414142">S</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).bindPopup(esc(S.home.name)).addTo(routeLayer);
+    bnds.push([S.home.lat, S.home.lng]);
+  }
+  if (bnds.length > 1) routeMap.fitBounds(bnds, { padding: [30, 30], maxZoom: 15 });
+  else if (bnds.length === 1) routeMap.setView(bnds[0], 14);
+}
+$('#candList').addEventListener('click', e => {
+  const b = e.target.closest('[data-add]'); if (!b) return;
+  S.route.stops.push(+b.dataset.add); S.route.finished = false; save(); renderRoute(); window.scrollTo(0, 0);
+});
+$('#routeStops').addEventListener('click', e => {
+  const row = e.target.closest('.stop[data-i]'); if (!row) return;
+  const i = +row.dataset.i, st = S.route.stops;
+  if (e.target.dataset.rm) st.splice(i, 1);
+  else if (e.target.dataset.mv) { const j = i + +e.target.dataset.mv; if (j < 0 || j >= st.length) return; [st[i], st[j]] = [st[j], st[i]]; }
+  else return;
+  save(); renderRoute();
+});
+$('#routeFinish').onclick = () => { S.route.finished = true; save(); renderRoute(); };
+$('#routeUndo').onclick = () => { if (S.route.finished) S.route.finished = false; else S.route.stops.pop(); save(); renderRoute(); };
+$('#routeClear').onclick = () => { if (!confirm('Clear the whole route?')) return; S.route = { stops: [], finished: false }; save(); renderRoute(); };
+
+/* ---------------- KOMs tab ---------------- */
+let komFilter = 'all';
+function komPeople() {
+  const ppl = new Set();
+  ppl.add(S.myName || 'Me');
+  Object.keys(S.komLists || {}).forEach(o => ppl.add(o));
+  return Array.from(ppl);
+}
+function komRowsFor(who) {
+  const isMe = who === (S.myName || 'Me');
+  const maxAge = (+S.settings.komMaxAgeDays || 7) * 86400e3;
+  const byName = new Map();
+  for (const s of Object.values(S.segments)) { const k = normName(s.name); if (!byName.has(k)) byName.set(k, []); byName.get(k).push(s); }
+  const out = [], seen = new Set();
+  const statusFor = (seg, listTime) => {
+    if (!seg) return 'untracked';
+    const d = S.details[seg.id]; if (!d) return 'refresh';
+    const komS = parseTime(d.kom);
+    if (listTime && komS && komS < listTime - 0.5) return 'check';
+    if (isMe && !listTime && d.prS && komS && d.prS > komS + 0.5) return 'check';
+    if (Date.now() - d.fetchedAt > maxAge) return 'refresh';
+    return 'held';
+  };
+  for (const r of (S.komLists[who]?.rows || [])) {
+    const cands = byName.get(r.key) || [];
+    const seg = cands.find(s => Math.abs((s.distance || 0) / 1000 - r.km) <= Math.max(0.02, r.km * 0.03)) || null;
+    if (seg) seen.add(String(seg.id));
+    out.push({ name: r.name, km: r.km, listTime: r.timeS, date: r.date, seg, status: statusFor(seg, r.timeS), src: 'list' });
+  }
+  if (isMe) {
+    for (const s of Object.values(S.segments)) {
+      if (seen.has(String(s.id))) continue;
+      const d = S.details[s.id]; if (!d || !d.prS) continue;
+      const komS = parseTime(d.kom);
+      if (komS && d.prS <= komS + 0.5) out.push({ name: s.name, km: (s.distance || 0) / 1000, listTime: d.prS, date: '', seg: s, status: statusFor(s, null), src: 'pr' });
+    }
+  }
+  const order = { check: 0, refresh: 1, held: 2, untracked: 3 };
+  out.sort((a, b) => order[a.status] - order[b.status] || a.name.localeCompare(b.name));
+  return out;
+}
+function renderKoms() {
+  const sel = $('#komWho'), ppl = komPeople();
+  const cur = ppl.includes(sel.value) ? sel.value : ppl[0];
+  sel.innerHTML = ppl.map(p => `<option value="${esc(p)}">${esc(p)}${p === (S.myName || 'Me') ? ' (me)' : ''}</option>`).join('');
+  sel.value = cur;
+  const rows = komRowsFor(cur);
+  const c = rows.reduce((a, r) => (a[r.status]++, a), { held: 0, check: 0, refresh: 0, untracked: 0 });
+  $('#komSum').innerHTML = `<div><b>${c.held}</b>held</div><div><b>${c.check}</b>to check</div><div><b>${c.refresh}</b>need refresh</div><div><b>${c.untracked}</b>not tracked</div>`;
+  const labels = { all: 'All', check: 'To check', refresh: 'Need refresh', held: 'Held', untracked: 'Not tracked' };
+  $('#komChips').innerHTML = Object.entries(labels).map(([k, v]) => `<button data-f="${k}" class="${komFilter === k ? 'on' : ''}">${v}</button>`).join('');
+  const isMe = cur === (S.myName || 'Me');
+  $('#komHint').textContent = isMe
+    ? `Your KOMs come from segments where your PR matches the KOM time${S.komLists[cur] ? ', plus your pasted KOM list' : ''}. ${S.komLists[cur] ? '' : 'For a complete list, paste your own KOM table in Settings using the name "' + (S.myName || 'Me') + '".'}`
+    : `From ${cur}'s pasted KOM list. "To check" means the current KOM time is faster than their listed time, so someone may have taken it.`;
+  const STL = { held: '✅ held', check: '⚠️ check', refresh: '🕓 refresh', untracked: '➖ not tracked' };
+  const shown = rows.filter(r => komFilter === 'all' || r.status === komFilter);
+  $('#komRows').innerHTML = shown.length ? shown.map(r => {
+    const d = r.seg ? S.details[r.seg.id] : null;
+    const now = d && d.kom ? `KOM now ${esc(d.kom)}` : (r.seg ? 'KOM time not fetched' : 'segment not imported');
+    const listed = r.listTime ? `${r.src === 'pr' ? 'your PR' : 'listed'} ${fmtTime(r.listTime)} (${kmh(r.km * 1000, r.listTime)})` : '';
+    const name = r.seg ? `<a href="https://www.strava.com/segments/${r.seg.id}" target="_blank" rel="noopener">${esc(r.name)}</a>` : esc(r.name);
+    return `<div class="komrow"><span class="st ${r.status}">${STL[r.status]}</span><div class="txt"><b>${name}</b>
+      <div class="sub">${r.km.toFixed(2)} km · ${listed}${listed ? ' · ' : ''}${now}${r.date ? ' · ' + esc(r.date) : ''}</div></div></div>`;
+  }).join('') : '<div class="small">Nothing in this filter.</div>';
+  const stale = rows.filter(r => r.seg && (r.status === 'refresh' || r.status === 'check')).length;
+  $('#komRefresh').disabled = busy || !rows.some(r => r.seg);
+  $('#komRefresh').textContent = stale ? `Refresh KOM times (${stale} need it)` : 'Refresh KOM times for this list';
+}
+$('#komWho').onchange = () => renderKoms();
+$('#komChips').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; komFilter = b.dataset.f; renderKoms(); });
+$('#komRefresh').onclick = async () => {
+  const rows = komRowsFor($('#komWho').value).filter(r => r.seg);
+  const pri = rows.filter(r => r.status === 'refresh' || r.status === 'check');
+  const ids = (pri.length ? pri : rows).map(r => r.seg.id);
+  showTab('ride'); await fetchKoms(ids); showTab('koms');
+};
+$('#myName').addEventListener('change', e => { S.myName = e.target.value.trim(); save(); renderList(); });
 
 /* ---------------- Settings rendering ---------------- */
 function renderSettings() {
@@ -941,10 +1318,12 @@ function renderSettings() {
   $('#usageLine').textContent = `Used this 15-min window: ${S.usage.c15}/${S.settings.limit15} · today (UTC day): ${S.usage.cDay}/${S.settings.limitDay}. Keep these a little under the limits shown on your Strava API settings page.`;
   $('#clientId').value = S.auth.clientId; $('#clientSecret').value = S.auth.clientSecret; $('#refreshToken').value = S.auth.refreshToken;
   $('#typeSel').value = S.settings.typeFilter;
+  $('#sortSel').value = S.settings.sortBy || 'best';
+  $('#myName').value = S.myName || '';
   komListSummary();
   renderBackupLine();
 }
-function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderList(); renderMap(); renderSettings(); }
+function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderLoc(); renderList(); renderMap(); renderSettings(); if (!$('#tab-route').hidden) renderRoute(); if (!$('#tab-koms').hidden) renderKoms(); }
 
 /* ---------------- Tabs ---------------- */
 function showTab(name) {
@@ -952,6 +1331,8 @@ function showTab(name) {
   $$('main > section').forEach(s => s.hidden = s.id !== 'tab-' + name);
   if (name === 'map' && ensureMap()) { setTimeout(() => { map.invalidateSize(); renderMap(); }, 30); }
   if (name === 'settings') renderSettings();
+  if (name === 'route') { ensureRouteMap(); setTimeout(() => { if (routeMap) routeMap.invalidateSize(); renderRoute(); }, 30); }
+  if (name === 'koms') renderKoms();
   window.scrollTo(0, 0);
 }
 $$('nav.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
@@ -965,6 +1346,7 @@ $('#btnStop').onclick = () => { abortFlag = true; setStatus('Stopping…'); };
 $('#timeSel').onchange = e => { S.hourKey = e.target.value; save(); renderWind(); renderList(); renderMap(); };
 $('#riderSel').onchange = e => { S.activeProfile = e.target.value; save(); renderAll(); };
 $('#typeSel').onchange = e => { S.settings.typeFilter = e.target.value; save(); renderList(); renderMap(); };
+$('#sortSel').onchange = e => { S.settings.sortBy = e.target.value; save(); renderList(); };
 
 const list = $('#list');
 list.addEventListener('toggle', e => { const d = e.target; if (d.tagName !== 'DETAILS') return; d.open ? openSet.add(d.dataset.id) : openSet.delete(d.dataset.id); }, true);
@@ -1001,7 +1383,7 @@ $('#authSave').onclick = async () => {
   S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); S.auth.refreshToken = $('#refreshToken').value.trim();
   S.auth.accessToken = ''; S.auth.expiresAt = 0; save();
   const st = $('#authStatus'); st.textContent = 'Testing…';
-  try { const a = await api('/athlete'); st.textContent = `Connected as ${a.firstname || ''} ${a.lastname || ''}. You're good to scan.`; }
+  try { const a = await api('/athlete'); if (!S.myName) { S.myName = `${a.firstname || ''} ${a.lastname || ''}`.trim(); save(); } st.textContent = `Connected as ${a.firstname || ''} ${a.lastname || ''}. You're good to scan.`; }
   catch (e) { st.textContent = e.message; }
 };
 const AUTH_SCOPE = 'read,read_all,activity:read_all';
@@ -1032,6 +1414,7 @@ $('#authExchange').onclick = async () => {
     Object.assign(S.auth, { accessToken: j.access_token, expiresAt: j.expires_at, refreshToken: j.refresh_token, scope: j.scope || '' });
     save(); $('#authCode').value = ''; renderSettings();
     const ath = j.athlete || {};
+    if (!S.myName && (ath.firstname || ath.lastname)) { S.myName = `${ath.firstname || ''} ${ath.lastname || ''}`.trim(); save(); }
     st.textContent = `Connected as ${ath.firstname || ''} ${ath.lastname || ''} (permissions: ${j.scope || 'unknown'}). Go to Ride and import your segments.`;
     renderList();
   } catch (e) { st.textContent = e.message; }
@@ -1045,7 +1428,8 @@ $('#klImport').onclick = () => {
   const merged = new Map(prev.map(r => [r.key + '|' + r.km, r]));
   for (const r of rows) merged.set(r.key + '|' + r.km, r);
   S.komLists[owner] = { rows: Array.from(merged.values()), importedAt: Date.now() };
-  if ($('#klIgnore').checked && !S.ignoredOwners.some(x => x.toLowerCase() === owner.toLowerCase())) S.ignoredOwners.push(owner);
+  const isMe = S.myName && owner.toLowerCase() === S.myName.toLowerCase();
+  if (!isMe && $('#klIgnore').checked && !S.ignoredOwners.some(x => x.toLowerCase() === owner.toLowerCase())) S.ignoredOwners.push(owner);
   save(); $('#klText').value = ''; renderAll();
   $('#klSummary').insertAdjacentHTML('afterbegin', `<div>Read ${rows.length} rows for ${esc(owner)}.</div>`);
 };
@@ -1077,6 +1461,7 @@ function shareSettingsObj() {
 function fullBackupObj() {
   return { ...shareSettingsObj(), kind: 'full',
     segments: S.segments, details: S.details, doneActivities: S.doneActivities,
+    home: S.home, route: S.route, myName: S.myName, legCache: S.legCache,
     auth: { clientId: S.auth.clientId, clientSecret: S.auth.clientSecret } };
 }
 function mergeBackup(j) {
@@ -1101,6 +1486,10 @@ function mergeBackup(j) {
       if (!cur || (d.fetchedAt || 0) > (cur.fetchedAt || 0)) S.details[id] = d;
     }
     S.doneActivities = Array.from(new Set([...(S.doneActivities || []), ...(j.doneActivities || [])])).slice(-3000);
+    if (j.home && !S.home) S.home = j.home;
+    if (j.route?.stops?.length && !S.route?.stops?.length) S.route = j.route;
+    if (j.myName && !S.myName) S.myName = j.myName;
+    S.legCache = { ...(j.legCache || {}), ...(S.legCache || {}) };
     if (j.auth?.clientId && !S.auth.clientId) { S.auth.clientId = j.auth.clientId; S.auth.clientSecret = j.auth.clientSecret || ''; }
     if (j.auth?.clientId && S.auth.clientId === j.auth.clientId && !S.auth.clientSecret) S.auth.clientSecret = j.auth.clientSecret || '';
   }
