@@ -76,6 +76,28 @@
   .site-row:hover{color:var(--grey-soft);}
   .site-row span:last-child{font-size:13px;color:var(--muted);}
 
+  .test-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 0;border-top:1px solid var(--line);}
+  .test-row p{margin:0;font-size:13px;color:var(--muted);}
+  .btn{background:var(--grey);color:var(--paper);border:none;padding:9px 18px;font:600 13px var(--font);cursor:pointer;transition:background .15s ease,color .15s ease;}
+  .btn:hover{background:var(--lime);color:var(--grey);}
+  .btn.ghost{background:transparent;color:var(--grey-soft);border:1px solid var(--line);}
+  .btn.ghost:hover{background:var(--line);color:var(--grey);}
+  #test-area{padding:8px 0 40px;}
+  #testDlg{border:1px solid var(--line);padding:0;width:min(420px,calc(100% - 32px));color:var(--grey);font-family:var(--font);}
+  #testDlg::backdrop{background:rgba(65,65,66,.55);}
+  .dlg-head{padding:20px 24px 4px;}
+  .dlg-head h3{margin:0;font-size:18px;}
+  .dlg-head p{margin:4px 0 0;font-size:13px;color:var(--grey-soft);}
+  .dlg-body{padding:16px 24px 24px;}
+  .dlg-body label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .dlg-body input{width:100%;height:44px;border:1px solid #a8a8ac;padding:0 12px;font:15px var(--font);color:var(--grey);}
+  .dlg-body input:focus{outline:2px solid var(--lime);outline-offset:0;border-color:var(--grey);}
+  .dlg-err{color:#8a2a1e;font-size:13px;margin:8px 0 0;min-height:1.2em;}
+  .dlg-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+  .test-list .site-row span:first-child{font-weight:600;}
+  .test-list .status-pill{margin-right:10px;}
+  .test-empty{margin:0;font-size:14px;color:var(--muted);}
+
   footer{padding:32px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);}
   .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
 </style>
@@ -195,6 +217,45 @@
   </div>
 </section>
 
+<section id="test-area">
+  <div class="wrap">
+    <div class="test-row">
+      <p>Test builds for KRD use only.</p>
+      <button class="btn ghost" id="testBtn" type="button">Test area</button>
+    </div>
+  </div>
+</section>
+
+<dialog id="testDlg" aria-labelledby="testDlgTitle">
+  <div id="loginView">
+    <div class="dlg-head">
+      <h3 id="testDlgTitle">Test area</h3>
+      <p>Enter the password to see test builds.</p>
+    </div>
+    <div class="dlg-body">
+      <label for="testPw">Password</label>
+      <input type="password" id="testPw" autocomplete="current-password">
+      <p class="dlg-err" id="testErr" role="alert"></p>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="button" id="testCancel">Cancel</button>
+        <button class="btn" type="button" id="testSignIn">Sign in</button>
+      </div>
+    </div>
+  </div>
+  <div id="listView" hidden>
+    <div class="dlg-head">
+      <h3>Test builds</h3>
+      <p>Not public. Check, then approve in chat.</p>
+    </div>
+    <div class="dlg-body">
+      <div class="site-list test-list" id="testList"></div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="button" id="testClose">Close</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
 <footer>
   <div class="wrap footer-inner">
     <span>&copy; 2026 KRD Engineering &amp; Management</span>
@@ -213,6 +274,47 @@
     burger.addEventListener('click', open);
     closeBtn.addEventListener('click', close);
     overlay.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
+  })();
+</script>
+<script>
+  (function(){
+    // Test area: client-side login only. The password is stored as a SHA-256 hash, not as text.
+    var HASH='892ae396ad5af343427f3eff6d1868be61b472e1eefaea3a5ae0162693c6dd70';
+    var KEY='krd-test-ok', TTL=12*3600*1000;
+    var dlg=document.getElementById('testDlg'), pw=document.getElementById('testPw'), err=document.getElementById('testErr');
+    var login=document.getElementById('loginView'), list=document.getElementById('listView'), box=document.getElementById('testList');
+    if(!dlg || !dlg.showModal) return;
+    function signedIn(){ try{ var t=+localStorage.getItem(KEY); return t && Date.now()-t<TTL; }catch(e){ return false; } }
+    function esc(t){ var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+    function showList(){
+      login.hidden=true; list.hidden=false; box.innerHTML='<p class="test-empty">Loading…</p>';
+      fetch('test/list.json',{cache:'no-store'}).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }).then(function(items){
+        if(!items || !items.length){ box.innerHTML='<p class="test-empty">No test builds yet.</p>'; return; }
+        box.innerHTML=items.map(function(it){
+          return '<a href="test/'+encodeURI(it.path)+'" class="site-row" target="_blank" rel="noopener"><span><span class="status-pill">Test</span>'+esc(it.title)+'</span></a>';
+        }).join('');
+      });
+    }
+    function sha256(t){
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)).then(function(b){
+        return Array.prototype.map.call(new Uint8Array(b),function(x){ return ('0'+x.toString(16)).slice(-2); }).join('');
+      });
+    }
+    function signIn(){
+      sha256(pw.value).then(function(h){
+        if(h===HASH){ try{ localStorage.setItem(KEY,String(Date.now())); }catch(e){} showList(); }
+        else { err.textContent='Incorrect password.'; pw.select(); }
+      });
+    }
+    document.getElementById('testBtn').addEventListener('click',function(){
+      pw.value=''; err.textContent='';
+      if(signedIn()){ showList(); } else { login.hidden=false; list.hidden=true; }
+      dlg.showModal(); if(!login.hidden) pw.focus();
+    });
+    document.getElementById('testSignIn').addEventListener('click',signIn);
+    pw.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); signIn(); } });
+    document.getElementById('testCancel').addEventListener('click',function(){ dlg.close(); });
+    document.getElementById('testClose').addEventListener('click',function(){ dlg.close(); });
   })();
 </script>
 </body>
