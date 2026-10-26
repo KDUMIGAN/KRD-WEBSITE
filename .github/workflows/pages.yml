@@ -1,0 +1,77 @@
+# Publishes the live site from main, plus the preview branch's test/ folder under /test/.
+# Runs when main changes, or when the preview branch asks for a republish.
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _site
+
+      - name: Get preview branch (if it exists)
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}.git" preview >/dev/null; then
+            git clone --depth 1 --branch preview "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" _preview
+          fi
+
+      - name: Add test pages, sign-in check and list
+        run: |
+          rm -rf _site/.git _site/.github _site/test
+          mkdir -p _site/test
+          if [ -d _preview/test ]; then cp -R _preview/test/. _site/test/; fi
+          python3 - <<'PY'
+          import json, os, re, html
+          root = '_site/test'
+          tag = '<meta name="robots" content="noindex, nofollow"><script src="/assets/test-guard.js"></script>'
+          items = []
+          for dirpath, _, files in os.walk(root):
+              for f in sorted(files):
+                  if not f.lower().endswith('.html'):
+                      continue
+                  full = os.path.join(dirpath, f)
+                  src = open(full, encoding='utf-8', errors='replace').read()
+                  src, n = re.subn(r'(<head[^>]*>)', r'\1' + tag, src, count=1, flags=re.I)
+                  if n == 0:
+                      src = tag + src
+                  open(full, 'w', encoding='utf-8').write(src)
+                  rel = os.path.relpath(full, root).replace(os.sep, '/')
+                  m = re.search(r'<title[^>]*>(.*?)</title>', src, re.I | re.S)
+                  title = html.unescape(m.group(1).strip()) if m else rel
+                  items.append({'title': title, 'path': rel})
+          items.sort(key=lambda i: i['title'].lower())
+          json.dump(items, open(os.path.join(root, 'list.json'), 'w'), indent=1)
+          print(f'{len(items)} test page(s)')
+          PY
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
