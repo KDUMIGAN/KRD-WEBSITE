@@ -1,0 +1,18 @@
+# When test pages on this branch change, republish the site so they appear under /test/.
+# The actual publish runs from main (see main's .github/workflows/pages.yml).
+name: Publish test pages
+
+on:
+  push:
+    branches: [preview]
+
+permissions:
+  actions: write
+
+jobs:
+  republish:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
