@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Enclosure Heat Calculator v12</title>
+<title>Enclosure Heat Calculator v13</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2256 53 508 508%22%3E%3Crect x=%2256.62%22 y=%2253.78%22 width=%22507.117%22 height=%22507.117%22 fill=%22#E3E421%22/%3E%3Cg fill=%22#fff%22%3E%3Cpolygon points=%22238.084 529.72 155.219 446.854 237.891 364.18 194.796 364.18 118.271 440.704 118.271 364.18 87.796 364.18 87.796 482.802 118.101 452.833 194.989 529.72 238.084 529.72%22/%3E%3Cpath d=%22M387.531,529.409l-44.055-56.629c22.844-1.497,40.962-19.557,40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464,0,13.538,5.059,13.538,11.276v25.028c0,6.217-6.074,11.274-13.538,11.274h-91.827v30.475h55.211l43.941,56.482h39.78Z%22/%3E%3Cpath d=%22M462.739,364.464h-64.437v30.929h64.437c21.444,0,38.891,17.448,38.891,38.891v25.34c0,21.444-17.448,38.891-38.891,38.891h-64.437v30.929h64.437c38.499,0,69.82-31.321,69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z%22/%3E%3C/g%3E%3C/svg%3E">
 <style>
 :root{
@@ -29,7 +29,8 @@ button,input,select{font:inherit;color:inherit}
 .brand-logo svg{width:180px;height:auto;display:block;margin-bottom:12px}
 .nav-group{display:flex;flex-direction:column}
 .nav-title{padding:0 24px 8px;font-size:13px;color:#BDBDC0}
-.nav-btn{display:flex;align-items:center;min-height:48px;padding:0 24px;border:0;background:transparent;color:var(--white);text-align:left;cursor:pointer;font-size:15px}
+.nav-btn{display:flex;align-items:center;min-height:48px;padding:0 24px;border:0;background:transparent;color:var(--white);text-align:left;cursor:pointer;font-size:15px;text-decoration:none}
+.nav-btn:not([aria-current]):hover{background:rgba(255,255,255,.08)}
 .nav-btn[aria-current="page"]{background:var(--krd-lime);color:#2A2A2B;font-weight:700}
 .nav-note{padding:10px 24px 0;font-size:13px;color:#BDBDC0}
 
@@ -229,7 +230,8 @@ dialog::backdrop{background:rgba(35,35,37,.55)}
   .app{grid-template-columns:minmax(0,1fr)}
   .side{flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px 0;gap:8px}
   .nav-title,.nav-note{display:none}
-  .nav-group{flex-direction:row}
+  .nav-group{flex-direction:row;flex-wrap:wrap}
+  .nav-btn{min-height:40px;padding:0 14px}
   .brand-logo svg{width:120px;margin-bottom:4px}
   .top,.calc-grid{padding-left:16px;padding-right:16px}
   .sec{padding:18px 16px}
@@ -249,7 +251,9 @@ dialog::backdrop{background:rgba(35,35,37,.55)}
     <div class="brand"><div class="brand-logo" id="brandLogo"></div><b>Calculators</b></div>
     <nav class="nav-group" aria-label="Calculators">
       <div class="nav-title">Calculators</div>
-      <button class="nav-btn" aria-current="page" type="button">Enclosure heat</button>
+      <a class="nav-btn" href="KRD_ArcPressure_Calculator_v2.html">Arc pressure</a>
+      <a class="nav-btn" aria-current="page" href="KRD_EnclosureHeat_Calculator_v13.html">Enclosure heat</a>
+      <a class="nav-btn" href="KRD_MaxDemand_Calculator_v2.html">Maximum demand</a>
       <div class="nav-note">More calculators appear here as they're completed.</div>
     </nav>
   </aside>

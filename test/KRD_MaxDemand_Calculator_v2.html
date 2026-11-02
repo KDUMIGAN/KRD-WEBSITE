@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Max Demand Calculator v1</title>
+<title>Max Demand Calculator v2</title>
 <link rel="icon" id="favicon">
 <style>
 :root{--krd-grey:#414142;--krd-lime:#E3E421;--ink:#232325;--ink-2:#4A4A4D;--ink-3:#66666A;--rule:#D9D9DB;--rule-2:#EBEBEC;--field:#A8A8AC;--ground:#F3F3F2;--white:#FFFFFF;--sel:#EEEEEC;--pass-bg:#E2F0E5;--pass:#1D5A2C;--fail-bg:#F6E0DD;--fail:#8A2A1E;--bar:#E07B00;--res:#F4F4F5;--res-2:#E2E2E4}
@@ -12,13 +12,16 @@ html,body{margin:0}
 body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--ground);line-height:1.4}
 button,input,select{font:inherit;color:inherit}
 .app{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
-.side{background:var(--krd-grey);color:#fff;padding:24px 20px;display:flex;flex-direction:column;gap:22px}
-.side .brand svg{width:180px;height:auto;display:block}
-.side .brand .sub{margin-top:8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#D0D0D2}
-.side nav{display:flex;flex-direction:column;gap:2px}
-.side nav a{color:#fff;text-decoration:none;padding:10px 12px;border-left:3px solid transparent}
-.side nav a.on{background:rgba(255,255,255,.08);border-left-color:var(--krd-lime);color:var(--krd-lime);font-weight:700}
-.side .more{font-size:12px;color:#BDBDC0}
+.side{background:var(--krd-grey);color:#fff;padding:28px 0;display:flex;flex-direction:column;gap:28px}
+.brand{padding:0 24px}
+.brand b{display:block;font-size:22px;font-weight:300}
+.brand-logo svg{width:180px;height:auto;display:block;margin-bottom:12px}
+.nav-group{display:flex;flex-direction:column}
+.nav-title{padding:0 24px 8px;font-size:13px;color:#BDBDC0}
+.nav-btn{display:flex;align-items:center;min-height:48px;padding:0 24px;border:0;background:transparent;color:#fff;text-align:left;cursor:pointer;font-size:15px;text-decoration:none}
+.nav-btn:not([aria-current]):hover{background:rgba(255,255,255,.08)}
+.nav-btn[aria-current="page"]{background:var(--krd-lime);color:#2A2A2B;font-weight:700}
+.nav-note{padding:10px 24px 0;font-size:13px;color:#BDBDC0}
 .main{min-width:0;display:flex;flex-direction:column}
 .top{background:#fff;border-bottom:1px solid var(--rule);padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
 .top .meta{display:flex;flex-wrap:wrap;gap:12px;flex:1;min-width:0}
@@ -94,9 +97,11 @@ dialog .df{padding:0 20px 20px;display:flex;justify-content:flex-end;gap:8px}
 @media (max-width:1150px){.grid{grid-template-columns:minmax(0,1fr)}.res{position:static}}
 @media (max-width:760px){
  .app{grid-template-columns:minmax(0,1fr)}
- .side{flex-direction:row;align-items:center;padding:12px 16px;gap:14px;flex-wrap:wrap}
- .side .brand svg{width:120px}.side .more{display:none}
- .side nav a{padding:6px 10px}
+ .side{flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px 0;gap:8px}
+ .nav-title,.nav-note{display:none}
+ .nav-group{flex-direction:row;flex-wrap:wrap}
+ .nav-btn{min-height:40px;padding:0 14px}
+ .brand-logo svg{width:120px;margin-bottom:4px}
  .grid{padding:12px 16px}.top{padding:12px 16px}
  .load{grid-template-columns:repeat(2,minmax(0,1fr))}
  .load .c2,.load .c3,.load .c4{grid-column:1/-1}
@@ -124,10 +129,15 @@ dialog .df{padding:0 20px 20px;display:flex;justify-content:flex-end;gap:8px}
 <body>
 <div class="app">
  <aside class="side">
-  <div class="brand"><div id="sideLogo"></div><div class="sub">Calculators</div></div>
-  <nav><a href="#" class="on" aria-current="page">Maximum demand</a></nav>
-  <div class="more">More calculators appear here as they're completed.</div>
- </aside>
+    <div class="brand"><div class="brand-logo" id="sideLogo"></div><b>Calculators</b></div>
+    <nav class="nav-group" aria-label="Calculators">
+      <div class="nav-title">Calculators</div>
+      <a class="nav-btn" href="KRD_ArcPressure_Calculator_v2.html">Arc pressure</a>
+      <a class="nav-btn" href="KRD_EnclosureHeat_Calculator_v13.html">Enclosure heat</a>
+      <a class="nav-btn" aria-current="page" href="KRD_MaxDemand_Calculator_v2.html">Maximum demand</a>
+      <div class="nav-note">More calculators appear here as they're completed.</div>
+    </nav>
+  </aside>
  <div class="main">
   <header class="top">
    <div class="meta">
