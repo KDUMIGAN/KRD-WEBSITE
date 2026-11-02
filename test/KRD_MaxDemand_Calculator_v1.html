@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Max Demand Calculator v1</title>
+<link rel="icon" id="favicon">
+<style>
+:root{--krd-grey:#414142;--krd-lime:#E3E421;--ink:#232325;--ink-2:#4A4A4D;--ink-3:#66666A;--rule:#D9D9DB;--rule-2:#EBEBEC;--field:#A8A8AC;--ground:#F3F3F2;--white:#FFFFFF;--sel:#EEEEEC;--pass-bg:#E2F0E5;--pass:#1D5A2C;--fail-bg:#F6E0DD;--fail:#8A2A1E;--bar:#E07B00;--res:#F4F4F5;--res-2:#E2E2E4}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--ground);line-height:1.4}
+button,input,select{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
+.side{background:var(--krd-grey);color:#fff;padding:24px 20px;display:flex;flex-direction:column;gap:22px}
+.side .brand svg{width:180px;height:auto;display:block}
+.side .brand .sub{margin-top:8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#D0D0D2}
+.side nav{display:flex;flex-direction:column;gap:2px}
+.side nav a{color:#fff;text-decoration:none;padding:10px 12px;border-left:3px solid transparent}
+.side nav a.on{background:rgba(255,255,255,.08);border-left-color:var(--krd-lime);color:var(--krd-lime);font-weight:700}
+.side .more{font-size:12px;color:#BDBDC0}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{background:#fff;border-bottom:1px solid var(--rule);padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+.top .meta{display:flex;flex-wrap:wrap;gap:12px;flex:1;min-width:0}
+.top .meta label.f{min-width:120px}
+.top .meta label.f.name{flex:1 1 260px}
+.top .acts{display:flex;flex-wrap:wrap;gap:8px}
+.btn{height:44px;padding:0 16px;border:1px solid var(--krd-grey);background:#fff;cursor:pointer;border-radius:0;display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+.btn:hover{background:var(--sel)}
+.btn.pri{background:var(--krd-grey);color:#fff}
+.btn.pri:hover{background:#2E2E2F}
+.btn.link{border-color:transparent;text-decoration:underline;padding:0 8px}
+.btn.sm{height:36px;padding:0 12px;font-size:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;padding:20px;align-items:start}
+.panel{background:#fff;border:1px solid var(--rule)}
+.sec{padding:20px;border-bottom:1px solid var(--rule-2)}
+.sec:last-child{border-bottom:0}
+.sec h2{font-size:17px;margin:0 0 4px}
+.lead{margin:0 0 14px;color:var(--ink-3);font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
+label.f>span{display:block}
+input[type=text],input[type=number],select{height:44px;border:1px solid var(--field);border-radius:0;background:#fff;padding:0 10px;width:100%;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--krd-lime);outline-offset:1px}
+.seg{display:flex;flex-wrap:wrap}
+.seg button{height:44px;padding:0 14px;border:1px solid var(--field);background:#fff;cursor:pointer;margin-right:-1px;border-radius:0}
+.seg button[aria-pressed=true]{background:var(--krd-grey);border-color:var(--krd-grey);color:#fff;position:relative}
+.datastat{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.datastat .st{font-size:14px}
+.load{border:1px solid var(--rule);margin-bottom:12px;padding:12px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;position:relative}
+.load.flag{box-shadow:inset 4px 0 0 var(--bar)}
+.load .c2{grid-column:span 2}.load .c3{grid-column:span 3}.load .c4{grid-column:span 4}.load .c6{grid-column:1/-1}
+.load .hd{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-3)}
+.load .hd b{color:var(--ink)}
+.load .rf{grid-column:1/-1;font-size:13px;color:#7A4300}
+.unit3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.res{position:sticky;top:16px}
+.answer{background:var(--res);padding:18px 20px;display:flex;justify-content:space-between;gap:16px;align-items:flex-end;border-bottom:1px solid var(--res-2)}
+.answer .big{font-size:40px;font-weight:300;line-height:1}
+.answer .big b{font-weight:700}
+.answer .lbl{font-size:13px;color:var(--ink-3);margin-bottom:6px}
+.answer .gov{text-align:right;font-size:14px}
+.answer .gov b{display:block;font-size:18px}
+.rsec{padding:16px 20px;border-bottom:1px solid var(--rule-2)}
+.rsec h3{font-size:15px;margin:0 0 10px}
+table.rt,table.ft{width:100%;border-collapse:collapse;font-size:14px}
+table.rt th,table.rt td,table.ft th,table.ft td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+table.rt th,table.ft th{font-size:12px;color:var(--ink-3);font-weight:400;border-bottom-color:var(--rule)}
+table .n{text-align:right}
+tr.lim td:last-child{box-shadow:inset -4px 0 0 var(--bar)}
+tr.gov td{font-weight:700;background:var(--res);border-top:1px solid var(--rule)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--ink-3)}.kv dd{margin:0;font-weight:700;text-align:right}
+.warnnote,.infonote{padding:10px 12px;font-size:14px;margin:0 0 8px}
+.warnnote{background:#FFF3E0;border-left:4px solid var(--bar)}
+.infonote{background:var(--res);border-left:4px solid var(--field)}
+.working h3{font-size:15px;margin:18px 0 8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.working h3:first-child{margin-top:0}
+.tag{font-size:11px;font-weight:700;padding:3px 8px;text-transform:uppercase;letter-spacing:.04em}
+.tag.pass{background:var(--pass-bg);color:var(--pass)}.tag.fail{background:var(--fail-bg);color:var(--fail)}.tag.mute{background:var(--res-2);color:var(--ink-3)}
+.eq{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--rule-2);font-size:14px}
+.eq span:first-child{color:var(--ink-2)}
+.eq span:last-child{font-weight:700;white-space:nowrap}
+.working ul{margin:6px 0 10px 18px;padding:0;font-size:13px;color:var(--ink-2)}
+.disc{padding:12px 20px;font-size:12px;color:var(--ink-3)}
+dialog{border:1px solid var(--rule);padding:0;width:min(460px,92vw)}
+dialog::backdrop{background:rgba(35,35,37,.45)}
+dialog .dh{background:var(--krd-grey);color:#fff;padding:14px 20px;font-weight:700}
+dialog .db{padding:20px;display:flex;flex-direction:column;gap:12px}
+dialog .df{padding:0 20px 20px;display:flex;justify-content:flex-end;gap:8px}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.hide{display:none!important}
+#report{display:none}
+@media (max-width:1150px){.grid{grid-template-columns:minmax(0,1fr)}.res{position:static}}
+@media (max-width:760px){
+ .app{grid-template-columns:minmax(0,1fr)}
+ .side{flex-direction:row;align-items:center;padding:12px 16px;gap:14px;flex-wrap:wrap}
+ .side .brand svg{width:120px}.side .more{display:none}
+ .side nav a{padding:6px 10px}
+ .grid{padding:12px 16px}.top{padding:12px 16px}
+ .load{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .load .c2,.load .c3,.load .c4{grid-column:1/-1}
+}
+/* report */
+@page{size:A4 portrait;margin:14mm}
+@media print{
+ body{background:#fff;font-size:11pt}
+ .app,dialog{display:none!important}
+ #report{display:block}
+ #report .rh{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--krd-grey);padding-bottom:10px;margin-bottom:12px}
+ #report .rh img,#report .rh svg{max-width:200px;max-height:70px}
+ #report h1{font-size:18pt;margin:0 0 4px}
+ #report h2{font-size:12pt;margin:16px 0 6px;border-bottom:1px solid var(--rule);padding-bottom:3px}
+ #report .meta{font-size:10pt;text-align:right}
+ #report .answer{border:1px solid var(--rule)}
+ #report table{page-break-inside:auto}#report tr{page-break-inside:avoid}
+ #report .kv{grid-template-columns:auto 1fr auto 1fr}
+ #report .kv dd{text-align:left}
+ #report .working h3{page-break-after:avoid}
+ #report *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="side">
+  <div class="brand"><div id="sideLogo"></div><div class="sub">Calculators</div></div>
+  <nav><a href="#" class="on" aria-current="page">Maximum demand</a></nav>
+  <div class="more">More calculators appear here as they're completed.</div>
+ </aside>
+ <div class="main">
+  <header class="top">
+   <div class="meta">
+    <label class="f name"><span>Calculation name</span><input type="text" id="mName" placeholder="e.g. Workshop MSB"></label>
+    <label class="f"><span>Job no.</span><input type="text" id="mJob"></label>
+    <label class="f" style="max-width:90px"><span>Rev</span><input type="text" id="mRev"></label>
+   </div>
+   <div class="acts">
+    <a href="#" class="btn link" id="bNew">Start new</a>
+    <button class="btn" id="bImport">Import</button>
+    <button class="btn" id="bSave">Save</button>
+    <button class="btn pri" id="bPdf">Export PDF</button>
+    <input type="file" id="fImport" accept=".json,application/json" class="hide">
+   </div>
+  </header>
+  <div class="grid">
+   <div class="panel" id="inputs">
+    <section class="sec">
+     <h2>Standards data</h2>
+     <p class="lead">AS/NZS 3000 Appendix C values aren't built into this page. Load your data file once and this browser remembers it.</p>
+     <div class="datastat">
+      <div class="st" id="dataStat"></div>
+      <div class="row"><button class="btn sm" id="bData">Load data file</button><button class="btn sm link" id="bDataClr">Remove</button></div>
+      <input type="file" id="fData" accept=".json,application/json" class="hide">
+     </div>
+    </section>
+    <section class="sec">
+     <h2>Supply and installation</h2>
+     <p class="lead">Installation type sets which Appendix C table the load groups come from.</p>
+     <div class="row" style="margin-bottom:14px">
+      <label class="f"><span>Supply</span><div class="seg" id="segPh"><button data-v="1">Single phase</button><button data-v="3">Three phase</button></div></label>
+      <label class="f" style="width:150px"><span>Phase voltage (V)</span><input type="number" id="vph" min="1" step="1"></label>
+     </div>
+     <label class="f" style="margin-bottom:14px"><span>Installation type</span><div class="seg" id="segInst"><button data-v="single">Single domestic</button><button data-v="multi">Multiple domestic</button><button data-v="nondom">Non-domestic</button><button data-v="ind">Industrial</button></div></label>
+     <div id="tblWrap"></div>
+     <div id="unitsWrap"></div>
+    </section>
+    <section class="sec">
+     <h2>Loads</h2>
+     <p class="lead" id="loadsLead"></p>
+     <div id="loads"></div>
+     <button class="btn" id="bAdd">+ Add load</button>
+    </section>
+   </div>
+   <div class="panel res" id="results"></div>
+  </div>
+ </div>
+</div>
+
+<dialog id="dlgPdf">
+ <div class="dh">Export PDF</div>
+ <div class="db">
+  <label class="f"><span>File name</span><input type="text" id="pFile"></label>
+  <label class="f"><span>Calculated by</span><input type="text" id="pBy"></label>
+  <label class="chk"><input type="checkbox" id="pKrd"> Use the KRD logo</label>
+  <label class="f" id="pLogoWrap"><span>Logo (optional)</span><input type="file" id="pLogo" accept="image/*"></label>
+  <label class="chk"><input type="checkbox" id="pFull"> Show full calculations</label>
+  <div class="infonote" style="margin:0">In the print dialog choose Save as PDF and set Layout: Portrait.</div>
+ </div>
+ <div class="df"><button class="btn" id="pCancel">Cancel</button><button class="btn pri" id="pGo">Export</button></div>
+</dialog>
+
+<div id="report"></div>
+
+<script>
+/* ---------- KRD logo ---------- */
+const KRD_SYM='<rect x="56.62" y="53.78" width="507.117" height="507.117" fill="#E3E421"/><g fill="#fff"><polygon points="238.084 529.72 155.219 446.854 237.891 364.18 194.796 364.18 118.271 440.704 118.271 364.18 87.796 364.18 87.796 482.802 118.101 452.833 194.989 529.72 238.084 529.72"/><path d="M387.531,529.409l-44.055-56.629c22.844-1.497,40.962-19.557,40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464,0,13.538,5.059,13.538,11.276v25.028c0,6.217-6.074,11.274-13.538,11.274h-91.827v30.475h55.211l43.941,56.482h39.78Z"/><path d="M462.739,364.464h-64.437v30.929h64.437c21.444,0,38.891,17.448,38.891,38.891v25.34c0,21.444-17.448,38.891-38.891,38.891h-64.437v30.929h64.437c38.499,0,69.82-31.321,69.82-69.82v-25.34c0-38.499-31.321-69.820-69.82-69.82Z"/></g>';
+const KRD_TXT='M598.349,395.231h36.139v4.251h-31.154v18.912h29.174v4.252h-29.174v20.671h31.52v4.251h-36.505v-52.338Z'+
+'M640.867,409.745h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z'+
+'M712.266,444.491c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.069,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.080-8.65-17.080-19.425,0-10.409,6.158-19.059,17.080-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM707.647,428.217c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027Z'+
+'M721.138,395.231h4.618v7.403h-4.618v-7.403ZM721.138,409.745h4.618v37.824h-4.618v-37.824Z'+
+'M734.553,409.745h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z'+
+'M776.704,429.903c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.963,13.561-16.493,13.561-12.021,0-17.080-9.236-17.080-20.012,0-9.969,5.058-20.012,17.080-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM801.187,426.018c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z'+
+'M814.75,429.903c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.080-9.236-17.080-20.012,0-9.969,5.058-20.012,17.080-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM839.233,426.018c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z'+
+'M850.085,409.745h4.251v8.87h.146c2.346-6.084,7.477-9.676,14.294-9.383v4.618c-8.356-.439-14.074,5.718-14.074,13.562v20.158h-4.618v-37.824Z'+
+'M873.249,395.231h4.618v7.403h-4.618v-7.403ZM873.249,409.745h4.618v37.824h-4.618v-37.824Z'+
+'M886.664,409.745h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z'+
+'M958.063,444.491c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.080-8.65-17.080-19.425,0-10.409,6.158-19.059,17.080-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM953.445,428.217c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027Z'+
+'M598.203,470.63h7.33l18.106,45.888,18.033-45.888h7.33v52.338h-4.984v-45.228h-.146l-17.886,45.228h-4.691l-17.959-45.228h-.147v45.228h-4.984v-52.338Z'+
+'M658.095,496.726c.439-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM682.725,502.297h-.146c-.587,1.1-2.639,1.466-3.885,1.686-7.843,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011Z'+
+'M696.507,485.145h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z'+
+'M735.506,496.726c.44-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM760.136,502.297h-.147c-.586,1.1-2.639,1.466-3.885,1.686-7.844,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011Z'+
+'M805.953,519.89c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.080-8.65-17.080-19.425,0-10.409,6.158-19.059,17.080-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM801.334,503.617c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027Z'+
+'M817.464,505.303c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.080-9.236-17.080-20.012,0-9.969,5.058-20.012,17.080-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM841.947,501.418c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z'+
+'M852.798,485.145h4.252v6.377h.22c2.419-4.544,6.377-7.477,12.388-7.477,4.985,0,9.456,2.419,10.849,7.403,2.272-4.984,7.037-7.403,12.021-7.403,8.283,0,12.535,4.325,12.535,13.268v25.656h-4.618v-25.436c0-6.231-2.346-9.603-8.943-9.603-7.99,0-10.262,6.598-10.262,13.635v21.404h-4.618v-25.656c.073-5.131-2.052-9.383-7.917-9.383-7.99,0-11.216,6.011-11.289,13.928v21.111h-4.618v-37.824Z'+
+'M916.575,505.303c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.080-9.236-17.080-20.012,0-9.969,5.058-20.012,17.080-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM941.059,501.418c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z'+
+'M951.836,485.145h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z'+
+'M998.605,485.145h7.697v3.885h-7.697v25.51c0,3.005.44,4.765,3.738,4.984,1.32,0,2.639-.073,3.958-.22v3.958c-1.393,0-2.712.147-4.105.147-6.157,0-8.283-2.053-8.21-8.503v-25.876h-6.597v-3.885h6.597v-11.362h4.618v11.362Z';
+const KRD_PLUS='M1023.38,425.139v7.843h-14.587v14.587h-7.843v-14.587h-14.587v-7.843h14.587v-14.587h7.843v14.587h14.587Z';
+function krdLogo(textColour){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 47 980 520" role="img" aria-label="KRD Engineering + Management">'+KRD_SYM+'<path fill="'+textColour+'" d="'+KRD_TXT+'"/><path fill="#E3E421" d="'+KRD_PLUS+'"/></svg>';}
+document.getElementById('sideLogo').innerHTML=krdLogo('#fff');
+document.getElementById('favicon').href='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="56 53 508 508">'+KRD_SYM+'</svg>');
+
+/* ---------- constants ---------- */
+const CALC_TYPE='krd-maxdemand-calc', CALC_VER=1, DATA_TYPE='krd-md-data';
+const LS_CALC='krd-md-calc', LS_DATA='krd-md-data';
+const STD=[6,10,16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3200,4000,5000,6300];
+const INST={single:'Single domestic',multi:'Multiple domestic',nondom:'Non-domestic',ind:'Industrial'};
+const RULES=['full','pct','points','largestPlus','perUnit','fixed'];
+const NEEDS_I=['full','pct','largestPlus'];
+const ASSESS='ASSESS';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f=(x,d=1)=>(x==null||!isFinite(x))?'—':(+x).toFixed(d);
+const num=v=>{if(v===''||v==null)return null;const n=+v;return isFinite(n)?n:null;};
+let uidN=0;const uid=()=>'L'+Date.now().toString(36)+(uidN++);
+
+function newLoad(){return {id:uid(),desc:'',grp:'',qty:1,val:null,unit:'A',pf:1,ph:'A',scope:'unit',div:100};}
+function defaults(){return {v:CALC_VER,name:'',job:'',rev:'',phases:3,vph:230,inst:'single',tableId:'',units:{A:0,B:0,C:0},loads:[newLoad()],pdf:{file:'',by:'',useKrd:false,full:true}};}
+
+/* migrate / sanitise a saved state */
+function clean(o){
+ const d=defaults();o=o&&typeof o==='object'?o:{};
+ const s=Object.assign(d,o);
+ s.v=CALC_VER;
+ s.phases=+s.phases===1?1:3;
+ s.vph=num(s.vph)||230;
+ if(!INST[s.inst])s.inst='single';
+ s.units=Object.assign({A:0,B:0,C:0},o.units||{});
+ ['A','B','C'].forEach(p=>s.units[p]=Math.max(0,Math.round(num(s.units[p])||0)));
+ s.pdf=Object.assign(d.pdf,o.pdf||{});delete s.pdf.logo;
+ s.loads=(Array.isArray(o.loads)?o.loads:d.loads).map(l=>{const n=Object.assign(newLoad(),l||{});
+  n.id=n.id||uid();n.qty=num(n.qty);n.val=num(n.val);n.pf=num(n.pf);n.div=num(n.div);
+  if(!['A','kW','kVA'].includes(n.unit))n.unit='A';
+  if(!['A','B','C','3'].includes(n.ph))n.ph='A';
+  if(!['unit','comm'].includes(n.scope))n.scope='unit';
+  return n;});
+ return s;
+}
+
+/* ---------- data file ---------- */
+let D=null;
+function validateData(o){
+ const e=[];
+ if(!o||o.type!==DATA_TYPE)return ['Not a KRD maximum demand data file (type must be "'+DATA_TYPE+'").'];
+ if(!Array.isArray(o.tables)||!o.tables.length)return ['Data file has no tables.'];
+ o.tables.forEach((t,i)=>{
+  const w='Table '+(t&&t.id||i+1)+': ';
+  if(!t.id)e.push(w+'missing id');
+  if(!['single','multi','nondom'].includes(t.inst))e.push(w+'inst must be single, multi or nondom');
+  if(!Array.isArray(t.groups))e.push(w+'groups missing');
+  else t.groups.forEach(g=>{if(!g.code)e.push(w+'group without code');else if(g.code===ASSESS)e.push(w+'group code ASSESS is reserved');if(!g.rule||!RULES.includes(g.rule.t))e.push(w+'group '+g.code+' has unknown rule type');});
+ });
+ return e;
+}
+function loadStoredData(){try{const o=JSON.parse(localStorage.getItem(LS_DATA)||'null');if(o&&!validateData(o).length)D=o;}catch(e){}}
+function instKey(){return S.inst==='ind'?'nondom':S.inst;}
+function candTables(){return D?D.tables.filter(t=>t.inst===instKey()):[];}
+function activeTable(){const c=candTables();return c.find(t=>t.id===S.tableId)||c[0]||null;}
+function tableForUnits(n){return candTables().find(t=>n>=(t.unitsMin==null?1:t.unitsMin)&&n<=(t.unitsMax==null?Infinity:t.unitsMax))||null;}
+function groupOptions(){
+ let gs=[];
+ if(S.inst==='multi'){const seen={};candTables().forEach(t=>t.groups.forEach(g=>{if(!seen[g.code]){seen[g.code]=1;gs.push(g);}}));}
+ else{const t=activeTable();if(t)gs=t.groups.slice();}
+ gs.push({code:ASSESS,desc:'By assessment (own diversity %)'});
+ return gs;
+}
+function grpDesc(code){if(code===ASSESS)return 'By assessment';const g=groupOptions().find(x=>x.code===code);return g?g.desc:'';}
+
+/* ---------- state ---------- */
+let S=defaults();
+try{const o=JSON.parse(localStorage.getItem(LS_CALC)||'null');if(o)S=clean(o);}catch(e){}
+loadStoredData();
+let logoData=null;
+function autosave(){try{const c=JSON.parse(JSON.stringify(S));if(c.pdf)delete c.pdf.logo;localStorage.setItem(LS_CALC,JSON.stringify(c));}catch(e){}}
+
+/* ---------- calculation ---------- */
+const isMultiUnit=L=>S.inst==='multi'&&L.scope==='unit';
+function loadPhase(L){if(S.phases===1)return 'A';return L.ph;}
+function isThree(L){return S.phases===3&&!isMultiUnit(L)&&L.ph==='3';}
+/* current per item in A (line current for 3-phase loads) */
+function itemI(L){
+ const v=L.val;if(v==null||v<0)return null;
+ if(L.unit==='A')return v;
+ let kva=v;
+ if(L.unit==='kW'){if(!(L.pf>0&&L.pf<=1))return null;kva=v/L.pf;}
+ return isThree(L)?kva*1000/(3*S.vph):kva*1000/S.vph;
+}
+function evalRule(r,items,n){
+ const p=k=>{const x=num(r[k]);return x;};
+ const sumI=items.reduce((a,b)=>a+(b.I||0),0), N=items.reduce((a,b)=>a+(b.qty||0),0);
+ const out={A:0,eq:[],err:null};
+ const need=(...ks)=>{const miss=ks.filter(k=>p(k)==null);if(miss.length){out.err='Data file rule is missing '+miss.join(', ');return false;}return true;};
+ switch(r.t){
+  case 'full':out.A=sumI;out.eq.push(['100% of connected load = '+items.map(i=>f(i.I)).join(' + '),f(out.A)+' A']);break;
+  case 'pct':if(!need('pct'))break;out.A=sumI*p('pct')/100;out.eq.push([f(p('pct'),0)+'% × '+f(sumI)+' A',f(out.A)+' A']);break;
+  case 'points':{if(!need('first','firstA','step','stepA'))break;
+   if(N<=0){out.A=0;out.eq.push(['No points','0.0 A']);break;}
+   const k=Math.max(0,Math.ceil((N-p('first'))/p('step')));out.A=p('firstA')+k*p('stepA');
+   out.eq.push([N+' points: '+f(p('firstA'))+' A for first '+p('first')+' + '+k+' × '+f(p('stepA'))+' A (each further '+p('step')+' or part)',f(out.A)+' A']);break;}
+  case 'largestPlus':{const lp=p('largestPct')==null?100:p('largestPct');if(!need('restPct'))break;
+   const Im=items.reduce((a,b)=>Math.max(a,b.I1||0),0);const rest=Math.max(0,sumI-Im);
+   out.A=Im*lp/100+rest*p('restPct')/100;
+   out.eq.push([f(lp,0)+'% × '+f(Im)+' A (largest) + '+f(p('restPct'),0)+'% × ('+f(sumI)+' − '+f(Im)+') A',f(out.A)+' A']);break;}
+  case 'perUnit':if(!need('fixedA','perUnitA'))break;out.A=p('fixedA')+p('perUnitA')*n;
+   out.eq.push([f(p('fixedA'))+' A + '+f(p('perUnitA'))+' A × '+n+(S.inst==='multi'?' units':''),f(out.A)+' A']);break;
+  case 'fixed':if(!need('A'))break;out.A=p('A');out.eq.push(['Fixed allowance',f(out.A)+' A']);break;
+ }
+ return out;
+}
+function calc(){
+ const phs=S.phases===3?['A','B','C']:['A'];
+ const rowF={};S.loads.forEach(L=>rowF[L.id]=[]);
+ const notes=[];const addF=(L,m)=>{if(!rowF[L.id].includes(m))rowF[L.id].push(m);};
+ const multi=S.inst==='multi';
+ if(!D)notes.push({w:1,t:'No data file loaded. Only "By assessment" loads are calculated.'});
+ if(!(S.vph>0))notes.push({w:1,t:'Phase voltage must be above 0 V.'});
+ // row checks
+ S.loads.forEach(L=>{
+  if(!L.grp)addF(L,'Choose a load group.');
+  if(!(L.qty>0))addF(L,'Quantity is 0 or blank.');
+  if(L.unit==='kW'&&!(L.pf>0&&L.pf<=1))addF(L,'Power factor must be above 0 and no more than 1.');
+  if(L.grp===ASSESS&&(L.div==null||L.div<0))addF(L,'Enter a diversity %.');
+  if(L.grp&&L.grp!==ASSESS&&!groupOptions().some(g=>g.code===L.grp))addF(L,'Group '+L.grp+' is not in the loaded data for '+INST[S.inst].toLowerCase()+'.');
+ });
+ if(multi&&phs.every(P=>!(S.units[P]>0)))notes.push({w:1,t:'Enter the number of living units on '+(S.phases===3?'each phase':'the supply')+'.'});
+ const PH=phs.map(P=>{
+  const n=multi?(S.units[P]||0):1;
+  const table=multi?(n>0?tableForUnits(n):null):activeTable();
+  if(multi&&n>0&&!table&&D)notes.push({w:1,t:'Phase '+P+': no table in the data file covers '+n+' units.'});
+  const byG={};
+  S.loads.forEach(L=>{
+   let mult;
+   if(isMultiUnit(L)){if(!(n>0))return;mult=n;}
+   else{const lp=loadPhase(L);if(!(lp===P||lp==='3'))return;mult=1;}
+   if(!L.grp)return;
+   const I1=itemI(L);const q=(L.qty||0)*mult;
+   (byG[L.grp]=byG[L.grp]||[]).push({L,I1,qty:q,I:I1==null?null:I1*q});
+  });
+  const groups=[];
+  Object.keys(byG).forEach(code=>{
+   const items=byG[code];
+   const conn=items.reduce((a,b)=>a+(b.I||0),0);
+   const pfw=(()=>{let s=0,w=0;items.forEach(i=>{const pf=i.L.pf>0&&i.L.pf<=1?i.L.pf:1;s+=(i.I||0)*pf;w+=(i.I||0);});return w>0?s/w:1;})();
+   if(code===ASSESS){
+    let A=0;const eq=[];let ok=true;
+    items.forEach(i=>{if(i.I==null){addF(i.L,'Rating is blank or invalid.');ok=false;return;}const d=i.L.div==null?0:i.L.div;const a=i.I*d/100;A+=a;
+     eq.push([(i.L.desc||'Load')+': '+f(d,0)+'% × '+f(i.I)+' A',f(a)+' A']);});
+    groups.push({code,desc:'By assessment',rule:null,items,conn,A,eq,pfw,ok});return;
+   }
+   const g=table&&table.groups.find(x=>x.code===code);
+   if(!g){
+    items.forEach(i=>addF(i.L,table?('Group '+code+' is not in table '+table.id+(multi?' (used for phase '+P+')':'')+'.'):'No data table available for this group.'));
+    groups.push({code,desc:grpDesc(code),rule:null,items,conn,A:null,eq:[],pfw,ok:false});return;
+   }
+   let ok=true;
+   if(NEEDS_I.includes(g.rule.t))items.forEach(i=>{if(i.I==null){addF(i.L,'Rating is blank or invalid.');ok=false;}});
+   const r=evalRule(g.rule,items.map(i=>Object.assign({},i,{I:i.I||0,I1:i.I1||0})),n);
+   if(r.err){ok=false;notes.push({w:1,t:'Group '+esc(code)+' ('+esc(table.id)+'): '+esc(r.err)+'.'});}
+   groups.push({code,desc:g.desc,note:g.note,rule:g.rule,items,conn,A:ok?r.A:null,eq:r.eq,pfw,ok});
+  });
+  groups.sort((a,b)=>a.code<b.code?-1:a.code>b.code?1:0);
+  const demand=groups.reduce((a,g)=>a+(g.A||0),0);
+  const conn=groups.reduce((a,g)=>a+g.conn,0);
+  const kva=S.vph*demand/1000;
+  const kw=groups.reduce((a,g)=>a+S.vph*(g.A||0)/1000*g.pfw,0);
+  return {P,n,table,groups,demand,conn,kva,kw};
+ });
+ const max=Math.max(...PH.map(x=>x.demand));
+ const gov=PH.find(x=>x.demand===max);
+ const avg=PH.reduce((a,x)=>a+x.demand,0)/PH.length;
+ const imb=S.phases===3&&avg>0?Math.max(...PH.map(x=>Math.abs(x.demand-avg)))/avg*100:null;
+ const kva=PH.reduce((a,x)=>a+x.kva,0), kw=PH.reduce((a,x)=>a+x.kw,0);
+ const sw=STD.find(r=>r>=max-1e-9);
+ if(max>0&&!sw)notes.push({w:1,t:'Demand is above the largest standard rating in the list ('+STD[STD.length-1]+' A).'});
+ const flagged=S.loads.filter(L=>rowF[L.id].length);
+ if(flagged.length)notes.unshift({w:1,t:flagged.length+' load'+(flagged.length>1?'s have':' has')+' a problem and '+(flagged.length>1?'are':'is')+' not fully counted: '+flagged.map((L,i)=>esc(L.desc||('Load '+(S.loads.indexOf(L)+1)))).join(', ')+'.'});
+ if(imb!=null&&imb>10)notes.push({w:0,t:'Phase imbalance is '+f(imb,0)+'%. Consider moving loads off phase '+gov.P+'.'});
+ if(sw)notes.push({w:0,t:'Suggested main switch / supply rating is the next standard size at or above the demand. It does not check cable, discrimination or supply authority limits.'});
+ return {PH,max,gov,avg,imb,kva,kw,sw,notes,rowF};
+}
+
+/* ---------- inputs rendering ---------- */
+function setSeg(id,val){document.querySelectorAll('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(val))));}
+function renderInputs(){
+ $('mName').value=S.name;$('mJob').value=S.job;$('mRev').value=S.rev;
+ setSeg('segPh',S.phases);setSeg('segInst',S.inst);$('vph').value=S.vph;
+ // data status
+ $('dataStat').innerHTML=D?('<b>'+esc(D.title||'Data file')+'</b> &middot; '+D.tables.length+' table'+(D.tables.length>1?'s':'')):'<span style="color:#7A4300">No data file loaded. Only "By assessment" is available.</span>';
+ $('bDataClr').classList.toggle('hide',!D);
+ // table select
+ const c=candTables();
+ if(S.inst!=='multi'&&c.length>1){
+  const t=activeTable();
+  $('tblWrap').innerHTML='<label class="f" style="margin-bottom:14px"><span>Appendix C table / column</span><select id="tblSel">'+c.map(x=>'<option value="'+esc(x.id)+'"'+(t&&x.id===t.id?' selected':'')+'>'+esc(x.name||x.id)+'</option>').join('')+'</select></label>';
+  $('tblSel').onchange=e=>{S.tableId=e.target.value;renderInputs();update();};
+ }else $('tblWrap').innerHTML='';
+ // units
+ if(S.inst==='multi'){
+  const phs=S.phases===3?['A','B','C']:['A'];
+  $('unitsWrap').innerHTML='<label class="f"><span>Living units '+(S.phases===3?'on each phase':'on the supply')+'</span></label><div class="unit3">'+phs.map(P=>'<label class="f"><span>'+(S.phases===3?'Phase '+P:'Units')+'</span><input type="number" min="0" step="1" data-u="'+P+'" value="'+(S.units[P]||'')+'"></label>').join('')+'</div>';
+  $('unitsWrap').querySelectorAll('[data-u]').forEach(i=>i.oninput=e=>{S.units[e.target.dataset.u]=Math.max(0,Math.round(num(e.target.value)||0));update();});
+ }else $('unitsWrap').innerHTML='';
+ $('loadsLead').textContent=S.inst==='multi'?'Per-unit loads are entered for one living unit and counted on every phase by its number of units. Communal loads go on a chosen phase.':'Loads in the same group on the same phase are combined using that group\'s Appendix C rule.';
+ renderLoads();
+}
+function renderLoads(){
+ const gs=groupOptions();
+ const multi=S.inst==='multi';
+ $('loads').innerHTML=S.loads.map((L,i)=>{
+  const showPh=S.phases===3&&!isMultiUnit(L);
+  const opts='<option value="">Choose…</option>'+gs.map(g=>'<option value="'+esc(g.code)+'"'+(g.code===L.grp?' selected':'')+'>'+esc(g.code===ASSESS?g.desc:(g.code+' – '+g.desc))+'</option>').join('')+(L.grp&&!gs.some(g=>g.code===L.grp)?'<option value="'+esc(L.grp)+'" selected>'+esc(L.grp)+' (not in data)</option>':'');
+  return '<div class="load" data-id="'+L.id+'">'+
+   '<div class="hd"><b>Load '+(i+1)+'</b><button class="btn sm link" data-act="del">Remove</button></div>'+
+   '<label class="f c3"><span>Description</span><input type="text" data-k="desc" value="'+esc(L.desc)+'"></label>'+
+   '<label class="f c3"><span>Load group</span><select data-k="grp">'+opts+'</select></label>'+
+   (multi?'<label class="f c2"><span>Scope</span><select data-k="scope"><option value="unit"'+(L.scope==='unit'?' selected':'')+'>Per unit</option><option value="comm"'+(L.scope==='comm'?' selected':'')+'>Communal</option></select></label>':'')+
+   '<label class="f"><span>'+(isMultiUnit(L)?'Qty per unit':'Qty')+'</span><input type="number" min="0" step="1" data-k="qty" value="'+(L.qty==null?'':L.qty)+'"></label>'+
+   '<label class="f"><span>Rating each</span><input type="number" min="0" step="any" data-k="val" value="'+(L.val==null?'':L.val)+'"></label>'+
+   '<label class="f"><span>Unit</span><select data-k="unit">'+['A','kW','kVA'].map(u=>'<option'+(u===L.unit?' selected':'')+'>'+u+'</option>').join('')+'</select></label>'+
+   '<label class="f"><span>PF</span><input type="number" min="0" max="1" step="0.01" data-k="pf" value="'+(L.pf==null?'':L.pf)+'"></label>'+
+   (showPh?'<label class="f"><span>Phase</span><select data-k="ph">'+[['A','A'],['B','B'],['C','C'],['3','3-phase']].map(o=>'<option value="'+o[0]+'"'+(o[0]===L.ph?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></label>':'')+
+   (L.grp===ASSESS?'<label class="f"><span>Diversity %</span><input type="number" min="0" step="any" data-k="div" value="'+(L.div==null?'':L.div)+'"></label>':'')+
+   '<div class="rf" data-rf></div></div>';
+ }).join('');
+}
+const STRUCT=['grp','scope','unit','ph'];
+$('loads').addEventListener('input',e=>{
+ const el=e.target,k=el.dataset.k;if(!k)return;
+ const L=S.loads.find(x=>x.id===el.closest('.load').dataset.id);if(!L)return;
+ if(STRUCT.includes(k))return;
+ L[k]=k==='desc'?el.value:num(el.value);update();
+});
+$('loads').addEventListener('change',e=>{
+ const el=e.target,k=el.dataset.k;if(!k||!STRUCT.includes(k))return;
+ const L=S.loads.find(x=>x.id===el.closest('.load').dataset.id);if(!L)return;
+ L[k]=el.value;renderLoads();update();
+});
+$('loads').addEventListener('click',e=>{
+ if(e.target.dataset.act!=='del')return;
+ const id=e.target.closest('.load').dataset.id;S.loads=S.loads.filter(x=>x.id!==id);
+ if(!S.loads.length)S.loads.push(newLoad());renderLoads();update();
+});
+$('bAdd').onclick=()=>{S.loads.push(newLoad());renderLoads();update();const n=$('loads').lastElementChild;if(n){const i=n.querySelector('input');if(i)i.focus();}};
+$('segPh').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.phases=+b.dataset.v;renderInputs();update();};
+$('segInst').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.inst=b.dataset.v;S.tableId='';renderInputs();update();};
+$('vph').oninput=e=>{S.vph=num(e.target.value);update();};
+$('vph').onchange=e=>{if(!(S.vph>0)){S.vph=230;e.target.value=230;update();}};
+[['mName','name'],['mJob','job'],['mRev','rev']].forEach(([id,k])=>$(id).oninput=e=>{S[k]=e.target.value;autosave();});
+
+/* ---------- results ---------- */
+let R=null;
+function ruleText(r){if(!r)return '';switch(r.t){
+ case 'full':return '100% of connected load';
+ case 'pct':return r.pct+'% of connected load';
+ case 'points':return r.firstA+' A for first '+r.first+' points + '+r.stepA+' A per further '+r.step+' or part';
+ case 'largestPlus':return (r.largestPct==null?100:r.largestPct)+'% of largest + '+r.restPct+'% of remainder';
+ case 'perUnit':return r.fixedA+' A + '+r.perUnitA+' A per unit';
+ case 'fixed':return r.A+' A fixed';}return '';}
+function phaseTable(R){
+ return '<table class="rt"><thead><tr><th>Phase</th>'+(S.inst==='multi'?'<th class="n">Units</th>':'')+'<th class="n">Connected (A)</th><th class="n">Demand (A)</th></tr></thead><tbody>'+
+  R.PH.map(x=>'<tr'+(R.PH.length>1&&x===R.gov&&x.demand>0?' class="lim"':'')+'><td>'+(S.phases===3?x.P:'Single phase')+'</td>'+(S.inst==='multi'?'<td class="n">'+x.n+'</td>':'')+'<td class="n">'+f(x.conn)+'</td><td class="n"><b>'+f(x.demand)+'</b></td></tr>').join('')+'</tbody></table>';
+}
+function summaryKV(R){
+ return '<dl class="kv"><dt>Total demand</dt><dd>'+f(R.kva,1)+' kVA</dd><dt>Total demand</dt><dd>'+f(R.kw,1)+' kW</dd>'+
+  (R.imb!=null?'<dt>Phase imbalance</dt><dd>'+f(R.imb,0)+'%</dd>':'')+
+  '<dt>Suggested main switch / supply</dt><dd>'+(R.sw&&R.max>0?R.sw+' A':'—')+'</dd></dl>';
+}
+function notesHtml(R){return R.notes.map(n=>'<div class="'+(n.w?'warnnote':'infonote')+'">'+n.t+'</div>').join('');}
+function working(R){
+ let h='';
+ h+='<h3>Load currents <span class="tag mute">Inputs</span></h3>';
+ h+='<ul><li>Single-phase load: I = kVA × 1000 / '+f(S.vph,0)+' V; kW is divided by PF first.</li>'+(S.phases===3?'<li>Three-phase load: I = kVA × 1000 / (3 × '+f(S.vph,0)+' V), the line current, counted on A, B and C.</li>':'')+'</ul>';
+ S.loads.forEach((L,i)=>{const I=itemI(L);if(L.unit==='A'||!L.grp)return;
+  const kva=L.unit==='kW'?(L.pf>0?L.val/L.pf:null):L.val;
+  h+='<div class="eq"><span>'+esc(L.desc||'Load '+(i+1))+': '+(L.unit==='kW'?f(L.val,2)+' kW / '+f(L.pf,2)+' = ':'')+f(kva,2)+' kVA × 1000 / '+(isThree(L)?'(3 × '+f(S.vph,0)+')':f(S.vph,0))+'</span><span>'+f(I)+' A each</span></div>';});
+ R.PH.forEach(x=>{
+  const tag=x===R.gov&&R.PH.length>1&&x.demand>0?'<span class="tag fail">Governs</span>':'<span class="tag mute">'+f(x.demand)+' A</span>';
+  h+='<h3>'+(S.phases===3?'Phase '+x.P:'Single phase')+(S.inst==='multi'?' – '+x.n+' units'+(x.table?', '+esc(x.table.name||x.table.id):''):(x.table?' – '+esc(x.table.name||x.table.id):''))+' '+tag+'</h3>';
+  if(!x.groups.length){h+='<ul><li>No loads on this phase.</li></ul>';return;}
+  x.groups.forEach(g=>{
+   h+='<div class="eq"><span><b>'+esc(g.code===ASSESS?'By assessment':g.code+' – '+g.desc)+'</b>'+(g.rule?' &middot; '+esc(ruleText(g.rule)):'')+'</span><span>'+(g.A==null?'not counted':'')+'</span></div>';
+   g.items.forEach(i=>{h+='<div class="eq"><span>&nbsp;&nbsp;'+esc(i.L.desc||'Load '+(S.loads.indexOf(i.L)+1))+': '+i.qty+' × '+f(i.I1)+' A</span><span>'+f(i.I)+' A connected</span></div>';});
+   g.eq.forEach(e=>h+='<div class="eq"><span>&nbsp;&nbsp;'+esc(e[0])+'</span><span>'+esc(e[1])+'</span></div>');
+   if(g.note)h+='<ul><li>'+esc(g.note)+'</li></ul>';
+  });
+  h+='<table class="ft"><thead><tr><th>Group</th><th class="n">Connected (A)</th><th class="n">Demand (A)</th></tr></thead><tbody>'+
+   x.groups.map(g=>'<tr><td>'+esc(g.code===ASSESS?'By assessment':g.code)+'</td><td class="n">'+f(g.conn)+'</td><td class="n">'+(g.A==null?'—':f(g.A))+'</td></tr>').join('')+
+   '<tr class="gov"><td>'+(S.phases===3?'Phase '+x.P:'Total')+'</td><td class="n">'+f(x.conn)+'</td><td class="n">'+f(x.demand)+'</td></tr></tbody></table>';
+ });
+ h+='<h3>Totals <span class="tag mute">Summary</span></h3>';
+ h+='<div class="eq"><span>Maximum demand = max('+R.PH.map(x=>f(x.demand)).join(', ')+') A</span><span>'+f(R.max)+' A</span></div>';
+ h+='<div class="eq"><span>S = '+f(S.vph,0)+' V × ('+R.PH.map(x=>f(x.demand)).join(' + ')+') A / 1000</span><span>'+f(R.kva,1)+' kVA</span></div>';
+ h+='<div class="eq"><span>P = Σ (group kVA × weighted PF)</span><span>'+f(R.kw,1)+' kW</span></div>';
+ if(R.imb!=null)h+='<div class="eq"><span>Imbalance = max |I − '+f(R.avg)+'| / '+f(R.avg)+' A × 100</span><span>'+f(R.imb,0)+'%</span></div>';
+ if(R.sw&&R.max>0)h+='<div class="eq"><span>Next standard rating ≥ '+f(R.max)+' A</span><span>'+R.sw+' A</span></div>';
+ h+='<ul><li>Weighted PF per group = Σ(I × PF) / Σ I using each load\'s PF. Loads entered in A or kVA use the PF field as entered (default 1.00).</li><li>Appendix C rules come from the loaded data file: '+esc(D?(D.title||'untitled'):'none loaded')+'.</li></ul>';
+ return h;
+}
+function renderResults(){
+ const any=R.max>0;
+ const gtxt=R.PH.length>1?('Phase '+R.gov.P):'Single phase';
+ $('results').innerHTML=
+  '<div class="answer"><div><div class="lbl">Maximum demand</div><div class="big"><b>'+f(R.max)+'</b> A</div></div><div class="gov">'+(any?(R.PH.length>1?'Governing phase<b>'+gtxt+'</b>':'<b>'+f(R.kva,1)+' kVA</b>'):'<b>—</b>')+'</div></div>'+
+  '<div class="rsec"><h3>Demand by phase</h3>'+phaseTable(R)+'</div>'+
+  '<div class="rsec">'+summaryKV(R)+'</div>'+
+  (R.notes.length?'<div class="rsec">'+notesHtml(R)+'</div>':'')+
+  '<div class="rsec working"><h3 style="margin-top:0">Working</h3>'+working(R)+'</div>'+
+  '<div class="disc">Design aid only. Verify against AS/NZS 3000 and the supply authority\'s requirements.</div>';
+ document.querySelectorAll('#loads .load').forEach(el=>{
+  const fl=R.rowF[el.dataset.id]||[];el.classList.toggle('flag',fl.length>0);
+  el.querySelector('[data-rf]').textContent=fl.join(' ');
+ });
+}
+function update(){R=calc();renderResults();autosave();}
+
+/* ---------- data file controls ---------- */
+$('bData').onclick=()=>$('fData').click();
+$('fData').onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{
+ let o;try{o=JSON.parse(rd.result);}catch(err){alert('That file is not valid JSON.');return;}
+ const er=validateData(o);if(er.length){alert('Data file not loaded:\n\n'+er.slice(0,12).join('\n'));return;}
+ D=o;try{localStorage.setItem(LS_DATA,JSON.stringify(o));}catch(err){}renderInputs();update();};rd.readAsText(file);e.target.value='';};
+$('bDataClr').onclick=()=>{if(!confirm('Remove the data file from this browser?'))return;D=null;try{localStorage.removeItem(LS_DATA);}catch(e){}renderInputs();update();};
+
+/* ---------- save / import / new ---------- */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+const fname=()=>(S.name||'max-demand').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'_')||'max-demand';
+$('bSave').onclick=()=>{const c=JSON.parse(JSON.stringify(S));delete c.pdf.logo;download(fname()+'.json',JSON.stringify({type:CALC_TYPE,version:CALC_VER,saved:new Date().toISOString(),calc:c},null,1),'application/json');};
+$('bImport').onclick=()=>$('fImport').click();
+$('fImport').onchange=e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();rd.onload=()=>{
+ let o;try{o=JSON.parse(rd.result);}catch(err){alert('That file is not valid JSON.');return;}
+ if(!o||o.type!==CALC_TYPE){alert(o&&o.type===DATA_TYPE?'That is a data file. Use Load data file under Standards data.':'Not a KRD maximum demand calculation file.');return;}
+ S=clean(o.calc);renderInputs();update();};rd.readAsText(file);e.target.value='';};
+$('bNew').onclick=e=>{e.preventDefault();if(!confirm('Start a new calculation? Unsaved changes will be lost.'))return;const pdf=S.pdf;S=defaults();S.pdf.by=pdf.by;S.pdf.useKrd=pdf.useKrd;S.pdf.full=pdf.full;renderInputs();update();};
+
+/* ---------- PDF ---------- */
+$('bPdf').onclick=()=>{
+ $('pFile').value=S.pdf.file||fname();$('pBy').value=S.pdf.by||'';$('pKrd').checked=!!S.pdf.useKrd;$('pFull').checked=S.pdf.full!==false;
+ $('pLogoWrap').classList.toggle('hide',!!S.pdf.useKrd);$('dlgPdf').showModal();};
+$('pKrd').onchange=e=>$('pLogoWrap').classList.toggle('hide',e.target.checked);
+$('pLogo').onchange=e=>{const file=e.target.files[0];if(!file){logoData=null;return;}const rd=new FileReader();rd.onload=()=>logoData=rd.result;rd.readAsDataURL(file);};
+$('pCancel').onclick=()=>$('dlgPdf').close();
+$('pGo').onclick=()=>{
+ S.pdf.file=$('pFile').value.trim();S.pdf.by=$('pBy').value.trim();S.pdf.useKrd=$('pKrd').checked;S.pdf.full=$('pFull').checked;autosave();
+ $('dlgPdf').close();buildReport();
+ const t=document.title;document.title=S.pdf.file||fname();
+ setTimeout(()=>{window.print();document.title=t;},50);
+};
+function buildReport(){
+ R=calc();
+ const logo=S.pdf.useKrd?krdLogo('#404041'):(logoData?'<img src="'+logoData+'" alt="Logo">':'');
+ const kv=(a)=>'<dl class="kv">'+a.map(([k,v])=>'<dt>'+esc(k)+'</dt><dd>'+v+'</dd>').join('')+'</dl>';
+ const inp=[['Supply',S.phases===3?'Three phase':'Single phase'],['Phase voltage',f(S.vph,0)+' V'],['Installation',INST[S.inst]],
+  ['Data file',esc(D?(D.title||'untitled'):'None loaded')]];
+ if(S.inst!=='multi'&&activeTable())inp.push(['Table / column',esc(activeTable().name||activeTable().id)]);
+ if(S.inst==='multi')inp.push(['Living units',(S.phases===3?['A','B','C'].map(P=>P+': '+(S.units[P]||0)).join(', '):String(S.units.A||0))]);
+ const loads='<table class="rt"><thead><tr><th>Load</th><th>Group</th><th class="n">Qty</th><th class="n">Rating</th><th class="n">PF</th><th>'+(S.inst==='multi'?'Scope / phase':'Phase')+'</th><th class="n">Each (A)</th></tr></thead><tbody>'+
+  S.loads.map((L,i)=>'<tr><td>'+esc(L.desc||'Load '+(i+1))+'</td><td>'+esc(L.grp===ASSESS?'Assessed '+f(L.div,0)+'%':L.grp||'—')+'</td><td class="n">'+(L.qty==null?'—':L.qty)+(isMultiUnit(L)?' /unit':'')+'</td><td class="n">'+(L.val==null?'—':L.val+' '+L.unit)+'</td><td class="n">'+f(L.pf,2)+'</td><td>'+(isMultiUnit(L)?'Per unit':(S.phases===1?'—':(L.ph==='3'?'3-phase':L.ph))+(S.inst==='multi'?' (communal)':''))+'</td><td class="n">'+f(itemI(L))+'</td></tr>').join('')+'</tbody></table>';
+ $('report').innerHTML=
+  '<div class="rh"><div>'+logo+'</div><div class="meta"><h1>Maximum demand calculation</h1>'+
+  '<div><b>'+esc(S.name||'Untitled')+'</b></div><div>Job '+esc(S.job||'—')+' &middot; Rev '+esc(S.rev||'—')+'</div>'+
+  '<div>Calculated by '+esc(S.pdf.by||'—')+' &middot; '+new Date().toLocaleDateString('en-AU')+'</div></div></div>'+
+  '<div class="answer"><div><div class="lbl">Maximum demand</div><div class="big"><b>'+f(R.max)+'</b> A</div></div><div class="gov">'+(R.PH.length>1?'Governing phase<b>Phase '+R.gov.P+'</b>':'<b>'+f(R.kva,1)+' kVA</b>')+'</div></div>'+
+  '<h2>Inputs</h2>'+kv(inp)+
+  '<h2>Results</h2>'+phaseTable(R)+'<div style="margin-top:10px">'+summaryKV(R)+'</div>'+
+  (R.notes.length?'<h2>Notes</h2>'+notesHtml(R):'')+
+  '<h2>Loads</h2>'+loads+
+  (S.pdf.full?'<h2>Working</h2><div class="working">'+working(R)+'</div>':'')+
+  '<p style="font-size:9pt;color:#66666A;margin-top:16px">Design aid only. Verify against AS/NZS 3000 and the supply authority\'s requirements.</p>';
+}
+window.addEventListener('beforeprint',()=>{if(!$('report').innerHTML)buildReport();});
+window.addEventListener('afterprint',()=>{$('report').innerHTML='';});
+
+renderInputs();update();
+</script>
+</body>
+</html>

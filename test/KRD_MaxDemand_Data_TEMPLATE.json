@@ -1,0 +1,46 @@
+{
+ "type": "krd-md-data",
+ "version": 1,
+ "title": "TEST DATA - placeholder values, NOT AS/NZS 3000",
+ "_format": {
+  "tables": "One entry per Appendix C table column. inst is single (Table C1 single domestic), multi (Table C1 blocks of living units) or nondom (Table C2, also used for Industrial). For multi, unitsMin/unitsMax pick the column by the number of units on each phase.",
+  "groups": "code (e.g. A(i)), desc, optional note shown in the working, and a rule.",
+  "rule types": {
+   "full": "100% of connected current. {t:'full'}",
+   "pct": "pct % of connected current. {t:'pct', pct}",
+   "points": "firstA amps for the first 'first' points, plus stepA amps for each further 'step' points or part. Qty = points. {t:'points', first, firstA, step, stepA}",
+   "largestPlus": "largestPct % of the largest single item + restPct % of the rest. largestPct defaults to 100. {t:'largestPlus', largestPct, restPct}",
+   "perUnit": "fixedA + perUnitA x number of living units on the phase (n = 1 outside multiple domestic). {t:'perUnit', fixedA, perUnitA}",
+   "fixed": "Fixed amps whenever the group has a load. {t:'fixed', A}"
+  },
+  "reserved": "Group code ASSESS is built into the calculator (By assessment, own diversity %)."
+ },
+ "tables": [
+  {"id": "TEST-SD", "name": "TEST single domestic", "inst": "single", "groups": [
+   {"code": "T1", "desc": "Test lighting points", "rule": {"t": "points", "first": 10, "firstA": 5, "step": 10, "stepA": 1}},
+   {"code": "T2", "desc": "Test socket outlets", "rule": {"t": "points", "first": 8, "firstA": 9, "step": 8, "stepA": 4}},
+   {"code": "T3", "desc": "Test cooking", "rule": {"t": "pct", "pct": 55}},
+   {"code": "T4", "desc": "Test air-conditioning", "rule": {"t": "full"}},
+   {"code": "T5", "desc": "Test motors", "rule": {"t": "largestPlus", "largestPct": 100, "restPct": 45}, "note": "Test note shown in working."}
+  ]},
+  {"id": "TEST-MD-2-5", "name": "TEST 2 to 5 units", "inst": "multi", "unitsMin": 2, "unitsMax": 5, "groups": [
+   {"code": "U1", "desc": "Test unit lighting", "rule": {"t": "perUnit", "fixedA": 4, "perUnitA": 1.5}},
+   {"code": "U2", "desc": "Test unit cooking", "rule": {"t": "pct", "pct": 35}},
+   {"code": "U3", "desc": "Test communal", "rule": {"t": "full"}}
+  ]},
+  {"id": "TEST-MD-6-PLUS", "name": "TEST 6+ units", "inst": "multi", "unitsMin": 6, "groups": [
+   {"code": "U1", "desc": "Test unit lighting", "rule": {"t": "perUnit", "fixedA": 6, "perUnitA": 0.7}},
+   {"code": "U2", "desc": "Test unit cooking", "rule": {"t": "pct", "pct": 20}},
+   {"code": "U3", "desc": "Test communal", "rule": {"t": "full"}}
+  ]},
+  {"id": "TEST-ND-A", "name": "TEST non-domestic column A", "inst": "nondom", "groups": [
+   {"code": "N1", "desc": "Test lighting", "rule": {"t": "pct", "pct": 85}},
+   {"code": "N2", "desc": "Test motors", "rule": {"t": "largestPlus", "restPct": 60}},
+   {"code": "N3", "desc": "Test fixed allowance", "rule": {"t": "fixed", "A": 12}}
+  ]},
+  {"id": "TEST-ND-B", "name": "TEST non-domestic column B", "inst": "nondom", "groups": [
+   {"code": "N1", "desc": "Test lighting", "rule": {"t": "pct", "pct": 70}},
+   {"code": "N2", "desc": "Test motors", "rule": {"t": "largestPlus", "restPct": 40}}
+  ]}
+ ]
+}
