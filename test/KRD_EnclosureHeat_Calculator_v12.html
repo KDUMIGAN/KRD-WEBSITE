@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enclosure Heat Calculator v12</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2256 53 508 508%22%3E%3Crect x=%2256.62%22 y=%2253.78%22 width=%22507.117%22 height=%22507.117%22 fill=%22#E3E421%22/%3E%3Cg fill=%22#fff%22%3E%3Cpolygon points=%22238.084 529.72 155.219 446.854 237.891 364.18 194.796 364.18 118.271 440.704 118.271 364.18 87.796 364.18 87.796 482.802 118.101 452.833 194.989 529.72 238.084 529.72%22/%3E%3Cpath d=%22M387.531,529.409l-44.055-56.629c22.844-1.497,40.962-19.557,40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464,0,13.538,5.059,13.538,11.276v25.028c0,6.217-6.074,11.274-13.538,11.274h-91.827v30.475h55.211l43.941,56.482h39.78Z%22/%3E%3Cpath d=%22M462.739,364.464h-64.437v30.929h64.437c21.444,0,38.891,17.448,38.891,38.891v25.34c0,21.444-17.448,38.891-38.891,38.891h-64.437v30.929h64.437c38.499,0,69.82-31.321,69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z%22/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{
+  --krd-grey:#414142; --krd-lime:#E3E421;
+  --ink:#232325; --ink-2:#4A4A4D; --ink-3:#66666A;
+  --rule:#D9D9DB; --rule-2:#EBEBEC; --field:#A8A8AC; --ground:#F3F3F2; --white:#FFFFFF;
+  --sel:#EEEEEC; --dark:#2F2F31;
+  --pass-bg:#E2F0E5; --pass:#1D5A2C; --fail-bg:#F6E0DD; --fail:#8A2A1E;
+  --bar:#E07B00; --res:#F4F4F5; --res-2:#E2E2E4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--ground);font-variant-numeric:tabular-nums;font-size:15px;line-height:1.4}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #1F5FAD;outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.side{background:var(--krd-grey);color:var(--white);padding:28px 0;display:flex;flex-direction:column;gap:28px}
+.brand{padding:0 24px}
+.brand span{display:block;font-size:14px;color:var(--krd-lime);font-weight:700}
+.brand b{display:block;font-size:22px;font-weight:300}
+.brand-logo svg{width:180px;height:auto;display:block;margin-bottom:12px}
+.nav-group{display:flex;flex-direction:column}
+.nav-title{padding:0 24px 8px;font-size:13px;color:#BDBDC0}
+.nav-btn{display:flex;align-items:center;min-height:48px;padding:0 24px;border:0;background:transparent;color:var(--white);text-align:left;cursor:pointer;font-size:15px}
+.nav-btn[aria-current="page"]{background:var(--krd-lime);color:#2A2A2B;font-weight:700}
+.nav-note{padding:10px 24px 0;font-size:13px;color:#BDBDC0}
+
+.main-col{display:flex;flex-direction:column;min-width:0}
+.top{background:var(--white);border-bottom:1px solid var(--rule);padding:16px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.top-fields{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2)}
+.f input,.f select{min-height:44px;padding:0 10px;border:1px solid var(--field);border-radius:0;background:var(--white);font-size:15px;color:var(--ink);width:100%}
+.f input:focus,.f select:focus{border-color:var(--ink)}
+.btn{min-height:44px;padding:0 18px;border:1px solid var(--field);border-radius:0;background:var(--white);color:var(--ink);font-weight:700;cursor:pointer}
+.btn:hover{background:var(--ground)}
+.btn.primary{border:2px solid var(--ink);padding:0 17px}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
+.linkbtn{border:0;background:none;padding:6px 4px;font-weight:700;text-decoration:underline;cursor:pointer;color:var(--ink);font-size:14px}
+
+.calc-grid{padding:28px 32px 48px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start}
+.panel{background:var(--white);border:1px solid var(--rule)}
+.sec{padding:20px 24px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:14px}
+.sec:last-child{border-bottom:0}
+.sec h2{margin:0;font-size:17px;font-weight:700}
+.sec .lead{margin:-8px 0 0;font-size:13px;color:var(--ink-3)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.span2{grid-column:span 2}
+.hint{font-size:13px;color:var(--ink-3);margin:0}
+
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--field);background:var(--white)}
+.seg button{min-height:42px;border:0;background:var(--white);cursor:pointer;font-size:14px;padding:0 8px}
+.seg button+button{border-left:1px solid var(--field)}
+.seg button[aria-pressed="true"]{background:var(--sel);font-weight:700;box-shadow:inset 0 0 0 2px var(--ink)}
+.seg-wrap{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2)}
+
+.drawwrap{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:16px;align-items:start}
+#draw svg{width:100%;height:auto;display:block;max-height:420px}
+#draw rect[data-cid]{cursor:pointer}
+.ctabs{display:flex;flex-direction:column;gap:6px}
+.ctab{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;padding:6px 12px;border:1px solid var(--rule);background:var(--white);font-size:14px;text-align:left;cursor:pointer}
+.ctab[aria-pressed="true"]{border:2px solid var(--ink);background:var(--sel);font-weight:700;padding:5px 11px}
+.ctab small{font-weight:400;color:var(--ink-3);white-space:nowrap}
+.ctab small.hot{color:var(--fail);font-weight:700}
+.ctab.over{box-shadow:inset 0 0 0 3px var(--krd-lime)}
+.addrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.faces{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--field);border:1px solid var(--field)}
+.face{padding:8px 10px;font-size:13px;background:var(--white);border:0;text-align:left;cursor:pointer;min-height:60px;display:flex;flex-direction:column;justify-content:flex-start}
+.face b{display:block;font-size:14px}
+.face small{display:block;color:var(--ink-3);line-height:1.3;margin-top:2px}
+.face.cov{background:var(--res)}
+.face.set b::after{content:" (set)";font-weight:400;color:var(--ink-3);font-size:12px}
+
+.table-wrap{overflow-x:auto}
+.items{width:100%;border-collapse:collapse;min-width:880px}
+.items th{font-size:12px;font-weight:700;color:var(--ink-3);text-align:left;padding:6px;border-bottom:1.5px solid var(--ink)}
+.items td{padding:6px;border-top:1px solid var(--rule-2);vertical-align:top;text-align:left}
+.items input,.items select{min-height:36px;padding:0 8px;border:1px solid var(--field);border-radius:0;background:var(--white);font-size:14px;width:100%}
+.items .n{text-align:right;white-space:nowrap;padding-top:14px}
+.items tr.limrow td:last-child{box-shadow:inset -4px 0 0 var(--bar)}
+.pp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:6px}
+.pp label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ink-3)}
+.pp.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pp .pl{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ink-3)}
+.mini{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--field);min-height:36px;background:var(--white)}
+.mini button{border:0;background:var(--white);font-size:13px;cursor:pointer;padding:0 4px}
+.mini button+button{border-left:1px solid var(--field)}
+.mini button[aria-pressed="true"]{background:var(--sel);font-weight:700;box-shadow:inset 0 0 0 2px var(--ink)}
+.sv{min-height:36px;display:flex;align-items:center;padding:0 8px;border:1px dashed var(--field);background:var(--res);font-size:13px;color:var(--ink-2)}
+.sug{margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--rule);background:var(--res);padding:6px 8px;font-size:12px;color:var(--ink-2)}
+.sug[hidden]{display:none}
+.dn{margin-top:6px;border:1px solid var(--rule);background:var(--res);padding:4px 8px;font-size:12px;color:var(--ink-2)}
+.dn[hidden]{display:none}
+.over{margin-top:6px;border:1px solid #E0B46A;background:#FFF6E6;color:#6E4300;padding:4px 8px;font-size:12px;font-weight:700}
+.limtag{display:block;margin-top:4px;font-size:12px;font-weight:700;color:#7A4500}
+.limtag:empty{display:none}
+.wh{font-size:12px;color:var(--ink-3);margin-top:4px}
+.grip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:36px;cursor:grab;color:var(--ink-3);font-weight:700;letter-spacing:-2px;user-select:none}
+.xbtn{min-height:36px;width:32px;border:1px solid var(--field);background:var(--white);cursor:pointer;font-size:16px}
+.empty{padding:16px 6px;color:var(--ink-2)}
+.arow{display:grid;grid-template-columns:28px minmax(0,1fr) 36px;gap:8px;align-items:center}
+.arow b{font-size:14px;color:var(--ink-3);text-align:right}
+.arow input{min-height:40px;padding:0 10px;border:1px solid var(--field);border-radius:0;background:var(--white);font-size:15px;width:100%}
+.r-ass{margin:0 0 2mm;padding-left:6mm;font-size:10pt}
+.r-ass li{padding:0.8mm 0}
+
+.results{display:flex;flex-direction:column;gap:20px;position:sticky;top:16px}
+.results .panel{background:var(--res);border-color:var(--rule)}
+.answer{background:var(--res-2);color:var(--ink);border-top:3px solid var(--ink);padding:18px 24px 20px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.answer .k{font-size:14px;color:var(--ink-2)}
+.answer .v{font-size:32px;font-weight:300;line-height:1.15;margin-top:4px}
+.answer .v b{font-weight:700}
+.answer .gov{font-size:14px;color:var(--ink-2);text-align:right}
+.answer .gov b{color:var(--ink)}
+.panel-head{padding:16px 24px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.panel-head h2{margin:0;font-size:17px}
+table.bal{table-layout:fixed;width:calc(100% - 48px);margin:0 24px 16px;border-collapse:collapse;font-size:14px}
+table.bal th{font-size:13px;font-weight:700;color:var(--ink-3);text-align:right;padding:8px 6px;border-bottom:1.5px solid var(--ink)}
+table.bal th:first-child,table.bal td:first-child{text-align:left;width:36%}
+table.bal td{text-align:right;padding:9px 6px;border-top:1px solid var(--rule);vertical-align:top}
+table.bal tr.tot td{font-weight:700;background:var(--res-2)}
+table.bal td.ok{color:var(--pass)}
+table.bal td.bad{color:var(--fail)}
+table.bal .na{color:var(--ink-3)}
+table.bal small{display:block;font-size:12px;color:var(--ink-3);font-weight:400}
+.tag{display:inline-block;padding:3px 8px;font-size:12px;font-weight:700}
+.tag.pass{background:var(--pass-bg);color:var(--pass)}
+.tag.fail{background:var(--fail-bg);color:var(--fail)}
+.lims{padding:0 24px 16px}
+.lim{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:12px;padding:9px 0;border-top:1px solid var(--rule);font-size:14px;align-items:baseline}
+.lim span{color:var(--ink-2);font-size:13px}
+.notes{display:flex;flex-direction:column;gap:8px;padding:0 24px 16px}
+.notes:empty{display:none}
+.warnnote{margin:0;border:1px solid #E0B46A;background:#FFF6E6;color:#6E4300;padding:8px 12px;font-size:13px}
+.infonote{margin:0;border:1px solid var(--rule);background:var(--white);color:var(--ink-2);padding:8px 12px;font-size:13px}
+
+.wk{padding:4px 24px 18px;font-size:14px}
+.wk h3{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 6px;padding-bottom:4px;border-bottom:1.5px solid var(--ink);font-size:15px}
+.wk h3 small{font-size:12px;font-weight:700}
+.wk h3 small.pass{color:var(--pass)} .wk h3 small.fail{color:var(--fail)} .wk h3 small.mute{color:var(--ink-3);font-weight:400}
+.wk ul{margin:0 0 6px;padding-left:18px;color:var(--ink-2);font-size:13px;line-height:1.55}
+.wk .eq{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:4px 0;border-top:1px solid var(--rule-2)}
+.wk .eq span{color:var(--ink-2)} .wk .eq b{text-align:right;white-space:nowrap}
+.wk table.ft{width:100%;border-collapse:collapse;font-size:13px;margin:2px 0 6px}
+.wk table.ft th,.wk table.ft td{padding:5px 6px;border-top:1px solid var(--rule-2);text-align:left;vertical-align:top}
+.wk table.ft th{border-top:0;color:var(--ink-3);font-weight:700}
+.wk table.ft td:last-child,.wk table.ft th:last-child{text-align:right}
+.wk table.ft tr.gov td{font-weight:700;background:var(--res-2)}
+.wk .sub{color:var(--ink-3);font-size:12px}
+.disclaimer{font-size:13px;color:var(--ink-3);margin:0}
+
+dialog{border:0;padding:0;max-width:500px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(35,35,37,.55)}
+.modal{padding:24px;display:flex;flex-direction:column;gap:14px}
+.modal h2{margin:0;font-size:20px}
+.logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo-row .fname{font-size:14px;color:var(--ink-2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logo-prev{height:96px;border:1px dashed var(--field);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;background:var(--ground);text-align:center}
+.logo-prev img{max-height:80px;max-width:90%;display:block;margin:0 auto}
+.checkrow{display:flex;gap:10px;align-items:center;font-size:15px;min-height:44px}
+.checkrow input{width:20px;height:20px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--white);color:var(--ink);border:2px solid var(--ink);padding:12px 18px;font-size:14px;display:none;z-index:10;max-width:calc(100% - 32px)}
+.toast.show{display:block}
+
+#report{display:none}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  body{background:#fff}
+  .app,.toast,dialog{display:none !important}
+  #report{display:block;font-size:11pt;color:#232325;padding:0 14mm}
+  #report *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.r-page{width:100%;border-collapse:collapse}
+.r-page>thead>tr>td,.r-page>tfoot>tr>td{height:12mm;padding:0}
+.r-page>tbody>tr>td{padding:0}
+.r-block{display:grid;grid-template-columns:52mm 1fr;border:1.5px solid #232325}
+.r-logo{border-right:1.5px solid #232325;display:flex;align-items:center;justify-content:center;padding:4mm;min-height:28mm}
+.r-logo img{max-width:100%;max-height:22mm}
+.r-title{padding:3mm 4mm;border-bottom:1.5px solid #232325}
+.r-title small{display:block;font-size:9pt;color:#66666A}
+.r-title b{font-size:16pt}
+.r-meta{display:grid;grid-template-columns:repeat(4,1fr)}
+.r-meta div{padding:2mm 3mm;font-size:10pt}
+.r-meta div+div{border-left:1px solid #A8A8AC}
+.r-meta small{display:block;font-size:8pt;color:#66666A}
+.r-answer{border:1.5px solid #232325;padding:4mm 5mm;margin:5mm 0;display:flex;justify-content:space-between;align-items:flex-end;gap:4mm}
+.r-answer small{font-size:9pt;color:#66666A;display:block}
+.r-answer b{font-size:17pt}
+.r-h{font-weight:700;border-bottom:1.5px solid #232325;padding-bottom:1mm;margin:5mm 0 2mm;break-after:avoid}
+.r-draw{display:grid;grid-template-columns:70mm 1fr;gap:6mm;align-items:start}
+.r-draw svg{width:100%;height:auto;max-height:80mm}
+.r-kv div{display:flex;justify-content:space-between;gap:4mm;border-bottom:1px solid #EBEBEC;padding:1.2mm 0;font-size:10pt}
+.r-kv span{color:#4A4A4D}
+#report table.bal{width:100%;margin:0 0 2mm;table-layout:auto;font-size:9.5pt}
+#report table.bal td,#report table.bal th{padding:1.4mm 1.5mm}
+#report table.bal tr{break-inside:avoid}
+#report .notes,#report .lims{padding:0}
+#report .notes{margin-top:2mm}
+#report .warnnote,#report .infonote{font-size:9pt;padding:1.5mm 3mm}
+#report .lim{font-size:10pt;padding:1.4mm 0}
+.r-items{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:3mm}
+.r-items th,.r-items td{border-bottom:1px solid #EBEBEC;padding:1.2mm 1.5mm;text-align:left}
+.r-items th{color:#66666A}
+.r-items .n{text-align:right}
+.r-sub{font-size:10pt;font-weight:700;margin:3mm 0 1mm}
+.r-work .wk{padding:0;font-size:10pt}
+.r-work .wk h3{font-size:11pt;margin:4mm 0 1.5mm;break-after:avoid}
+.r-work .wk ul,.r-work .wk table.ft{font-size:9.5pt}
+.r-work .wk table.ft{break-inside:avoid}
+.r-foot{margin-top:6mm;border-top:1px solid #A8A8AC;padding-top:2mm;font-size:9pt;color:#66666A}
+
+@media (max-width:1150px){
+  .calc-grid{grid-template-columns:minmax(0,1fr)}
+  .results{position:static}
+}
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px 0;gap:8px}
+  .nav-title,.nav-note{display:none}
+  .nav-group{flex-direction:row}
+  .brand-logo svg{width:120px;margin-bottom:4px}
+  .top,.calc-grid{padding-left:16px;padding-right:16px}
+  .sec{padding:18px 16px}
+  .grid3,.grid4,.drawwrap{grid-template-columns:minmax(0,1fr)}
+  .span2{grid-column:auto}
+  .faces{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seg{grid-auto-flow:row}
+  .seg button+button{border-left:0;border-top:1px solid var(--field)}
+  table.bal{width:calc(100% - 32px);margin:0 16px 16px}
+  .panel-head,.lims,.notes,.wk{padding-left:16px;padding-right:16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="brand-logo" id="brandLogo"></div><b>Calculators</b></div>
+    <nav class="nav-group" aria-label="Calculators">
+      <div class="nav-title">Calculators</div>
+      <button class="nav-btn" aria-current="page" type="button">Enclosure heat</button>
+      <div class="nav-note">More calculators appear here as they're completed.</div>
+    </nav>
+  </aside>
+
+  <div class="main-col">
+    <header class="top">
+      <div class="top-fields">
+        <label class="f" style="width:300px">Calculation name<input data-k="name"></label>
+        <label class="f" style="width:140px">Job no.<input data-k="job"></label>
+        <label class="f" style="width:64px">Rev<input data-k="rev"></label>
+      </div>
+      <div class="actions">
+        <button class="linkbtn" type="button" id="btnNew">Start new</button>
+        <button class="btn" type="button" id="btnImport">Import</button>
+        <button class="btn" type="button" id="btnSave">Save</button>
+        <button class="btn primary" type="button" id="btnPdf">Export PDF</button>
+        <input type="file" id="fileImport" accept=".json,application/json" hidden>
+      </div>
+    </header>
+
+    <div class="calc-grid">
+      <div class="panel" aria-label="Inputs">
+        <div class="sec">
+          <h2>Site</h2>
+          <div class="grid3">
+            <label class="f">Ambient air (°C)<input data-k="ambient" inputmode="decimal"></label>
+            <label class="f">Enclosure material<select data-k="material" id="matSel"></select></label>
+            <label class="f" id="kF">k value (W/m²K)<input data-k="kCustom" inputmode="decimal"></label>
+            <label class="f">Altitude (m)<input data-k="altitude" inputmode="decimal"></label>
+            <label class="f">Default component rating (°C)<input data-k="defRating" inputmode="decimal"></label>
+            <label class="f">A/C set point (°C)<input data-k="acSet" inputmode="decimal"></label>
+          </div>
+          <p class="hint">The default component rating is used for any item without its own max ambient.</p>
+          <div class="seg-wrap">Location
+            <div class="seg" data-seg="location"><button type="button" data-v="indoor">Indoors</button><button type="button" data-v="shade">Outdoors, shaded</button><button type="button" data-v="sun">Outdoors, in sun</button></div>
+          </div>
+          <div id="sunBox" style="display:flex;flex-direction:column;gap:14px">
+            <div class="grid3">
+              <label class="f">Finish colour<select data-k="finish" id="finSel"></select></label>
+              <label class="f" id="aF"><span>Absorptance α</span><input data-k="aCustom" inputmode="decimal"></label>
+              <label class="f">Solar irradiance G (W/m²)<input data-k="irr" inputmode="decimal"></label>
+              <label class="f"><span>Outside surface h<sub>o</sub> (W/m²K)</span><input data-k="ho" inputmode="decimal"></label>
+            </div>
+            <div class="seg-wrap">Faces in sun (exposed parts only)
+              <div class="seg" id="sunSeg"><button type="button" data-sun="top">Top</button><button type="button" data-sun="front">Front</button><button type="button" data-sun="back">Back</button><button type="button" data-sun="left">Left</button><button type="button" data-sun="right">Right</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Assembly</h2>
+          <p class="lead">Select a compartment to edit it. To move an item, drag its handle onto a compartment in the list.</p>
+          <div class="drawwrap">
+            <div id="draw"></div>
+            <div class="ctabs" id="ctabs" aria-label="Compartments"></div>
+          </div>
+          <p class="hint">Red dashed lines are faces touching another compartment. Grey dotted lines have no wall or are vented, so the air is shared and those compartments are calculated together.</p>
+        </div>
+
+        <div class="sec" id="editor"></div>
+        <div class="sec" id="itemsSec"></div>
+        <div class="sec" id="assumSec"></div>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="panel">
+          <div class="answer" id="answer"></div>
+          <div class="panel-head"><h2>Heat balance</h2><span class="hint" id="balNote"></span></div>
+          <div class="table-wrap" id="balance"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Cooling device required</h2></div>
+          <div class="table-wrap" id="cooling"></div>
+          <div class="notes" id="notes"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Temperature limits</h2></div>
+          <div class="lims" id="limits"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Working</h2></div>
+          <div id="working"></div>
+        </div>
+        <p class="disclaimer">Design aid only. Heat balance using IEC/TR 60890 effective surface area. AS/NZS 61439 temperature-rise limits for terminals and accessible surfaces still apply. Check cooling device selection against the manufacturer's rated capacity at the site conditions.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<dialog id="pdfDlg" aria-labelledby="pdfTitle">
+  <form method="dialog" class="modal">
+    <h2 id="pdfTitle">Export PDF</h2>
+    <label class="f">File name<input id="pdfName"></label>
+    <label class="f">Calculated by<input id="pdfBy"></label>
+    <label class="checkrow"><input type="checkbox" id="pdfKrd">Use the KRD logo</label>
+    <div class="f" id="logoPick">Logo
+      <div class="logo-row">
+        <button type="button" class="btn" id="logoBtn">Choose logo</button>
+        <span class="fname" id="logoName">No file chosen</span>
+        <button type="button" class="linkbtn" id="logoRemove" hidden>Remove</button>
+        <input type="file" id="pdfLogo" accept="image/*" hidden>
+      </div>
+    </div>
+    <div class="logo-prev" id="logoPrev">Logo preview</div>
+    <label class="checkrow"><input type="checkbox" id="pdfWork" checked>Show full calculations</label>
+    <p class="hint">Your browser's print window opens next. Choose "Save as PDF" as the printer.</p>
+    <div class="modal-actions">
+      <button class="btn" value="cancel" type="submit" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok" type="submit">Create PDF</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="report"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= KRD LOGO (inline so the page stays one file) ================= */
+const KRD_SYM='<rect x="56.62" y="53.78" width="507.117" height="507.117" fill="#E3E421"/><g fill="#fff"><polygon points="238.084 529.72 155.219 446.854 237.891 364.18 194.796 364.18 118.271 440.704 118.271 364.18 87.796 364.18 87.796 482.802 118.101 452.833 194.989 529.72 238.084 529.72"/><path d="M387.531,529.409l-44.055-56.629c22.844-1.497,40.962-19.557,40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464,0,13.538,5.059,13.538,11.276v25.028c0,6.217-6.074,11.274-13.538,11.274h-91.827v30.475h55.211l43.941,56.482h39.78Z"/><path d="M462.739,364.464h-64.437v30.929h64.437c21.444,0,38.891,17.448,38.891,38.891v25.34c0,21.444-17.448,38.891-38.891,38.891h-64.437v30.929h64.437c38.499,0,69.82-31.321,69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z"/></g>';
+const KRD_TXT="M598.349,395.231h36.139v4.251h-31.154v18.912h29.174v4.252h-29.174v20.671h31.52v4.251h-36.505v-52.338ZM640.867,409.745h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM712.266,444.491c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.069,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM707.647,428.217c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027ZM721.138,395.231h4.618v7.403h-4.618v-7.403ZM721.138,409.745h4.618v37.824h-4.618v-37.824ZM734.553,409.745h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM776.704,429.903c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.963,13.561-16.493,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM801.187,426.018c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM814.75,429.903c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM839.233,426.018c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM850.085,409.745h4.251v8.87h.146c2.346-6.084,7.477-9.676,14.294-9.383v4.618c-8.356-.439-14.074,5.718-14.074,13.562v20.158h-4.618v-37.824ZM873.249,395.231h4.618v7.403h-4.618v-7.403ZM873.249,409.745h4.618v37.824h-4.618v-37.824ZM886.664,409.745h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM958.063,444.491c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM953.445,428.217c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027ZM598.203,470.63h7.33l18.106,45.888,18.033-45.888h7.33v52.338h-4.984v-45.228h-.146l-17.886,45.228h-4.691l-17.959-45.228h-.147v45.228h-4.984v-52.338ZM658.095,496.726c.439-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM682.725,502.297h-.146c-.587,1.1-2.639,1.466-3.885,1.686-7.843,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011ZM696.507,485.145h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM735.506,496.726c.44-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM760.136,502.297h-.147c-.586,1.1-2.639,1.466-3.885,1.686-7.844,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011ZM805.953,519.89c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM801.334,503.617c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027ZM817.464,505.303c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM841.947,501.418c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM852.798,485.145h4.252v6.377h.22c2.419-4.544,6.377-7.477,12.388-7.477,4.985,0,9.456,2.419,10.849,7.403,2.272-4.984,7.037-7.403,12.021-7.403,8.283,0,12.535,4.325,12.535,13.268v25.656h-4.618v-25.436c0-6.231-2.346-9.603-8.943-9.603-7.99,0-10.262,6.598-10.262,13.635v21.404h-4.618v-25.656c.073-5.131-2.052-9.383-7.917-9.383-7.99,0-11.216,6.011-11.289,13.928v21.111h-4.618v-37.824ZM916.575,505.303c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM941.059,501.418c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM951.836,485.145h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM998.605,485.145h7.697v3.885h-7.697v25.51c0,3.005.44,4.765,3.738,4.984,1.32,0,2.639-.073,3.958-.22v3.958c-1.393,0-2.712.147-4.105.147-6.157,0-8.283-2.053-8.21-8.503v-25.876h-6.597v-3.885h6.597v-11.362h4.618v11.362Z";
+const krdLogo=txt=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 47 980 520" role="img" aria-label="KRD Engineering + Management">${KRD_SYM}<path fill="${txt}" d="${KRD_TXT}"/><path fill="#E3E421" d="M1023.38,425.139v7.843h-14.587v14.587h-7.843v-14.587h-14.587v-7.843h14.587v-14.587h7.843v14.587h14.587Z"/></svg>`;
+const krdLogoUri=()=>"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(krdLogo("#404041"));
+document.getElementById("brandLogo").innerHTML=krdLogo("#fff");
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
+const num=(v,d=0)=>{const n=parseFloat(String(v==null?"":v).replace(",","."));return isFinite(n)?n:d;};
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=(n,d=0)=>isFinite(n)?(+n).toFixed(d):"–";
+const f2=n=>fmt(n,2),f3=n=>fmt(n,3);
+const Wt=n=>isFinite(n)?`${Math.round(n)} W`:"–";
+const tr=n=>isFinite(n)?String(+(+n).toFixed(3)):"–";
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),3200);}
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return false;}}};
+
+/* ================= REFERENCE DATA ================= */
+/* heat transfer coefficient k (W/m²K) */
+const MAT={steel:{l:"Painted sheet steel",k:5.5},ss:{l:"Stainless steel",k:3.7},al:{l:"Aluminium",k:12},al2:{l:"Aluminium, double-walled",k:4.5},plastic:{l:"Polycarbonate or GRP",k:3.5},custom:{l:"Custom k value",k:null}};
+/* solar absorptance of the outer finish */
+const FIN={white:{l:"White",a:0.3},light:{l:"Light grey, e.g. RAL 7035",a:0.5},mid:{l:"Mid grey",a:0.7},dark:{l:"Dark grey or black",a:0.9},ss:{l:"Bare stainless",a:0.4},custom:{l:"Custom absorptance",a:null}};
+const FACES=["top","front","back","left","right"];
+const FACE_L={top:"Top",front:"Front",back:"Back",left:"Left",right:"Right"};
+/* IEC/TR 60890 surface factor b: [open to air, covered] */
+const FB={top:[1.4,0.7],front:[0.9,0.5],back:[0.9,0.5],left:[0.9,0.5],right:[0.9,0.5]};
+/* filter fan factor f (m³K/Wh) by altitude */
+const fanF=alt=>alt<=100?3.1:alt<=250?3.2:alt<=500?3.3:alt<=750?3.4:3.5;
+/* typical watt-loss figures, a starting point only */
+const one=(l,d)=>({l,a:{l:"W each",d},f:a=>a,txt:()=>""});
+/* standard maximum loss per pole by rated current: [up to In (A), W] */
+const STD={
+  mcb:{name:"IEC 60898-1 max",bands:[[10,3],[16,3.5],[25,4.5],[32,6],[40,7.5],[50,9],[63,13],[100,15],[125,20]]},
+  fuse:{name:"IEC 60269 gG max",bands:[[100,7.5,"NH000"],[160,12,"NH00"],[250,23,"NH1"],[400,34,"NH2"],[630,48,"NH3"]]},
+  mccb:{name:"typical estimate",bands:[[100,10],[160,15],[250,25],[400,35],[630,50],[800,65],[1250,100],[1600,130]]}};
+/* gG fuse sizes: maximum power dissipation per link at the largest rating of each size (IEC 60269) */
+const FUSES={"10x38":{l:"10×38",max:32,w:3},"14x51":{l:"14×51",max:50,w:5},"22x58":{l:"22×58",max:125,w:9.5},
+  nh000:{l:"NH000",max:100,w:7.5},nh00:{l:"NH00",max:160,w:12},nh1:{l:"NH1",max:250,w:23},nh2:{l:"NH2",max:400,w:34},nh3:{l:"NH3",max:630,w:48}};
+const FUSE_AUTO=["10x38","14x51","22x58","nh00","nh1","nh2","nh3"];
+const stdLoss=(key,In)=>{const t=STD[key];if(!t||!(In>0))return null;const b=t.bands.find(x=>In<=x[0]+1e-9);return b?{w:b[1],txt:`${t.name}${b[2]?", "+b[2]:""}, up to ${b[0]} A`}:null;};
+const CUR=(l,al,std)=>({l,cur:true,std,a:{l:al,d:"3"}});
+const TYP={
+  w:{l:"Enter watts",a:{l:"W each",d:"0"},f:a=>a,txt:()=>""},
+  cur:CUR("From current (I²R)","Poles",null),
+  vsd:{l:"VSD, % of rated kW",a:{l:"Rated kW",d:"30"},b:{l:"Loss %",d:"3"},f:(a,b)=>a*10*b,txt:(a,b)=>`${tr(a)} kW × ${tr(b)} %`},
+  psu:{l:"Power supply, from efficiency",a:{l:"Output W",d:"240"},b:{l:"Efficiency %",d:"90"},f:(a,b)=>b>0&&b<=100?a*(100/b-1):NaN,txt:(a,b)=>`${tr(a)} W × (100 ÷ ${tr(b)} − 1)`},
+  tx:{l:"Transformer, % of kVA",a:{l:"kVA",d:"5"},b:{l:"Loss %",d:"3"},f:(a,b)=>a*10*b,txt:(a,b)=>`${tr(a)} kVA × ${tr(b)} %`},
+  cb:CUR("Circuit breaker, MCB","Poles","mcb"),
+  mccb:CUR("Circuit breaker, MCCB","Poles","mccb"),
+  fuse:CUR("Fuse, gG","Links","fuse"),
+  brake:{l:"Braking resistor, inside the enclosure",a:{l:"Braking power (kW)",d:"5"},f:a=>a*1000,txt:a=>`${tr(a)} kW while braking`,cyc:["1","9"]},
+  cont:one("Contactor, about 5 W","5"),
+  relay:one("Relay, about 1 W","1"),
+  plc:one("PLC CPU, about 10 W","10"),
+  io:one("PLC I/O card, about 3 W","3"),
+  sw:one("Network switch, about 12 W","12"),
+  heater:one("Heater, when on","50")
+};
+const loadR=it=>num(it.d)>0?num(it.c)/num(it.d):NaN;
+const usesStd=it=>{const T=TYP[it.t]||TYP.w;return !!(T.cur&&T.std&&it.src!=="enter");};
+const stdFor=it=>{const T=TYP[it.t]||TYP.w,In=num(it.d);if(!(In>0))return null;
+  if(T.std==="fuse"){const k=FUSES[it.fs]?it.fs:FUSE_AUTO.find(x=>FUSES[x].max>=In-1e-9),f=k&&FUSES[k];
+    if(!f||In>f.max+1e-9)return null;return {w:f.w,txt:`IEC 60269 gG max, ${f.l}${FUSES[it.fs]?"":" (picked by In)"}`};}
+  return stdLoss(T.std,In);};
+const perPole=it=>{const T=TYP[it.t]||TYP.w;if(usesStd(it)){const s=stdFor(it);return s?s.w:NaN;}return num(it.b,NaN);};
+const itemW=it=>{const T=TYP[it.t]||TYP.w;let v;if(T.cur){const r=loadR(it);v=num(it.a)*perPole(it)*r*r;}else v=T.f(num(it.a),num(it.b));return isFinite(v)&&v>0?v:0;};
+const itemTxt=it=>{const T=TYP[it.t]||TYP.w;if(!T.cur)return T.txt(num(it.a),num(it.b));const r=loadR(it),pp=perPole(it),st=usesStd(it)?stdFor(it):null;
+  return `${tr(num(it.a))} × ${tr(pp)} W × (${tr(num(it.c))} ÷ ${tr(num(it.d))})²${isFinite(r)?`, ${fmt(r*100,0)} % of rating`:""}${st?`. Loss per ${T.a.l==="Links"?"link":"pole"}: ${st.txt}`:""}`;};
+const overload=it=>{const T=TYP[it.t]||TYP.w;if(!T.cur)return 0;const r=loadR(it);return isFinite(r)&&r>1+1e-9?r:0;};
+const noIn=it=>{const T=TYP[it.t]||TYP.w;return !!T.cur&&!(num(it.d)>0);};
+const noStd=it=>{const T=TYP[it.t]||TYP.w;return usesStd(it)&&num(it.d)>0&&!stdFor(it);};
+const itemQ=it=>Math.max(0,num(it.qty,1));
+/* run cycle: duty only counts when each run is short enough that the enclosure can't reach full temperature */
+const ON_MAX=15;
+const dutyOf=it=>{const on=num(it.on,NaN),off=num(it.off,NaN),any=String(it.on||"").trim()!==""||String(it.off||"").trim()!=="";
+  if(!(on>0&&off>0))return {f:1,state:any?"incomplete":"cont"};
+  if(on>ON_MAX)return {f:1,state:"long",on,off};
+  return {f:on/(on+off),state:"ok",on,off};};
+const dutyTxt=it=>{const d=dutyOf(it);return d.state==="ok"?`${fmt(d.f*100,0)} % duty (${tr(d.on)} min on, ${tr(d.off)} min off)`:"";};
+const itemTot=it=>itemW(it)*itemQ(it)*dutyOf(it).f;
+const allowOf=c=>Math.max(0,num(c.allow,0));
+const compItems=c=>S.items.filter(i=>i.cid===c.id).reduce((a,i)=>a+itemTot(i),0);
+const compHeat=c=>compItems(c)*(1+allowOf(c)/100);
+
+/* ================= STATE ================= */
+function fresh(){return {type:"krd-enclosure-heat-calc",name:"New enclosure heat calculation",job:"",rev:"A",calcBy:"",
+  ambient:"40",material:"steel",kCustom:"5.5",altitude:"50",defRating:"40",acSet:"35",
+  location:"indoor",finish:"light",aCustom:"0.5",irr:"1000",ho:"20",sun:{top:true,front:true,back:false,left:false,right:false},
+  comps:[{id:1,name:"Compartment 1",x:0,y:0,W:800,H:2000,D:600,rating:"",allow:"",ovr:{back:"cov"}}],vent:[],
+  items:[{id:1,cid:1,name:"VSD 30 kW",qty:"1",t:"vsd",a:"30",b:"3",rating:"50"}],
+  sel:1,logo:"",logoName:"",krdLogo:false,assum:[]};}
+const KEY="krd-enclosure-heat-last";
+let S=fresh();
+function clean(){
+  if(!Array.isArray(S.comps)||!S.comps.length)S.comps=fresh().comps;
+  S.comps.forEach(c=>{["x","y","W","H","D"].forEach(k=>c[k]=num(c[k],0));c.id=+c.id;c.ovr=c.ovr&&typeof c.ovr==="object"?c.ovr:{};
+    c.rating=c.rating==null?"":String(c.rating);c.allow=c.allow==null?"":String(c.allow);c.name=c.name==null?"":String(c.name);});
+  if(!Array.isArray(S.vent))S.vent=[];
+  S.comps.forEach(c=>{if(c.merge&&cById(c.merge)&&+c.merge!==c.id)S.vent.push(pk(c.id,+c.merge));delete c.merge;
+    FACES.forEach(f=>{if(c.ovr[f]&&c.ovr[f]!=="cov")delete c.ovr[f];});});
+  S.vent=Array.from(new Set(S.vent.map(String)));
+  if(!Array.isArray(S.items))S.items=[];
+  S.items.forEach(i=>{i.id=+i.id;i.cid=+i.cid;if(i.t==="res"){const p=num(i.b);if(p>0&&p<100&&(i.on==null||i.on==="")&&(i.off==null||i.off==="")){i.on="1";i.off=String(+((100-p)/p).toFixed(2));}i.t="w";i.b="";}if(!TYP[i.t])i.t="w";["name","qty","a","b","rating","c","d","src","fs","on","off"].forEach(k=>i[k]=i[k]==null?"":String(i[k]));const T=TYP[i.t];if(T.cur){if(i.lm==="pct"){const dd=num(i.d);i.c=dd>0?String(+(num(i.c,100)/100*dd).toFixed(2)):"";}if(i.src!=="std"&&i.src!=="enter")i.src=T.std&&!(num(i.b)>0)?"std":"enter";}delete i.lm;});
+  S.items.forEach(i=>{if(!cById(i.cid))i.cid=S.comps[0].id;});
+  S.items.forEach(i=>{if(i.t==="brake"&&i.b!==""&&i.on===""&&i.off===""){const p=num(i.b);if(p>0&&p<100){i.on="1";i.off=String(+((100-p)/p).toFixed(2));}}
+    if(i.t==="res"){i.t="w";}if(i.t==="brake"||i.t==="w")i.b="";});
+  S.sun=Object.assign({top:true,front:true,back:false,left:false,right:false},S.sun||{});
+  if(!MAT[S.material])S.material="steel";if(!FIN[S.finish])S.finish="light";
+  if(!["indoor","shade","sun"].includes(S.location))S.location="indoor";
+  if(!Array.isArray(S.assum))S.assum=[];S.assum=S.assum.map(a=>a==null?"":String(a));
+  if(!cById(S.sel))S.sel=S.comps[0].id;}
+(function(){const raw=store.get(KEY);if(!raw)return;try{const d=JSON.parse(raw);if(d&&d.type==="krd-enclosure-heat-calc"&&Array.isArray(d.comps)&&d.comps.length){S=Object.assign(fresh(),d,{logo:"",logoName:""});}}catch(e){}})();
+const autosave=()=>store.set(KEY,JSON.stringify(Object.assign({},S,{logo:"",logoName:""})));
+
+const cById=id=>S.comps.find(c=>c.id===+id);
+const cLab=c=>c?"C"+c.id:"?";
+const pk=(a,b)=>(+a<+b?a+"-"+b:b+"-"+a);
+const isVent=(a,b)=>S.vent.includes(pk(a,b));
+const nextId=list=>list.reduce((m,x)=>Math.max(m,+x.id||0),0)+1;
+const kVal=()=>S.material==="custom"?Math.max(0.1,num(S.kCustom,5.5)):MAT[S.material].k;
+const aVal=()=>S.finish==="custom"?Math.min(1,Math.max(0,num(S.aCustom,0.5))):FIN[S.finish].a;
+
+/* ================= GEOMETRY ================= */
+/* x = distance from the left of the assembly, y = height off floor, all fronts flush, depth goes to the back (mm) */
+const EPS=0.5;
+const ov=(a1,a2,b1,b2)=>Math.max(0,Math.min(a2,b2)-Math.max(a1,b1));
+function faceInfo(c){const m=1e-6,r={top:{A:c.W*c.D*m,sh:[]},front:{A:c.W*c.H*m,sh:[]},back:{A:c.W*c.H*m,sh:[]},left:{A:c.D*c.H*m,sh:[]},right:{A:c.D*c.H*m,sh:[]}};
+  S.comps.forEach(o=>{if(o===c)return;
+    if(Math.abs(o.y-(c.y+c.H))<EPS){const a=ov(c.x,c.x+c.W,o.x,o.x+o.W)*Math.min(c.D,o.D);if(a>EPS)r.top.sh.push({id:o.id,a:a*m});}
+    const side=ov(c.y,c.y+c.H,o.y,o.y+o.H)*Math.min(c.D,o.D);
+    if(side>EPS&&Math.abs(o.x+o.W-c.x)<EPS)r.left.sh.push({id:o.id,a:side*m});
+    if(side>EPS&&Math.abs(c.x+c.W-o.x)<EPS)r.right.sh.push({id:o.id,a:side*m});});
+  return r;}
+function touching(a,b){const fa=faceInfo(a),fb=faceInfo(b);
+  return FACES.some(f=>fa[f].sh.some(s=>s.id===b.id))||FACES.some(f=>fb[f].sh.some(s=>s.id===a.id));}
+function clash(){for(let i=0;i<S.comps.length;i++)for(let j=i+1;j<S.comps.length;j++){const a=S.comps[i],b=S.comps[j];
+  if(ov(a.x,a.x+a.W,b.x,b.x+b.W)>EPS&&ov(a.y,a.y+a.H,b.y,b.y+b.H)>EPS)return [a,b];}return null;}
+function normX(){const mn=Math.min(...S.comps.map(c=>c.x));if(mn!==0)S.comps.forEach(c=>c.x-=mn);}
+function stackedOn(c){const out=[],seen=new Set([c.id]),q=[c];
+  while(q.length){const b=q.shift();S.comps.forEach(o=>{if(!seen.has(o.id)&&Math.abs(o.y-(b.y+b.H))<EPS&&ov(b.x,b.x+b.W,o.x,o.x+o.W)>EPS){seen.add(o.id);out.push(o);q.push(o);}});}
+  return out;}
+
+/* ================= CALCULATION ================= */
+function groupsOf(){const p={};S.comps.forEach(c=>p[c.id]=c.id);const fd=i=>p[i]===i?i:(p[i]=fd(p[i]));
+  S.vent=S.vent.filter(k=>{const [a,b]=k.split("-").map(Number),A=cById(a),B=cById(b);return A&&B&&touching(A,B);});
+  S.vent.forEach(k=>{const [a,b]=k.split("-").map(Number);p[fd(a)]=fd(b);});
+  const m=new Map();S.comps.forEach(c=>{const r=fd(c.id);if(!m.has(r))m.set(r,[]);m.get(r).push(c);});
+  return {list:Array.from(m.values()),bad:[]};}
+
+function compute(){
+  const k=kVal(),Ta=num(S.ambient,40),sunOn=S.location==="sun",al=aVal(),irr=Math.max(0,num(S.irr,1000)),ho=Math.max(1,num(S.ho,20)),
+    def=num(S.defRating,40),acSet=num(S.acSet,35),alt=Math.max(0,num(S.altitude,0)),ff=fanF(alt);
+  const FI={};S.comps.forEach(c=>{FI[c.id]=faceInfo(c);FACES.forEach(f=>{const F=FI[c.id][f];if(c.ovr[f]&&F.sh.reduce((a,s)=>a+s.a,0)>=F.A-1e-6)delete c.ovr[f];});});
+  const {list,bad}=groupsOf(),gid={};list.forEach((g,i)=>g.forEach(c=>gid[c.id]=i));
+  const G=list.map((cs,gi)=>{
+    let Ae=0,sunA=0;const faces=[];
+    cs.forEach(c=>FACES.forEach(f=>{const F=FI[c.id][f];let internal=0,cov=0,covBy=[];
+      F.sh.forEach(s=>{if(gid[s.id]===gi)internal+=s.a;else{cov+=s.a;covBy.push(s);}});
+      const o=c.ovr[f]||"";let exp;const avail=Math.max(0,F.A-internal);
+      if(o==="open"){exp=avail;cov=0;covBy=[];}
+      else if(o==="cov"){cov=avail;exp=0;}
+      else{cov=Math.min(cov,avail);exp=Math.max(0,avail-cov);}
+      const b=FB[f],contrib=exp*b[0]+cov*b[1];Ae+=contrib;
+      const sun=sunOn&&S.sun[f]?exp:0;sunA+=sun;
+      faces.push({c,f,A:F.A,internal,cov,covBy,exp,o,b,contrib,sun});}));
+    const its=S.items.filter(it=>cs.some(c=>c.id===it.cid));
+    const Qi=its.reduce((a,it)=>a+itemTot(it),0),Qa=cs.reduce((a,c)=>a+compItems(c)*allowOf(c)/100,0),Qc=Qi+Qa;
+    let Ti=Infinity,src=null;
+    its.forEach(it=>{const dflt=String(it.rating).trim()==="",r=dflt?def:num(it.rating,def);if(r<Ti){Ti=r;src={kind:"item",it,r,dflt};}});
+    cs.forEach(c=>{if(String(c.rating).trim()!==""&&isFinite(parseFloat(c.rating))){const r=num(c.rating);if(r<Ti){Ti=r;src={kind:"comp",c,r};}}});
+    if(!isFinite(Ti)){Ti=def;src={kind:"default",r:def};}
+    const Qs=sunOn?k*sunA*al*irr/ho:0,dT=Ti-Ta,Qw=k*Ae*dT,short=Qc+Qs-Qw,need=short>0.5;
+    const Tnat=Ae>0?Ta+(Qc+Qs)/(k*Ae):Infinity;
+    const fan=need&&dT>0?ff*short/dT:null,hx=need&&dT>0?short/dT:null;
+    const Tset=Math.min(acSet,Ti),ac=need?Qc+Qs+k*Ae*(Ta-Tset):null;
+    return {cs,its,faces,Ae,sunA,Qi,Qa,Qc,Qs,Ti,src,dT,Qw,short,need,Tnat,fan,hx,Tset,ac,label:cs.map(cLab).join(" + ")};});
+  const sum=f=>G.reduce((a,g)=>a+f(g),0),needG=G.filter(g=>g.need),imp=needG.some(g=>g.fan==null);
+  const tot={Qi:sum(g=>g.Qi),Qa:sum(g=>g.Qa),Qc:sum(g=>g.Qc),Qs:sum(g=>g.Qs),Qw:sum(g=>g.Qw),Ae:sum(g=>g.Ae),short:sum(g=>g.need?g.short:0),
+    fan:needG.length&&!imp?sum(g=>g.fan||0):null,hx:needG.length&&!imp?sum(g=>g.hx||0):null,ac:needG.length?sum(g=>g.ac||0):null};
+  return {G,tot,gid,bad,k,Ta,sunOn,al,irr,ho,def,acSet,alt,ff};}
+let R=null;
+
+/* ================= DRAWING ================= */
+function drawing(selId){
+  const cs=S.comps,pad=14,VW=320,gid=R?R.gid:{};
+  const mx=Math.max(...cs.map(c=>c.x+c.W+c.D*0.5)),my=Math.max(...cs.map(c=>c.y+c.H+c.D*0.35));
+  const sc=Math.min((VW-2*pad)/mx,320/my),VH=Math.ceil(my*sc+2*pad),base=pad+my*sc;
+  const P=pts=>pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  let g="",lines="",labels="";
+  cs.slice().sort((a,b)=>a.x-b.x||a.y-b.y).forEach(c=>{
+    const X=pad+c.x*sc,Y=base-(c.y+c.H)*sc,w=c.W*sc,h=c.H*sc,dx=c.D*sc*0.5,dy=c.D*sc*0.35,sel=c.id===selId;
+    g+=`<polygon points="${P([[X,Y],[X+dx,Y-dy],[X+w+dx,Y-dy],[X+w,Y]])}"/><polygon points="${P([[X+w,Y],[X+w+dx,Y-dy],[X+w+dx,Y+h-dy],[X+w,Y+h]])}"/>`;
+    g+=`<rect data-cid="${c.id}" x="${X.toFixed(1)}" y="${Y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}"${sel?' fill="#F8F8C9" stroke-width="2.6"':""}><title>${esc(cLab(c)+" "+c.name)}</title></rect>`;
+    if(w>26&&h>20)labels+=`<text x="${(X+w/2).toFixed(1)}" y="${(Y+h/2+(h>46&&w>60?-2:4)).toFixed(1)}" font-size="13" font-weight="700">${esc(cLab(c))}</text>`;
+    if(h>46&&w>60)labels+=`<text x="${(X+w/2).toFixed(1)}" y="${(Y+h/2+12).toFixed(1)}" font-size="9.5" fill="#66666A">${c.W}×${c.H}×${c.D}</text>`;});
+  const edge=(x1,y1,x2,y2,same)=>`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${same?"#8E8E93":"#C0392B"}" stroke-width="2" stroke-dasharray="${same?"2 3":"5 4"}"/>`;
+  cs.forEach(c=>{const fi=faceInfo(c),X=pad+c.x*sc,w=c.W*sc;
+    fi.right.sh.forEach(s=>{const o=cById(s.id),y1=Math.max(c.y,o.y),y2=Math.min(c.y+c.H,o.y+o.H);lines+=edge(X+w,base-y2*sc,X+w,base-y1*sc,gid[c.id]===gid[o.id]);});
+    fi.top.sh.forEach(s=>{const o=cById(s.id),x1=Math.max(c.x,o.x),x2=Math.min(c.x+c.W,o.x+o.W),yy=base-(c.y+c.H)*sc;lines+=edge(pad+x1*sc,yy,pad+x2*sc,yy,gid[c.id]===gid[o.id]);});});
+  const floor=`<line x1="${pad-6}" y1="${base.toFixed(1)}" x2="${(pad+mx*sc).toFixed(1)}" y2="${base.toFixed(1)}" stroke="#A8A8AC" stroke-width="1"/>`;
+  return `<svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="3D sketch of the enclosure assembly" fill="#fff" stroke="#232325" stroke-width="1.3" xmlns="http://www.w3.org/2000/svg">${floor}${g}${lines}<g fill="#232325" stroke="none" text-anchor="middle" pointer-events="none" font-family="Helvetica Neue,Helvetica,Arial,sans-serif">${labels}</g></svg>`;}
+
+/* ================= SITE INPUTS ================= */
+$("#matSel").innerHTML=Object.keys(MAT).map(k=>`<option value="${k}">${esc(MAT[k].l)}${MAT[k].k?` (k ${MAT[k].k})`:""}</option>`).join("");
+$("#finSel").innerHTML=Object.keys(FIN).map(k=>`<option value="${k}">${esc(FIN[k].l)}${FIN[k].a!=null?` (α ${FIN[k].a})`:""}</option>`).join("");
+function syncInputs(){
+  $$("[data-k]").forEach(el=>{el.value=S[el.dataset.k]==null?"":S[el.dataset.k];});
+  $$("[data-seg]").forEach(g=>g.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(String(S[g.dataset.seg])===b.dataset.v))));
+  $$("[data-sun]").forEach(b=>b.setAttribute("aria-pressed",String(!!S.sun[b.dataset.sun])));
+  $("#kF").style.display=S.material==="custom"?"flex":"none";
+  $("#aF").style.display=S.finish==="custom"?"flex":"none";
+  $("#sunBox").style.display=S.location==="sun"?"flex":"none";}
+$$("[data-k]").forEach(el=>el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{S[el.dataset.k]=el.value;if(el.tagName==="SELECT")syncInputs();update();}));
+$$("[data-seg]").forEach(g=>g.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S[g.dataset.seg]=b.dataset.v;syncInputs();update();}));
+$("#sunSeg").addEventListener("click",e=>{const b=e.target.closest("[data-sun]");if(!b)return;S.sun[b.dataset.sun]=!S.sun[b.dataset.sun];syncInputs();update();});
+
+/* ================= COMPARTMENT EDITOR ================= */
+function renderEditor(){const c=cById(S.sel);
+  $("#editor").innerHTML=`<h2>Compartment ${esc(cLab(c))}</h2>
+  <div class="grid4">
+    <label class="f span2">Name<input data-c="name" value="${esc(c.name)}"></label>
+    <label class="f">Height off floor (mm)<input data-g="y" value="${c.y}" inputmode="decimal"></label>
+    <label class="f">Temp rating (°C)<input data-c="rating" value="${esc(c.rating)}" placeholder="Optional" inputmode="decimal"></label>
+    <label class="f">Width (mm)<input data-g="W" value="${c.W}" inputmode="decimal"></label>
+    <label class="f">Height (mm)<input data-g="H" value="${c.H}" inputmode="decimal"></label>
+    <label class="f">Depth (mm)<input data-g="D" value="${c.D}" inputmode="decimal"></label>
+    <label class="f"><span>Cabling allowance (%)</span><input data-c="allow" value="${esc(c.allow)}" placeholder="0" inputmode="decimal"></label>
+  </div>
+  <p class="hint">Sizes apply when you leave the box. The bottom stays put, so height grows upward and anything sitting on top moves with it. Width grows to the right and anything further right shifts along. Temp rating is optional and only used if it's lower than the component ratings. Cabling allowance adds a % on top of this compartment's components for internal cabling and busbars, typically 10 to 20 % in drive and MCC panels.</p>
+  <div class="seg-wrap">Faces (worked out from the drawing, click to override)<div class="faces" id="faces"></div></div>
+  <p class="hint">Click a face to change it. A face against another compartment is either a wall (0.5) or no wall or vented, which shares the air so both are calculated as one. Any other face is open to air or covered, for example against a wall. A face that only partly touches cycles through both. The base isn't counted (IEC/TR 60890).</p>
+  <div class="addrow"><button class="btn sm" type="button" data-add="above">Add above</button><button class="btn sm" type="button" data-add="left">Add left</button><button class="btn sm" type="button" data-add="right">Add right</button><button class="linkbtn" type="button" id="delComp">Delete compartment</button></div>`;}
+function renderFaces(){const box=$("#faces");if(!box)return;const c=cById(S.sel),fi=faceInfo(c);
+  box.innerHTML=FACES.map(f=>{const F=fi[f],b=FB[f],touchA=F.sh.reduce((a,s)=>a+s.a,0),rest=Math.max(0,F.A-touchA),cov=c.ovr[f]==="cov";
+    const vents=F.sh.map(s=>isVent(c.id,s.id)),allV=vents.length&&vents.every(Boolean),anyV=vents.some(Boolean);
+    const tp=F.sh.map((s,i)=>`${vents[i]?"no wall to":"wall to"} ${cLab(cById(s.id))}`).join(", ");
+    const restTxt=cov?`covered, ${b[1]}`:`open, ${b[0]}`;let d;
+    if(!F.sh.length)d=cov?`Covered, ${b[1]}`:`Open, ${b[0]}`;
+    else if(rest<1e-6)d=allV?`No wall to ${F.sh.map(s=>cLab(cById(s.id))).join(", ")}, shared air`:`${tp[0].toUpperCase()+tp.slice(1)}${anyV?"":", "+b[1]}`;
+    else d=`${tp[0].toUpperCase()+tp.slice(1)}${anyV&&!allV?"":allV?"":", "+b[1]}; rest ${restTxt}`;
+    const shut=(rest<1e-6&&!allV)||(rest>=1e-6&&cov&&!anyV)||(!F.sh.length&&cov);
+    return `<button type="button" class="face${shut?" cov":""}${cov||anyV?" set":""}" data-face="${f}" title="Click to change"><b>${FACE_L[f]}</b><small>${esc(d)}</small></button>`;}).join("");}
+function faceClick(c,k){const F=faceInfo(c)[k],touchA=F.sh.reduce((a,s)=>a+s.a,0),rest=F.A-touchA>1e-6,keys=F.sh.map(s=>pk(c.id,s.id)),
+    vented=keys.length>0&&keys.every(x=>S.vent.includes(x)),cov=c.ovr[k]==="cov";
+  const setV=v=>{S.vent=S.vent.filter(x=>!keys.includes(x));if(v)S.vent.push(...keys);};
+  const setC=v=>{if(v)c.ovr[k]="cov";else delete c.ovr[k];};
+  if(!keys.length)setC(!cov);
+  else if(!rest){setV(!vented);setC(false);}
+  else{const n=((vented?2:0)+(cov?1:0)+1)%4;setV(n>=2);setC(n%2===1);}
+  update();}
+
+function setGeom(c,field,val){
+  const v=num(val,NaN);
+  if(!isFinite(v)||(field==="y"?v<0:v<50)){toast(field==="y"?"Height off floor can't be negative.":"Enter a size of at least 50 mm.");renderEditor();update();return;}
+  if(v===c[field])return;
+  const snap=JSON.stringify(S.comps);
+  if(field==="H"||field==="y"){const d=v-c[field],chain=stackedOn(c);c[field]=v;chain.forEach(o=>o.y+=d);}
+  else if(field==="W"){const d=v-c.W,edge=c.x+c.W;S.comps.forEach(o=>{if(o!==c&&o.x>=edge-EPS)o.x+=d;});c.W=v;}
+  else c.D=v;
+  normX();
+  const cl=clash()||(S.comps.some(o=>o.y<0)?[c,c]:null);
+  if(cl){S.comps=JSON.parse(snap);toast(cl[0]===cl[1]?"That would push a compartment below the floor.":`That doesn't fit: ${cLab(cl[0])} would overlap ${cLab(cl[1])}.`);}
+  renderEditor();update();}
+function addComp(dir){const c=cById(S.sel),id=nextId(S.comps);
+  const n={id,name:"Compartment "+id,x:c.x,y:c.y,W:c.W,H:c.H,D:c.D,rating:"",allow:c.allow||"",ovr:c.ovr.back?{back:c.ovr.back}:{}};
+  if(dir==="above")n.y=c.y+c.H;else if(dir==="right")n.x=c.x+c.W;else n.x=c.x-c.W;
+  S.comps.push(n);const cl=clash();
+  if(cl){S.comps.pop();const other=cl[0]===n?cl[1]:cl[0];toast(`There's already a compartment there (${cLab(other)}). Add it beside a different one, or resize first.`);return;}
+  normX();S.sel=id;renderEditor();renderItems();update();toast(`Added ${cLab(n)} ${dir==="above"?"above":dir==="right"?"to the right of":"to the left of"} ${cLab(c)}`);}
+function delComp(){const c=cById(S.sel);
+  if(S.comps.length===1){toast("An assembly needs at least one compartment.");return;}
+  const n=S.items.filter(i=>i.cid===c.id).length;
+  if(!confirm(`Delete ${cLab(c)} ${c.name}${n?` and its ${n} item${n>1?"s":""}`:""}?`))return;
+  S.items=S.items.filter(i=>i.cid!==c.id);S.comps=S.comps.filter(o=>o!==c);S.vent=S.vent.filter(k=>!k.split("-").map(Number).includes(c.id));
+  normX();S.sel=S.comps[0].id;renderEditor();renderItems();update();toast(`Deleted ${cLab(c)}`);}
+$("#editor").addEventListener("input",e=>{const el=e.target.closest("[data-c]");if(!el||el.tagName==="SELECT")return;cById(S.sel)[el.dataset.c]=el.value;update();});
+$("#editor").addEventListener("change",e=>{const g=e.target.closest("[data-g]");if(g){setGeom(cById(S.sel),g.dataset.g,g.value);return;}});
+$("#editor").addEventListener("click",e=>{const f=e.target.closest("[data-face]");
+  if(f){faceClick(cById(S.sel),f.dataset.face);return;}
+  const a=e.target.closest("[data-add]");if(a){addComp(a.dataset.add);return;}
+  if(e.target.closest("#delComp"))delComp();});
+
+/* ================= COMPARTMENT LIST ================= */
+function selectComp(id){if(!cById(id))return;S.sel=+id;renderEditor();renderItems();update();}
+function renderTabs(){$("#ctabs").innerHTML=S.comps.map(c=>{const g=R.G.find(x=>x.cs.includes(c)),w=compHeat(c);
+  return `<button type="button" class="ctab" data-sel="${c.id}" aria-pressed="${c.id===S.sel}"><span>${esc(cLab(c))} ${esc(c.name)}</span><small class="${g&&g.need?"hot":""}">${Wt(w)}</small></button>`;}).join("");}
+$("#ctabs").addEventListener("click",e=>{const b=e.target.closest("[data-sel]");if(b)selectComp(b.dataset.sel);});
+$("#draw").addEventListener("click",e=>{const r=e.target.closest("[data-cid]");if(r)selectComp(r.getAttribute("data-cid"));});
+let dragId=null;
+document.addEventListener("dragstart",e=>{const g=e.target.closest&&e.target.closest("[data-drag]");if(!g)return;dragId=+g.dataset.drag;try{e.dataTransfer.setData("text/plain",String(dragId));e.dataTransfer.effectAllowed="move";}catch(err){}});
+document.addEventListener("dragend",()=>{dragId=null;$$(".ctab.over").forEach(x=>x.classList.remove("over"));});
+$("#ctabs").addEventListener("dragover",e=>{const b=e.target.closest("[data-sel]");if(!b||dragId==null)return;e.preventDefault();$$(".ctab").forEach(x=>x.classList.toggle("over",x===b));});
+$("#ctabs").addEventListener("dragleave",e=>{if(!e.relatedTarget||!$("#ctabs").contains(e.relatedTarget))$$(".ctab.over").forEach(x=>x.classList.remove("over"));});
+$("#ctabs").addEventListener("drop",e=>{const b=e.target.closest("[data-sel]");if(!b||dragId==null)return;e.preventDefault();moveItem(dragId,+b.dataset.sel);dragId=null;});
+function moveItem(iid,cid){const it=S.items.find(i=>i.id===iid),c=cById(cid);if(!it||!c||it.cid===cid){$$(".ctab.over").forEach(x=>x.classList.remove("over"));return;}
+  it.cid=cid;renderItems();update();toast(`Moved ${it.name||"item"} to ${cLab(c)}`);}
+
+/* ================= COMPONENTS ================= */
+const lab=(l,k,v,ph)=>`<label><span>${esc(l)}</span><input data-if="${k}" value="${esc(v)}" inputmode="decimal"${ph?` placeholder="${esc(ph)}"`:""}></label>`;
+function rowHTML(it){const T=TYP[it.t]||TYP.w;
+  return `<tr data-id="${it.id}">
+    <td><span class="grip" draggable="true" data-drag="${it.id}" title="Drag onto a compartment in the list to move it">⋮⋮</span></td>
+    <td><input data-if="name" value="${esc(it.name)}" aria-label="Item name"><span class="limtag" data-lt="${it.id}"></span></td>
+    <td><input data-if="qty" value="${esc(it.qty)}" inputmode="decimal" aria-label="Quantity"></td>
+    <td><select data-if="t" aria-label="Watt loss method">${Object.keys(TYP).map(k=>`<option value="${k}"${k===it.t?" selected":""}>${k==="w"?"Enter watts":k==="cur"?"From current (I²R)":"Typical: "+esc(TYP[k].l)}</option>`).join("")}</select>
+      ${T.cur?"":`<div class="pp">${lab(T.a.l,"a",it.a)}${T.b?lab(T.b.l,"b",it.b):""}</div>`}
+      ${T.cur?`<div class="pp three">${lab("Load current (A)","c",it.c)}${lab("Rated current In (A)","d",it.d)}${lab(T.a.l,"a",it.a)}</div>
+      <div class="pp${T.std==="fuse"?" three":""}">${T.std==="fuse"?`<label><span>Fuse size</span><select data-if="fs"><option value="">Auto by In</option>${Object.keys(FUSES).map(k=>`<option value="${k}"${it.fs===k?" selected":""}>${FUSES[k].l}, up to ${FUSES[k].max} A</option>`).join("")}</select></label>`:""}${T.std?`<div class="pl"><span>Loss per ${T.a.l==="Links"?"link":"pole"}</span><div class="mini"><button type="button" data-src="std" aria-pressed="${it.src!=="enter"}">${T.std==="mccb"?"Typical":"Standard"}</button><button type="button" data-src="enter" aria-pressed="${it.src==="enter"}">Enter</button></div></div>`:""}${usesStd(it)?`<div class="pl"><span>W per ${T.a.l==="Links"?"link":"pole"} at In</span><div class="sv" data-sv="${it.id}"></div></div>`:lab(`W per ${T.a.l==="Links"?"link":"pole"} at In`,"b",it.b)}</div>`:""}
+      <div class="pp">${lab("On time (min)","on",it.on,"Continuous")}${lab("Off time (min)","off",it.off,"Continuous")}</div>
+      <div class="wh" data-wh="${it.id}"></div><div class="over" data-ov="${it.id}" hidden></div><div class="dn" data-dn="${it.id}" hidden></div><div class="sug" data-sug="${it.id}" hidden><span>MCBs only go up to 125 A. A breaker this size is an MCCB.</span><button type="button" class="btn sm" data-tomccb="${it.id}">Switch to MCCB</button></div></td>
+    <td><input data-if="rating" value="${esc(it.rating)}" placeholder="${esc(S.defRating)}" inputmode="decimal" aria-label="Max ambient °C"></td>
+    <td class="n"><b data-wt="${it.id}"></b></td>
+    <td><select data-mv="${it.id}" aria-label="Move or copy to compartment"><option value="">Move / copy…</option>${S.comps.length>1?`<optgroup label="Move to">${S.comps.filter(c=>c.id!==it.cid).map(c=>`<option value="m:${c.id}">${esc(cLab(c))}</option>`).join("")}</optgroup>`:""}<optgroup label="Copy to">${S.comps.map(c=>`<option value="c:${c.id}">${esc(cLab(c))}${c.id===it.cid?" (here)":""}</option>`).join("")}</optgroup></select></td>
+    <td><button type="button" class="xbtn" data-del="${it.id}" aria-label="Remove ${esc(it.name)}">×</button></td></tr>`;}
+function renderItems(){const c=cById(S.sel),its=S.items.filter(i=>i.cid===c.id);
+  $("#itemsSec").innerHTML=`<h2>Components in ${esc(cLab(c))}</h2>
+  <p class="lead">Enter the watt loss from the datasheet, calculate it from the current through the device, or pick a typical figure as a starting point and check it later. Leave on and off time blank for anything that runs continuously, or runs for more than 15 minutes at a time. Max ambient is the hottest air the item is rated to run in.</p>
+  <div class="table-wrap"><table class="items"><thead><tr><th style="width:30px"><span class="sr">Move</span></th><th>Item</th><th style="width:64px">Qty</th><th style="width:40%">Loss each</th><th style="width:92px">Max amb. °C</th><th class="n" style="width:80px">Total</th><th style="width:96px">Move / copy</th><th style="width:40px"><span class="sr">Remove</span></th></tr></thead>
+  <tbody>${its.map(rowHTML).join("")||`<tr><td colspan="8" class="empty">No items in this compartment yet.</td></tr>`}</tbody></table></div>
+  <div class="addrow"><button class="btn sm" type="button" id="addItem">Add item</button><span class="hint" id="itemTot"></span></div>`;}
+function updItemComputed(){const c=cById(S.sel),g=R.G.find(x=>x.cs.includes(c));
+  S.items.filter(i=>i.cid===c.id).forEach(it=>{const w=itemW(it),tx=itemTxt(it),ov=overload(it),ob=$(`[data-ov="${it.id}"]`);
+    if(ob){ob.hidden=!ov;ob.textContent=ov?`Load is ${fmt(ov*100,0)} % of rating, so the device is overloaded`:"";}
+    const wt=$(`[data-wt="${it.id}"]`),wh=$(`[data-wh="${it.id}"]`),lt=$(`[data-lt="${it.id}"]`),row=$(`tr[data-id="${it.id}"]`);if(!wt)return;
+    wt.textContent=Wt(itemTot(it));const sg=$(`[data-sug="${it.id}"]`);if(sg)sg.hidden=!(it.t==="cb"&&num(it.d)>125);
+    const sv=$(`[data-sv="${it.id}"]`);if(sv){const st=stdFor(it);sv.textContent=st?`${tr(st.w)} W (${st.txt})`:num(it.d)>0?"No standard figure, enter it":"Enter In first";}
+    const dn=$(`[data-dn="${it.id}"]`),du=dutyOf(it);if(dn){const m=du.state==="long"?`Runs for more than ${ON_MAX} min at a time, which is long enough to reach full temperature, so it's sized at 100 %`:du.state==="incomplete"?"Enter both on and off time, or leave both blank for continuous running":"";dn.hidden=!m;dn.textContent=m;}
+    const dt=dutyTxt(it);wh.textContent=(noIn(it)?"Enter the load current and rated current In to work out the loss":noStd(it)?(it.t==="cb"?"No MCB standard figure above 125 A":(TYP[it.t]||{}).std==="fuse"&&FUSES[it.fs]?`${FUSES[it.fs].l} only goes up to ${FUSES[it.fs].max} A, pick a larger size`:"No standard figure at this rating, switch to Enter"):tx?`${tx} = ${fmt(w,1)} W each`:"")+(dt?`${tx||noIn(it)?". ":""}Average ${fmt(w*dutyOf(it).f,1)} W each at ${dt}`:"");
+    const lim=g&&g.src&&g.src.kind==="item"&&g.src.it===it;lt.textContent=lim?`Sets ${g.label} limit, ${fmt(g.Ti,0)} °C`:"";row.classList.toggle("limrow",!!lim);});
+  const t=$("#itemTot");if(t&&g)t.textContent=`${cLab(c)} total ${Wt(compHeat(c))}${allowOf(c)>0?` incl. ${tr(allowOf(c))} % cabling allowance`:""} · ${g.label} limit ${fmt(g.Ti,0)} °C`;}
+$("#itemsSec").addEventListener("input",e=>{const el=e.target.closest("[data-if]");if(!el||el.tagName==="SELECT")return;
+  const it=S.items.find(i=>i.id===+el.closest("tr").dataset.id);if(!it)return;it[el.dataset.if]=el.value;update();});
+$("#itemsSec").addEventListener("change",e=>{const t=e.target.closest('[data-if="t"]');
+  if(t){const it=S.items.find(i=>i.id===+t.closest("tr").dataset.id),T=TYP[t.value];const old=itemW(it);it.t=t.value;
+    it.a=t.value==="w"?(old?String(+old.toFixed(2)):""):T.a.d;it.b=T.b?T.b.d:"";if(T.cur){it.src=T.std?"std":"enter";it.b="";}if(T.cyc&&it.on===""&&it.off===""){it.on=T.cyc[0];it.off=T.cyc[1];}renderItems();update();return;}
+  const fz=e.target.closest('[data-if="fs"]');if(fz){const it=S.items.find(i=>i.id===+fz.closest("tr").dataset.id);it.fs=fz.value;update();return;}
+  const m=e.target.closest("[data-mv]");if(m&&m.value){const [k,cid]=m.value.split(":");if(k==="c")copyItem(+m.dataset.mv,+cid);else moveItem(+m.dataset.mv,+cid);}});
+function copyItem(iid,cid){const i=S.items.findIndex(x=>x.id===iid);if(i<0)return;const it=S.items[i],n=Object.assign({},it,{id:nextId(S.items),cid:cid||it.cid});
+  S.items.splice(i+1,0,n);renderItems();update();toast(n.cid===it.cid?`Copied ${it.name||"item"}`:`Copied ${it.name||"item"} to ${cLab(cById(n.cid))}`);}
+$("#itemsSec").addEventListener("click",e=>{
+  const tm=e.target.closest("[data-tomccb]");if(tm){const it=S.items.find(i=>i.id===+tm.dataset.tomccb);it.t="mccb";it.src="std";renderItems();update();toast(`${it.name||"Item"} changed to an MCCB`);return;}
+  const sb=e.target.closest("[data-src]");if(sb){const it=S.items.find(i=>i.id===+sb.closest("tr").dataset.id),v=sb.dataset.src;if((it.src==="enter"?"enter":"std")===v)return;
+    if(v==="enter"&&!(num(it.b)>0)){const st=stdFor(it);if(st)it.b=String(st.w);}
+    it.src=v;renderItems();update();return;}
+  if(e.target.closest("#addItem")){const id=nextId(S.items);S.items.push({id,cid:S.sel,name:"New item",qty:"1",t:"w",a:"",b:"",c:"",d:"",src:"enter",on:"",off:"",rating:""});renderItems();update();
+    const inp=$(`tr[data-id="${id}"] [data-if="name"]`);if(inp){inp.focus();inp.select();}return;}
+  const d=e.target.closest("[data-del]");if(d){S.items=S.items.filter(i=>i.id!==+d.dataset.del);renderItems();update();}});
+
+/* ================= ASSUMPTIONS ================= */
+function renderAssum(){
+  $("#assumSec").innerHTML=`<h2>Assumptions</h2>
+  <p class="lead">Anything the calculation relies on that isn't an input above, e.g. duty, ventilation at the install location or datasheet sources. These print as a numbered list in the PDF.</p>
+  ${S.assum.length?S.assum.map((a,i)=>`<div class="arow"><b>${i+1}.</b><input data-as="${i}" value="${esc(a)}" aria-label="Assumption ${i+1}"><button type="button" class="xbtn" data-asdel="${i}" aria-label="Remove assumption ${i+1}">×</button></div>`).join(""):'<p class="hint">No assumptions added.</p>'}
+  <div class="addrow"><button class="btn sm" type="button" id="addAssum">Add assumption</button></div>`;}
+$("#assumSec").addEventListener("input",e=>{const el=e.target.closest("[data-as]");if(!el)return;S.assum[+el.dataset.as]=el.value;autosave();});
+$("#assumSec").addEventListener("click",e=>{
+  if(e.target.closest("#addAssum")){S.assum.push("");renderAssum();autosave();const ins=$$("#assumSec [data-as]");if(ins.length)ins[ins.length-1].focus();return;}
+  const d=e.target.closest("[data-asdel]");if(d){S.assum.splice(+d.dataset.asdel,1);renderAssum();autosave();}});
+
+/* ================= RESULTS ================= */
+const na={t:'<span class="na">–</span>'};
+function tbl(rows){const multi=R.G.length>1;
+  const head=`<tr><th scope="col"><span class="sr">Quantity</span></th>${R.G.map(g=>`<th scope="col">${esc(g.label)}</th>`).join("")}${multi?'<th scope="col">Assembly</th>':""}</tr>`;
+  const body=rows.map(r=>`<tr class="${r.cls||""}"><td>${r.l}</td>${R.G.map(g=>{const v=r.f(g);return `<td class="${v.c||""}">${v.t}</td>`;}).join("")}${multi?`<td>${r.t==null?na.t:r.t}</td>`:""}</tr>`).join("");
+  const mw=R.G.length>3?` style="min-width:${220+R.G.length*100}px"`:"";
+  return `<table class="bal"${mw}><thead>${head}</thead><tbody>${body}</tbody></table>`;}
+function limDesc(g){const s=g.src;if(!s)return "";
+  if(s.kind==="item"){const c=cById(s.it.cid);return `${esc(s.it.name||"Item")}${g.cs.length>1?` in ${cLab(c)}`:""}, max ambient ${fmt(s.r,0)} °C${s.dflt?" (default rating)":""}`;}
+  if(s.kind==="comp")return `${esc(cLab(s.c)+" "+s.c.name)} temp rating`;
+  return "No components, default component rating";}
+function renderResults(){const T=R.tot,need=R.G.filter(g=>g.need);
+  const A=$("#answer");
+  if(!need.length){const m=R.G.slice().sort((a,b)=>a.short-b.short).pop();
+    A.innerHTML=`<div><div class="k">No cooling needed</div><div class="v">Walls shed the heat</div></div><div class="gov">Least margin: <b>${esc(m.label)}</b><br>${Wt(-m.short)} spare at ${fmt(m.Ti,0)} °C</div>`;}
+  else{const w=need.slice().sort((a,b)=>b.short-a.short)[0];
+    A.innerHTML=`<div><div class="k">Cooling needed in ${need.length} of ${R.G.length} ${R.G.length>1?"compartments":"compartment"}${R.G.some(g=>g.cs.length>1)?" (shared air counted as one)":""}</div><div class="v"><b>${Wt(T.short)}</b> to remove</div></div><div class="gov">Worst: <b>${esc(w.label)}</b><br>${Wt(w.short)} over at ${fmt(w.Ti,0)} °C</div>`;}
+  $("#balNote").textContent=`Ambient ${fmt(R.Ta,1).replace(/\.0$/,"")} °C, ${{indoor:"indoors",shade:"outdoors, shaded",sun:"outdoors, in sun"}[S.location]}`;
+  const rows=T.Qa>0?[{l:"Components",f:g=>({t:Wt(g.Qi)}),t:Wt(T.Qi)},{l:"Cabling and busbar allowance",f:g=>({t:Wt(g.Qa)}),t:Wt(T.Qa)}]:[{l:"Components",f:g=>({t:Wt(g.Qc)}),t:Wt(T.Qc)}];
+  if(R.sunOn)rows.push({l:"Solar gain",f:g=>({t:Wt(g.Qs)}),t:Wt(T.Qs)});
+  rows.push({l:"Allowed inside",f:g=>({t:`${fmt(g.Ti,0)} °C`})},
+    {l:"Effective area A<sub>e</sub>",f:g=>({t:`${f2(g.Ae)} m²`}),t:`${f2(T.Ae)} m²`},
+    {l:"Walls shed at the limit",f:g=>g.Qw>=0?{t:Wt(g.Qw)}:{t:`gain ${Wt(-g.Qw)}`,c:"bad"},t:Wt(T.Qw)},
+    {l:"Inside temp with no cooling",f:g=>({t:isFinite(g.Tnat)?`${fmt(g.Tnat,1)} °C`:"–",c:g.Tnat>g.Ti+1e-9?"bad":""})},
+    {cls:"tot",l:"Shortfall",f:g=>g.need?{t:Wt(g.short)}:{t:"None",c:"ok"},t:T.short>0?Wt(T.short):"None"},
+    {l:"Status",f:g=>({t:g.need?'<span class="tag fail">Needs cooling</span>':'<span class="tag pass">OK</span>'})});
+  $("#balance").innerHTML=tbl(rows);
+  const imp={t:"Not possible",c:"bad"};
+  $("#cooling").innerHTML=tbl([
+    {l:"Filter fan airflow",f:g=>!g.need?na:g.fan==null?imp:{t:`${Math.ceil(g.fan)} m³/h`},t:T.fan!=null?`${Math.ceil(T.fan)} m³/h`:null},
+    {l:"Air/air heat exchanger",f:g=>!g.need?na:g.hx==null?imp:{t:`${fmt(g.hx,1)} W/K`},t:T.hx!=null?`${fmt(T.hx,1)} W/K`:null},
+    {l:`Air conditioner, set point ${fmt(R.acSet,0)} °C`,f:g=>!g.need?na:{t:Wt(g.ac)+(g.Tset<R.acSet?`<small>at the ${fmt(g.Tset,0)} °C limit</small>`:"")},t:T.ac!=null?Wt(T.ac):null}]);
+  const notes=[];
+  if(!need.length)notes.push(["info","No cooling device is needed. The walls can shed the heat at the allowed inside temperature."]);
+  const hot=need.filter(g=>g.dT<=0);
+  if(hot.length)notes.push(["warn",`${hot.map(g=>g.label).join(", ")}: ambient ${tr(R.Ta)} °C isn't below the allowed inside temperature, so filter fans and air/air heat exchangers can't cool ${hot.length>1?"them":"it"}. Use an air conditioner or an air/water heat exchanger.`]);
+  if(need.some(g=>g.fan!=null))notes.push(["info","Filter fans lower the IP rating of the enclosure, so check the site requirement. Size the fan on its airflow with the filter fitted, not its free-blowing figure."]);
+  if(need.length)notes.push(["info","Select air conditioners and heat exchangers on their rated capacity at this inside temperature and ambient, not the nominal rating point."]);
+  if(R.alt>1000)notes.push(["warn",`Altitude ${tr(R.alt)} m is above 1000 m. The fan factor 3.5 is used, so check with the fan manufacturer.`]);
+  R.G.filter(g=>g.Ae<=0).forEach(g=>notes.push(["warn",`${g.label} has no surface open or covered, so its walls can't shed any heat.`]));
+  if(R.sunOn&&!FACES.some(f=>S.sun[f]))notes.push(["warn","Outdoors in sun is selected but no faces are set as in sun."]);
+  if(S.items.some(i=>String(i.rating).trim()===""))notes.push(["info",`Items without a max ambient use the default component rating of ${tr(R.def)} °C.`]);
+  S.items.filter(overload).forEach(it=>notes.push(["warn",`${it.name||"Item"} in ${cLab(cById(it.cid))} is loaded to ${fmt(overload(it)*100,0)} % of its rating, so it's overloaded. Check the device selection.`]));
+  S.items.filter(noIn).forEach(it=>notes.push(["warn",`${it.name||"Item"} in ${cLab(cById(it.cid))} has no rated current In, so its loss counts as 0 W.`]));
+  S.items.filter(noStd).forEach(it=>notes.push(["warn",it.t==="cb"?`${it.name||"Item"} in ${cLab(cById(it.cid))} is set as an MCB but rated above 125 A, so its loss counts as 0 W. Change it to an MCCB.`:`${it.name||"Item"} in ${cLab(cById(it.cid))} is outside the range of the standard loss table${(TYP[it.t]||{}).std==="fuse"?" or the fuse size chosen":""}, so its loss counts as 0 W. ${(TYP[it.t]||{}).std==="fuse"?"Pick a larger fuse size or enter":"Enter"} the loss from the datasheet.`]));
+  if(R.G.some(g=>g.its.some(i=>i.t!=="w"&&!(TYP[i.t].cur&&i.src==="enter"))))notes.push(["info","Typical and standard watt-loss figures are a starting point. Standard figures are the maximum the product standard allows for the size, so real devices, especially small fuses, are usually much lower. Replace them with datasheet values before relying on the result."]);
+  $("#notes").innerHTML=notes.map(n=>`<p class="${n[0]==="warn"?"warnnote":"infonote"}">${esc(n[1])}</p>`).join("");
+  $("#limits").innerHTML=R.G.map(g=>`<div class="lim"><b>${esc(g.label)}</b><span>${limDesc(g)}</span><b>${fmt(g.Ti,0)} °C</b></div>`).join("");
+  $("#working").innerHTML=`<div class="wk">${R.G.map(workGroup).join("")}</div>`;}
+
+/* ================= WORKING ================= */
+const H=(t,st,cls)=>`<h3>${t}${st?`<small class="${cls||""}">${st}</small>`:""}</h3>`;
+const EQ=(l,v)=>`<div class="eq"><span>${l}</span><b>${v}</b></div>`;
+const UL=items=>`<ul>${items.filter(Boolean).map(x=>`<li>${x}</li>`).join("")}</ul>`;
+function workGroup(g){const multi=g.cs.length>1,L=esc(g.label),sunT=R.sunOn?" + Q<sub>sun</sub>":"";
+  let h=H(`${L}: effective surface area`,"IEC/TR 60890","mute");
+  if(multi)h+=UL([`${g.cs.map(c=>esc(cLab(c)+" "+c.name)).join(", ")} share their air (no wall or vented between them), so they're calculated as one. Faces between them aren't counted.`]);
+  h+=`<table class="ft"><tr><th>Face</th><th>Open, m² × b</th><th>Covered, m² × b</th><th>A × b</th></tr>`+g.faces.map(x=>{
+    const why=(x.covBy.length?` (wall to ${x.covBy.map(s=>cLab(cById(s.id))).join(", ")})`:"")+(x.o==="cov"?" (set covered)":"");
+    const inn=x.internal>1e-9?`<br><span class="sub">${f2(x.internal)} m² inside shared air, not counted</span>`:"";
+    return `<tr><td>${multi?esc(cLab(x.c))+" ":""}${FACE_L[x.f]}${why}${inn}</td><td>${x.exp>1e-9?`${f2(x.exp)} × ${x.b[0]}`:"–"}</td><td>${x.cov>1e-9?`${f2(x.cov)} × ${x.b[1]}`:"–"}</td><td>${f3(x.contrib)}</td></tr>`;}).join("")+
+    `<tr class="gov"><td>A<sub>e</sub></td><td></td><td></td><td>${f3(g.Ae)} m²</td></tr></table>`;
+  h+=UL(["Surface factor b: top 1.4 open, 0.7 covered. Front, back and sides 0.9 open, 0.5 covered or against another compartment.","The base isn't counted."]);
+  h+=H(`${L}: heat load`);
+  if(g.its.length)h+=`<table class="ft"><tr><th>Item</th><th>Qty</th><th>W each</th><th>Total</th></tr>`+g.its.map(it=>{const tx=itemTxt(it),ov=overload(it);
+      return `<tr><td>${esc(it.name||"Item")}${multi?` <span class="sub">(${esc(cLab(cById(it.cid)))})</span>`:""}${tx?`<br><span class="sub">${it.t==="cur"?"From current":"Typical"}: ${esc(tx)}${ov?", overloaded":""}</span>`:""}${dutyTxt(it)?`<br><span class="sub">× ${esc(dutyTxt(it))}</span>`:dutyOf(it).state==="long"?`<br><span class="sub">On for more than ${ON_MAX} min at a time, sized at 100 %</span>`:""}</td><td>${tr(itemQ(it))}</td><td>${fmt(itemW(it),1)}</td><td>${Wt(itemTot(it))}</td></tr>`;}).join("")+
+    (g.Qa>0?`<tr><td>Components subtotal</td><td></td><td></td><td>${Wt(g.Qi)}</td></tr>`+g.cs.filter(c=>allowOf(c)>0).map(c=>`<tr><td>Cabling and busbar allowance${multi?" "+esc(cLab(c)):""}: ${tr(allowOf(c))} % × ${Wt(compItems(c))}</td><td></td><td></td><td>${Wt(compItems(c)*allowOf(c)/100)}</td></tr>`).join(""):"")+
+    `<tr class="gov"><td>Q<sub>c</sub></td><td></td><td></td><td>${Wt(g.Qc)}</td></tr></table>`;
+  else h+=EQ("No components entered, Q<sub>c</sub>","0 W");
+  if(R.sunOn)h+=EQ(`Solar gain Q<sub>sun</sub> = k × A<sub>sun</sub> × α × G ÷ h<sub>o</sub> = ${tr(R.k)} × ${f2(g.sunA)} × ${tr(R.al)} × ${tr(R.irr)} ÷ ${tr(R.ho)}`,Wt(g.Qs));
+  h+=H(`${L}: heat balance`,g.need?"Needs cooling":"OK",g.need?"fail":"pass");
+  h+=EQ(`Allowed inside T<sub>i</sub>: ${limDesc(g)}`,`${fmt(g.Ti,0)} °C`);
+  h+=EQ(`Walls Q<sub>w</sub> = k × A<sub>e</sub> × (T<sub>i</sub> − T<sub>a</sub>) = ${tr(R.k)} × ${f3(g.Ae)} × (${tr(g.Ti)} − ${tr(R.Ta)})`,Wt(g.Qw));
+  const qw=g.Qw<0?`(${Math.round(g.Qw)})`:Math.round(g.Qw);
+  h+=EQ(`Shortfall = Q<sub>c</sub>${sunT} − Q<sub>w</sub> = ${Math.round(g.Qc)}${R.sunOn?" + "+Math.round(g.Qs):""} − ${qw}`,g.need?Wt(g.short):`None (${Wt(-g.short)} spare)`);
+  h+=EQ(`Inside temp with no cooling = T<sub>a</sub> + (Q<sub>c</sub>${sunT}) ÷ (k × A<sub>e</sub>) = ${tr(R.Ta)} + ${Math.round(g.Qc+g.Qs)} ÷ (${tr(R.k)} × ${f3(g.Ae)})`,isFinite(g.Tnat)?`${fmt(g.Tnat,1)} °C`:"–");
+  if(g.need){h+=H(`${L}: cooling`);
+    if(g.fan!=null){h+=EQ(`Filter fan V = f × Q ÷ (T<sub>i</sub> − T<sub>a</sub>) = ${R.ff} × ${Math.round(g.short)} ÷ ${tr(g.dT)}, f = ${R.ff} at ${tr(R.alt)} m`,`${Math.ceil(g.fan)} m³/h`);
+      h+=EQ(`Air/air heat exchanger q = Q ÷ (T<sub>i</sub> − T<sub>a</sub>) = ${Math.round(g.short)} ÷ ${tr(g.dT)}`,`${fmt(g.hx,1)} W/K`);}
+    else h+=EQ(`Filter fan and air/air heat exchanger: ambient ${tr(R.Ta)} °C isn't below the ${tr(g.Ti)} °C limit`,"Not possible");
+    h+=EQ(`Air conditioner at T<sub>set</sub> ${tr(g.Tset)} °C = Q<sub>c</sub>${sunT} + k × A<sub>e</sub> × (T<sub>a</sub> − T<sub>set</sub>) = ${Math.round(g.Qc+g.Qs)} + ${tr(R.k)} × ${f3(g.Ae)} × (${tr(R.Ta)} − ${tr(g.Tset)})`,Wt(g.ac));}
+  return h;}
+
+/* ================= UPDATE ================= */
+function update(){R=compute();
+  $("#draw").innerHTML=drawing(S.sel);renderTabs();renderFaces();renderResults();updItemComputed();autosave();}
+
+/* ================= FILES ================= */
+const safeName=n=>(String(n||"calculation").trim().replace(/[\\/:*?"<>|]+/g,"").replace(/\s+/g," ")||"calculation");
+function download(name,obj){const b=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+function readJSON(input,cb){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{let d=null;try{d=JSON.parse(rd.result);}catch(e){}cb(d,f.name);input.value="";};rd.readAsText(f);}
+function loadState(d){S=Object.assign(fresh(),d);clean();syncInputs();renderEditor();renderItems();renderAssum();update();}
+$("#btnSave").addEventListener("click",()=>{download(safeName(S.name)+".krdheat.json",{type:"krd-enclosure-heat-calc",version:1,saved:new Date().toISOString(),calc:Object.assign({},S,{logo:"",logoName:""})});toast("Calculation saved");});
+$("#btnImport").addEventListener("click",()=>$("#fileImport").click());
+$("#fileImport").addEventListener("change",e=>readJSON(e.target,(d,n)=>{if(!d||d.type!=="krd-enclosure-heat-calc"||!d.calc||!Array.isArray(d.calc.comps)){toast("That file isn't a saved enclosure heat calculation.");return;}
+  loadState(Object.assign({},d.calc,{type:"krd-enclosure-heat-calc"}));toast("Opened "+n);}));
+$("#btnNew").addEventListener("click",()=>{if(!confirm("Start a new calculation? Anything not saved to a file will be cleared."))return;loadState(fresh());toast("New calculation started");});
+
+/* ================= PDF ================= */
+const dlg=$("#pdfDlg");
+const reportLogo=()=>S.krdLogo?krdLogoUri():S.logo;
+function showLogo(){$("#pdfKrd").checked=!!S.krdLogo;$("#logoPick").style.display=S.krdLogo?"none":"flex";$("#logoPrev").innerHTML=reportLogo()?`<img src="${reportLogo()}" alt="Selected logo">`:"Logo preview";$("#logoName").textContent=S.logo?(S.logoName||"Logo selected"):"No file chosen";$("#logoRemove").hidden=!S.logo;}
+$("#btnPdf").addEventListener("click",()=>{$("#pdfName").value=safeName(S.name);$("#pdfBy").value=S.calcBy||"";showLogo();dlg.showModal();});
+$("#logoBtn").addEventListener("click",()=>$("#pdfLogo").click());
+$("#pdfKrd").addEventListener("change",e=>{S.krdLogo=e.target.checked;showLogo();});
+$("#logoRemove").addEventListener("click",()=>{S.logo="";S.logoName="";showLogo();});
+$("#pdfLogo").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{S.logo=rd.result;S.logoName=f.name;showLogo();e.target.value="";};rd.readAsDataURL(f);});
+dlg.addEventListener("close",()=>{if(dlg.returnValue!=="ok")return;S.calcBy=$("#pdfBy").value;autosave();buildReport($("#pdfWork").checked);
+  const old=document.title;document.title=safeName($("#pdfName").value);setTimeout(()=>{window.print();document.title=old;},60);});
+function buildReport(showWork){R=compute();renderResults();
+  const T=R.tot,need=R.G.filter(g=>g.need);
+  const ans=need.length?`${Wt(T.short)} to remove`:"No cooling needed";
+  const sub=need.length?`Cooling needed in ${need.length} of ${R.G.length}`:"Walls shed the heat in every compartment";
+  const loc={indoor:"Indoors",shade:"Outdoors, shaded",sun:"Outdoors, in sun"}[S.location];
+  const kv=[["Ambient air",`${tr(R.Ta)} °C`],["Location",loc],["Material",`${S.material==="custom"?"Custom":MAT[S.material].l}, k ${tr(R.k)} W/m²K`],["Altitude",`${tr(R.alt)} m`],
+    ["Default component rating",`${tr(R.def)} °C`],["A/C set point",`${tr(R.acSet)} °C`]];
+  if(R.sunOn)kv.push(["Finish",`${S.finish==="custom"?"Custom":FIN[S.finish].l}, α ${tr(R.al)}`],["Irradiance, h_o",`${tr(R.irr)} W/m², ${tr(R.ho)} W/m²K`],["Faces in sun",FACES.filter(f=>S.sun[f]).map(f=>FACE_L[f]).join(", ")||"None"]);
+  const comps=S.comps.map(c=>{const its=S.items.filter(i=>i.cid===c.id);
+    return `<div class="r-sub">${esc(cLab(c)+" "+c.name)} <span style="font-weight:400;color:#66666A">${c.W} W × ${c.H} H × ${c.D} D mm, ${c.y} mm off floor${c.rating!==""?`, rated ${esc(c.rating)} °C`:""}</span></div>`+
+      (allowOf(c)>0&&its.length?`<p style="font-size:9.5pt;margin:0 0 1mm;color:#4A4A4D">Cabling and busbar allowance ${tr(allowOf(c))} % = ${Wt(compItems(c)*allowOf(c)/100)}</p>`:"")+(its.length?`<table class="r-items"><tr><th>Item</th><th class="n">Qty</th><th class="n">W each</th><th class="n">Max amb.</th><th class="n">Total</th></tr>${its.map(it=>`<tr><td>${esc(it.name)}${dutyTxt(it)?` <span style="color:#66666A">(${esc(dutyTxt(it))})</span>`:""}</td><td class="n">${tr(itemQ(it))}</td><td class="n">${fmt(itemW(it),1)}</td><td class="n">${esc(it.rating===""?tr(R.def)+" (default)":it.rating)} °C</td><td class="n">${Wt(itemTot(it))}</td></tr>`).join("")}</table>`:`<p style="font-size:9.5pt;margin:0 0 3mm;color:#66666A">No items.</p>`);}).join("");
+  $("#report").innerHTML=`<table class="r-page"><thead><tr><td></td></tr></thead><tfoot><tr><td></td></tr></tfoot><tbody><tr><td>
+  <div class="r-block"><div class="r-logo">${reportLogo()?`<img src="${reportLogo()}" alt="">`:""}</div>
+   <div><div class="r-title"><small>Enclosure heat calculation</small><b>${esc(S.name)}</b></div>
+   <div class="r-meta"><div><small>Job no.</small>${esc(S.job||"–")}</div><div><small>Rev</small>${esc(S.rev||"–")}</div><div><small>Calculated by</small>${esc(S.calcBy||"–")}</div><div><small>Date</small>${new Date().toLocaleDateString("en-AU")}</div></div></div></div>
+  <div class="r-answer"><div><small>${esc(sub)}</small><b>${esc(ans)}</b></div><div style="text-align:right;font-size:10pt">${need.length?`Fans ${T.fan!=null?Math.ceil(T.fan)+" m³/h":"not possible"} · Heat exchanger ${T.hx!=null?fmt(T.hx,1)+" W/K":"not possible"}<br>Air conditioner ${Wt(T.ac)} at ${tr(R.acSet)} °C`:""}</div></div>
+  <div class="r-h">Assembly and site</div>
+  <div class="r-draw"><div>${drawing(null)}</div><div class="r-kv">${kv.map(k=>`<div><span>${esc(k[0])}</span><b>${esc(k[1])}</b></div>`).join("")}</div></div>
+  ${S.assum.some(a=>a.trim())?`<div class="r-h">Assumptions</div><ol class="r-ass">${S.assum.filter(a=>a.trim()).map(a=>`<li>${esc(a)}</li>`).join("")}</ol>`:""}
+  <div class="r-h">Heat balance</div>${$("#balance").innerHTML}
+  <div class="r-h">Cooling device required</div>${$("#cooling").innerHTML}<div class="notes">${$("#notes").innerHTML}</div>
+  <div class="r-h">Temperature limits</div><div class="lims">${$("#limits").innerHTML}</div>
+  <div class="r-h">Compartments and components</div>${comps}
+  ${showWork?`<div class="r-h">Calculations</div><div class="r-work">${$("#working").innerHTML}</div>`:""}
+  <div class="r-foot">Design aid only. Heat balance with IEC/TR 60890 effective surface area. AS/NZS 61439 temperature-rise limits for terminals and accessible surfaces still apply. Typical watt-loss figures are estimates; use datasheet values. Check cooling device selection against the manufacturer's rated capacity at the site conditions.</div></td></tr></tbody></table>`;}
+
+/* ================= START ================= */
+clean();syncInputs();renderEditor();renderItems();renderAssum();update();
+})();
+</script>
+</body>
+</html>
