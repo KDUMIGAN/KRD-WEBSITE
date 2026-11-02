@@ -1,0 +1,37 @@
+{
+ "type": "krd-arc-pressure-data",
+ "version": 1,
+ "title": "TEST DATA - placeholder values, NOT IEEE 1584",
+ "_format": {
+  "configs": "One entry per electrode configuration: VCB, VCBB, HCB. Leave out any you don't need.",
+  "ia": "IEEE 1584-2018 Table 1 coefficients k1 to k10 for the intermediate arcing current at 600, 2700 and 14300 V, in order [k1, k2, k3, k4, k5, k6, k7, k8, k9, k10]. Used in Eq 1: Iarc = 10^(k1 + k2 lg Ibf + k3 lg G) x (k4 Ibf^6 + k5 Ibf^5 + k6 Ibf^4 + k7 Ibf^3 + k8 Ibf^2 + k9 Ibf + k10).",
+  "varcf": "IEEE 1584-2018 Table 2 coefficients k1 to k7 for the arcing current variation factor, in order [k1 ... k7]. VarCf = k1 Voc^6 + k2 Voc^5 + k3 Voc^4 + k4 Voc^3 + k5 Voc^2 + k6 Voc + k7.",
+  "title": "Shown on the page and in the PDF. Change it to say whose data this is, e.g. 'IEEE 1584-2018 Tables 1-2 (K. Dumigan copy)'. A title containing TEST or placeholder shows a warning."
+ },
+ "configs": {
+  "VCB": {
+   "ia": {
+    "600":   [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.2],
+    "2700":  [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.25],
+    "14300": [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.3]
+   },
+   "varcf": [0, 0, 0, 0, 0, 0, 0.1]
+  },
+  "VCBB": {
+   "ia": {
+    "600":   [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.15],
+    "2700":  [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.2],
+    "14300": [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.25]
+   },
+   "varcf": [0, 0, 0, 0, 0, 0, 0.12]
+  },
+  "HCB": {
+   "ia": {
+    "600":   [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.1],
+    "2700":  [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.15],
+    "14300": [0, 1, -0.1, 0, 0, 0, 0, 0, 0, 1.2]
+   },
+   "varcf": [0, 0, 0, 0, 0, 0, 0.15]
+  }
+ }
+}

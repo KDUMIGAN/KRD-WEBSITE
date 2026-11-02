@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arc Pressure Calculator v1</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2256 53 508 508%22%3E%3Crect x=%2256.62%22 y=%2253.78%22 width=%22507.117%22 height=%22507.117%22 fill=%22#E3E421%22/%3E%3Cg fill=%22#fff%22%3E%3Cpolygon points=%22238.084 529.72 155.219 446.854 237.891 364.18 194.796 364.18 118.271 440.704 118.271 364.18 87.796 364.18 87.796 482.802 118.101 452.833 194.989 529.72 238.084 529.72%22/%3E%3Cpath d=%22M387.531,529.409l-44.055-56.629c22.844-1.497,40.962-19.557,40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464,0,13.538,5.059,13.538,11.276v25.028c0,6.217-6.074,11.274-13.538,11.274h-91.827v30.475h55.211l43.941,56.482h39.78Z%22/%3E%3Cpath d=%22M462.739,364.464h-64.437v30.929h64.437c21.444,0,38.891,17.448,38.891,38.891v25.34c0,21.444-17.448,38.891-38.891,38.891h-64.437v30.929h64.437c38.499,0,69.82-31.321,69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z%22/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{
+  --krd-grey:#414142; --krd-lime:#E3E421;
+  --ink:#232325; --ink-2:#4A4A4D; --ink-3:#66666A;
+  --rule:#D9D9DB; --rule-2:#EBEBEC; --field:#A8A8AC; --ground:#F3F3F2; --white:#FFFFFF;
+  --sel:#EEEEEC; --dark:#2F2F31;
+  --pass-bg:#E2F0E5; --pass:#1D5A2C; --fail-bg:#F6E0DD; --fail:#8A2A1E;
+  --bar:#E07B00; --res:#F4F4F5; --res-2:#E2E2E4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--ground);font-variant-numeric:tabular-nums;font-size:15px;line-height:1.4}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #1F5FAD;outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.side{background:var(--krd-grey);color:var(--white);padding:28px 0;display:flex;flex-direction:column;gap:28px}
+.brand{padding:0 24px}
+.brand span{display:block;font-size:14px;color:var(--krd-lime);font-weight:700}
+.brand b{display:block;font-size:22px;font-weight:300}
+.brand-logo svg{width:180px;height:auto;display:block;margin-bottom:12px}
+.nav-group{display:flex;flex-direction:column}
+.nav-title{padding:0 24px 8px;font-size:13px;color:#BDBDC0}
+.nav-btn{display:flex;align-items:center;min-height:48px;padding:0 24px;border:0;background:transparent;color:var(--white);text-align:left;cursor:pointer;font-size:15px}
+.nav-btn[aria-current="page"]{background:var(--krd-lime);color:#2A2A2B;font-weight:700}
+.nav-note{padding:10px 24px 0;font-size:13px;color:#BDBDC0}
+
+.main-col{display:flex;flex-direction:column;min-width:0}
+.top{background:var(--white);border-bottom:1px solid var(--rule);padding:16px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.top-fields{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2)}
+.f input,.f select{min-height:44px;padding:0 10px;border:1px solid var(--field);border-radius:0;background:var(--white);font-size:15px;color:var(--ink);width:100%}
+.f input:focus,.f select:focus{border-color:var(--ink)}
+.btn{min-height:44px;padding:0 18px;border:1px solid var(--field);border-radius:0;background:var(--white);color:var(--ink);font-weight:700;cursor:pointer}
+.btn:hover{background:var(--ground)}
+.btn.primary{border:2px solid var(--ink);padding:0 17px}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
+.linkbtn{border:0;background:none;padding:6px 4px;font-weight:700;text-decoration:underline;cursor:pointer;color:var(--ink);font-size:14px}
+
+.calc-grid{padding:28px 32px 48px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start}
+.panel{background:var(--white);border:1px solid var(--rule)}
+.sec{padding:20px 24px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:14px}
+.sec:last-child{border-bottom:0}
+.sec h2{margin:0;font-size:17px;font-weight:700}
+.sec .lead{margin:-8px 0 0;font-size:13px;color:var(--ink-3)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.span2{grid-column:span 2}
+.hint{font-size:13px;color:var(--ink-3);margin:0}
+
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--field);background:var(--white)}
+.seg button{min-height:42px;border:0;background:var(--white);cursor:pointer;font-size:14px;padding:0 8px}
+.seg button+button{border-left:1px solid var(--field)}
+.seg button[aria-pressed="true"]{background:var(--sel);font-weight:700;box-shadow:inset 0 0 0 2px var(--ink)}
+.seg-wrap{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2)}
+
+.drawwrap{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:16px;align-items:start}
+#draw svg{width:100%;height:auto;display:block;max-height:420px}
+#draw rect[data-cid]{cursor:pointer}
+.ctabs{display:flex;flex-direction:column;gap:6px}
+.ctab{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;padding:6px 12px;border:1px solid var(--rule);background:var(--white);font-size:14px;text-align:left;cursor:pointer}
+.ctab[aria-pressed="true"]{border:2px solid var(--ink);background:var(--sel);font-weight:700;padding:5px 11px}
+.ctab small{font-weight:400;color:var(--ink-3);white-space:nowrap}
+.ctab small.hot{color:var(--fail);font-weight:700}
+.ctab.over{box-shadow:inset 0 0 0 3px var(--krd-lime)}
+.addrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.faces{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--field);border:1px solid var(--field)}
+.face{padding:8px 10px;font-size:13px;background:var(--white);border:0;text-align:left;cursor:pointer;min-height:60px;display:flex;flex-direction:column;justify-content:flex-start}
+.face b{display:block;font-size:14px}
+.face small{display:block;color:var(--ink-3);line-height:1.3;margin-top:2px}
+.face.cov{background:var(--res)}
+.face.set b::after{content:" (set)";font-weight:400;color:var(--ink-3);font-size:12px}
+
+.table-wrap{overflow-x:auto}
+.items{width:100%;border-collapse:collapse;min-width:880px}
+.items th{font-size:12px;font-weight:700;color:var(--ink-3);text-align:left;padding:6px;border-bottom:1.5px solid var(--ink)}
+.items td{padding:6px;border-top:1px solid var(--rule-2);vertical-align:top;text-align:left}
+.items input,.items select{min-height:36px;padding:0 8px;border:1px solid var(--field);border-radius:0;background:var(--white);font-size:14px;width:100%}
+.items .n{text-align:right;white-space:nowrap;padding-top:14px}
+.items tr.limrow td:last-child{box-shadow:inset -4px 0 0 var(--bar)}
+.pp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:6px}
+.pp label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ink-3)}
+.pp.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pp .pl{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ink-3)}
+.mini{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--field);min-height:36px;background:var(--white)}
+.mini button{border:0;background:var(--white);font-size:13px;cursor:pointer;padding:0 4px}
+.mini button+button{border-left:1px solid var(--field)}
+.mini button[aria-pressed="true"]{background:var(--sel);font-weight:700;box-shadow:inset 0 0 0 2px var(--ink)}
+.sv{min-height:36px;display:flex;align-items:center;padding:0 8px;border:1px dashed var(--field);background:var(--res);font-size:13px;color:var(--ink-2)}
+.sug{margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--rule);background:var(--res);padding:6px 8px;font-size:12px;color:var(--ink-2)}
+.sug[hidden]{display:none}
+.dn{margin-top:6px;border:1px solid var(--rule);background:var(--res);padding:4px 8px;font-size:12px;color:var(--ink-2)}
+.dn[hidden]{display:none}
+.over{margin-top:6px;border:1px solid #E0B46A;background:#FFF6E6;color:#6E4300;padding:4px 8px;font-size:12px;font-weight:700}
+.limtag{display:block;margin-top:4px;font-size:12px;font-weight:700;color:#7A4500}
+.limtag:empty{display:none}
+.wh{font-size:12px;color:var(--ink-3);margin-top:4px}
+.grip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:36px;cursor:grab;color:var(--ink-3);font-weight:700;letter-spacing:-2px;user-select:none}
+.xbtn{min-height:36px;width:32px;border:1px solid var(--field);background:var(--white);cursor:pointer;font-size:16px}
+.empty{padding:16px 6px;color:var(--ink-2)}
+.arow{display:grid;grid-template-columns:28px minmax(0,1fr) 36px;gap:8px;align-items:center}
+.arow b{font-size:14px;color:var(--ink-3);text-align:right}
+.arow input{min-height:40px;padding:0 10px;border:1px solid var(--field);border-radius:0;background:var(--white);font-size:15px;width:100%}
+.r-ass{margin:0 0 2mm;padding-left:6mm;font-size:10pt}
+.r-ass li{padding:0.8mm 0}
+
+.results{display:flex;flex-direction:column;gap:20px;position:sticky;top:16px}
+.results .panel{background:var(--res);border-color:var(--rule)}
+.answer{background:var(--res-2);color:var(--ink);border-top:3px solid var(--ink);padding:18px 24px 20px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.answer .k{font-size:14px;color:var(--ink-2)}
+.answer .v{font-size:32px;font-weight:300;line-height:1.15;margin-top:4px}
+.answer .v b{font-weight:700}
+.answer .gov{font-size:14px;color:var(--ink-2);text-align:right}
+.answer .gov b{color:var(--ink)}
+.panel-head{padding:16px 24px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.panel-head h2{margin:0;font-size:17px}
+table.bal{table-layout:fixed;width:calc(100% - 48px);margin:0 24px 16px;border-collapse:collapse;font-size:14px}
+table.bal th{font-size:13px;font-weight:700;color:var(--ink-3);text-align:right;padding:8px 6px;border-bottom:1.5px solid var(--ink)}
+table.bal th:first-child,table.bal td:first-child{text-align:left;width:36%}
+table.bal td{text-align:right;padding:9px 6px;border-top:1px solid var(--rule);vertical-align:top}
+table.bal tr.tot td{font-weight:700;background:var(--res-2)}
+table.bal td.ok{color:var(--pass)}
+table.bal td.bad{color:var(--fail)}
+table.bal .na{color:var(--ink-3)}
+table.bal small{display:block;font-size:12px;color:var(--ink-3);font-weight:400}
+.tag{display:inline-block;padding:3px 8px;font-size:12px;font-weight:700}
+.tag.pass{background:var(--pass-bg);color:var(--pass)}
+.tag.fail{background:var(--fail-bg);color:var(--fail)}
+.lims{padding:0 24px 16px}
+.lim{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:12px;padding:9px 0;border-top:1px solid var(--rule);font-size:14px;align-items:baseline}
+.lim span{color:var(--ink-2);font-size:13px}
+.notes{display:flex;flex-direction:column;gap:8px;padding:0 24px 16px}
+.notes:empty{display:none}
+.warnnote{margin:0;border:1px solid #E0B46A;background:#FFF6E6;color:#6E4300;padding:8px 12px;font-size:13px}
+.infonote{margin:0;border:1px solid var(--rule);background:var(--white);color:var(--ink-2);padding:8px 12px;font-size:13px}
+
+.wk{padding:4px 24px 18px;font-size:14px}
+.wk h3{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 6px;padding-bottom:4px;border-bottom:1.5px solid var(--ink);font-size:15px}
+.wk h3 small{font-size:12px;font-weight:700}
+.wk h3 small.pass{color:var(--pass)} .wk h3 small.fail{color:var(--fail)} .wk h3 small.mute{color:var(--ink-3);font-weight:400}
+.wk ul{margin:0 0 6px;padding-left:18px;color:var(--ink-2);font-size:13px;line-height:1.55}
+.wk .eq{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:4px 0;border-top:1px solid var(--rule-2)}
+.wk .eq span{color:var(--ink-2)} .wk .eq b{text-align:right;white-space:nowrap}
+.wk table.ft{width:100%;border-collapse:collapse;font-size:13px;margin:2px 0 6px}
+.wk table.ft th,.wk table.ft td{padding:5px 6px;border-top:1px solid var(--rule-2);text-align:left;vertical-align:top}
+.wk table.ft th{border-top:0;color:var(--ink-3);font-weight:700}
+.wk table.ft td:last-child,.wk table.ft th:last-child{text-align:right}
+.wk table.ft tr.gov td{font-weight:700;background:var(--res-2)}
+.wk .sub{color:var(--ink-3);font-size:12px}
+.disclaimer{font-size:13px;color:var(--ink-3);margin:0}
+
+dialog{border:0;padding:0;max-width:500px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(35,35,37,.55)}
+.modal{padding:24px;display:flex;flex-direction:column;gap:14px}
+.modal h2{margin:0;font-size:20px}
+.logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo-row .fname{font-size:14px;color:var(--ink-2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logo-prev{height:96px;border:1px dashed var(--field);display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;background:var(--ground);text-align:center}
+.logo-prev img{max-height:80px;max-width:90%;display:block;margin:0 auto}
+.checkrow{display:flex;gap:10px;align-items:center;font-size:15px;min-height:44px}
+.checkrow input{width:20px;height:20px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--white);color:var(--ink);border:2px solid var(--ink);padding:12px 18px;font-size:14px;display:none;z-index:10;max-width:calc(100% - 32px)}
+.toast.show{display:block}
+
+#report{display:none}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  body{background:#fff}
+  .app,.toast,dialog{display:none !important}
+  #report{display:block;font-size:11pt;color:#232325;padding:0 14mm}
+  #report *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.r-page{width:100%;border-collapse:collapse}
+.r-page>thead>tr>td,.r-page>tfoot>tr>td{height:12mm;padding:0}
+.r-page>tbody>tr>td{padding:0}
+.r-block{display:grid;grid-template-columns:52mm 1fr;border:1.5px solid #232325}
+.r-logo{border-right:1.5px solid #232325;display:flex;align-items:center;justify-content:center;padding:4mm;min-height:28mm}
+.r-logo img{max-width:100%;max-height:22mm}
+.r-title{padding:3mm 4mm;border-bottom:1.5px solid #232325}
+.r-title small{display:block;font-size:9pt;color:#66666A}
+.r-title b{font-size:16pt}
+.r-meta{display:grid;grid-template-columns:repeat(4,1fr)}
+.r-meta div{padding:2mm 3mm;font-size:10pt}
+.r-meta div+div{border-left:1px solid #A8A8AC}
+.r-meta small{display:block;font-size:8pt;color:#66666A}
+.r-answer{border:1.5px solid #232325;padding:4mm 5mm;margin:5mm 0;display:flex;justify-content:space-between;align-items:flex-end;gap:4mm}
+.r-answer small{font-size:9pt;color:#66666A;display:block}
+.r-answer b{font-size:17pt}
+.r-h{font-weight:700;border-bottom:1.5px solid #232325;padding-bottom:1mm;margin:5mm 0 2mm;break-after:avoid}
+.r-draw{display:grid;grid-template-columns:70mm 1fr;gap:6mm;align-items:start}
+.r-draw svg{width:100%;height:auto;max-height:80mm}
+.r-kv div{display:flex;justify-content:space-between;gap:4mm;border-bottom:1px solid #EBEBEC;padding:1.2mm 0;font-size:10pt}
+.r-kv span{color:#4A4A4D}
+#report table.bal{width:100%;margin:0 0 2mm;table-layout:auto;font-size:9.5pt}
+#report table.bal td,#report table.bal th{padding:1.4mm 1.5mm}
+#report table.bal tr{break-inside:avoid}
+#report .notes,#report .lims{padding:0}
+#report .notes{margin-top:2mm}
+#report .warnnote,#report .infonote{font-size:9pt;padding:1.5mm 3mm}
+#report .lim{font-size:10pt;padding:1.4mm 0}
+.r-items{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:3mm}
+.r-items th,.r-items td{border-bottom:1px solid #EBEBEC;padding:1.2mm 1.5mm;text-align:left}
+.r-items th{color:#66666A}
+.r-items .n{text-align:right}
+.r-sub{font-size:10pt;font-weight:700;margin:3mm 0 1mm}
+.r-work .wk{padding:0;font-size:10pt}
+.r-work .wk h3{font-size:11pt;margin:4mm 0 1.5mm;break-after:avoid}
+.r-work .wk ul,.r-work .wk table.ft{font-size:9.5pt}
+.r-work .wk table.ft{break-inside:avoid}
+.r-foot{margin-top:6mm;border-top:1px solid #A8A8AC;padding-top:2mm;font-size:9pt;color:#66666A}
+
+@media (max-width:1150px){
+  .calc-grid{grid-template-columns:minmax(0,1fr)}
+  .results{position:static}
+}
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px 0;gap:8px}
+  .nav-title,.nav-note{display:none}
+  .nav-group{flex-direction:row}
+  .brand-logo svg{width:120px;margin-bottom:4px}
+  .top,.calc-grid{padding-left:16px;padding-right:16px}
+  .sec{padding:18px 16px}
+  .grid3,.grid4,.drawwrap{grid-template-columns:minmax(0,1fr)}
+  .span2{grid-column:auto}
+  .faces{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seg{grid-auto-flow:row}
+  .seg button+button{border-left:0;border-top:1px solid var(--field)}
+  table.bal{width:calc(100% - 32px);margin:0 16px 16px}
+  .panel-head,.lims,.notes,.wk{padding-left:16px;padding-right:16px}
+}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:36px;padding:0 12px;border:1px solid var(--field);background:var(--white);font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--sel);font-weight:700;box-shadow:inset 0 0 0 2px var(--ink)}
+.subhead{font-size:15px;font-weight:700;margin:6px 0 -4px;padding-top:12px;border-top:1px solid var(--rule-2)}
+.items.slim{min-width:560px}
+.checkrow.sm{min-height:36px;font-size:14px;flex-wrap:wrap}
+.checkrow select{min-height:36px;padding:0 8px;border:1px solid var(--field);border-radius:0;background:var(--white);font-size:14px}
+.datastat{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.datastat .st{font-size:14px;flex:1;min-width:200px}
+.warnrow{color:#7A4300}
+table.bal tr.limrow td:last-child{box-shadow:inset -4px 0 0 var(--bar)}
+.hide{display:none !important}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="brand-logo" id="brandLogo"></div><b>Calculators</b></div>
+    <nav class="nav-group" aria-label="Calculators">
+      <div class="nav-title">Calculators</div>
+      <button class="nav-btn" aria-current="page" type="button">Arc pressure</button>
+      <div class="nav-note">More calculators appear here as they're completed.</div>
+    </nav>
+  </aside>
+
+  <div class="main-col">
+    <header class="top">
+      <div class="top-fields">
+        <label class="f" style="width:300px">Calculation name<input data-k="name"></label>
+        <label class="f" style="width:140px">Job no.<input data-k="job"></label>
+        <label class="f" style="width:64px">Rev<input data-k="rev"></label>
+      </div>
+      <div class="actions">
+        <button class="linkbtn" type="button" id="btnNew">Start new</button>
+        <button class="btn" type="button" id="btnImport">Import</button>
+        <button class="btn" type="button" id="btnSave">Save</button>
+        <button class="btn primary" type="button" id="btnPdf">Export PDF</button>
+        <input type="file" id="fileImport" accept=".json,application/json" hidden>
+        <input type="file" id="fileHeat" accept=".json,application/json" hidden>
+        <input type="file" id="fileData" accept=".json,application/json" hidden>
+      </div>
+    </header>
+
+    <div class="calc-grid">
+      <div class="panel" aria-label="Inputs">
+        <div class="sec">
+          <h2>Standards data</h2>
+          <p class="lead">IEEE 1584-2018 coefficients (Tables 1 and 2) aren't built into this page. Load your data file once and this browser remembers it.</p>
+          <div class="datastat">
+            <div class="st" id="dataStat"></div>
+            <button class="btn sm" type="button" id="btnData">Load data file</button>
+            <button class="linkbtn" type="button" id="btnDataClr">Remove</button>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>General</h2>
+          <div class="grid4">
+            <label class="f"><span>Heat transfer factor kp</span><input data-k="kp" inputmode="decimal"></label>
+            <label class="f"><span>Adiabatic constant γ</span><input data-k="gamma" inputmode="decimal"></label>
+            <label class="f">Ambient (°C)<input data-k="Ta" inputmode="decimal"></label>
+            <label class="f">Ambient pressure (kPa)<input data-k="Pa" inputmode="decimal"></label>
+          </div>
+          <p class="hint">kp is the fraction of arc energy that heats the gas. 1.0 is conservative. Ambient pressure is absolute (101.3 kPa at sea level).</p>
+        </div>
+
+        <div class="sec">
+          <h2>Compartments</h2>
+          <p class="lead">Select a compartment to edit it. Compartments open to each other share one gas volume.</p>
+          <div class="ctabs" id="ctabs" aria-label="Compartments"></div>
+          <div class="addrow"><button class="btn sm" type="button" id="addComp">Add compartment</button><button class="btn sm" type="button" id="btnHeat">Import from enclosure heat file</button></div>
+          <p class="hint">Import brings across compartment names, W/H/D and which compartments are open to each other. Doors, fasteners, vents and supplies are entered here and kept for compartments with the same number.</p>
+        </div>
+
+        <div class="sec" id="editor"></div>
+        <div class="sec" id="assumSec"></div>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="panel">
+          <div class="answer" id="answer"></div>
+          <div class="panel-head"><h2>Compartments</h2><span class="hint">Peak ΔP vs door withstand</span></div>
+          <div class="table-wrap" id="resTable"></div>
+          <div class="notes" id="notes"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Working</h2></div>
+          <div id="working"></div>
+        </div>
+        <p class="disclaimer">Design aid only. Arcing current to IEEE 1584-2018, arc voltage from SR410, pressure by energy balance with orifice venting. Verify against the relevant standard and test data (e.g. IEC TR 61641, AS/NZS 61439).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<dialog id="pdfDlg" aria-labelledby="pdfTitle">
+  <div class="modal">
+    <h2 id="pdfTitle">Export PDF</h2>
+    <label class="f">File name<input id="pdfName"></label>
+    <label class="f">Calculated by<input id="pdfBy"></label>
+    <label class="checkrow"><input type="checkbox" id="pdfKrd">Use the KRD logo</label>
+    <div class="f" id="logoPick">Logo
+      <div class="logo-row">
+        <button type="button" class="btn" id="logoBtn">Choose logo</button>
+        <span class="fname" id="logoName">No file chosen</span>
+        <button type="button" class="linkbtn" id="logoRemove" hidden>Remove</button>
+        <input type="file" id="pdfLogo" accept="image/*" hidden>
+      </div>
+    </div>
+    <div class="logo-prev" id="logoPrev">Logo preview</div>
+    <label class="checkrow"><input type="checkbox" id="pdfWork" checked>Show full calculations</label>
+    <p class="hint">Your browser's print window opens next. Choose "Save as PDF" as the printer and set Layout: Portrait.</p>
+    <div class="modal-actions">
+      <button class="btn" type="button" id="pdfCancel">Cancel</button>
+      <button class="btn primary" type="button" id="pdfGo">Create PDF</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="report"></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+(function(){
+"use strict";
+
+/* ================= KRD LOGO (inline so the page stays one file) ================= */
+const KRD_SYM='<rect x="56.62" y="53.78" width="507.117" height="507.117" fill="#E3E421"/><g fill="#fff"><polygon points="238.084 529.72 155.219 446.854 237.891 364.18 194.796 364.18 118.271 440.704 118.271 364.18 87.796 364.18 87.796 482.802 118.101 452.833 194.989 529.72 238.084 529.72"/><path d="M387.531,529.409l-44.055-56.629c22.844-1.497,40.962-19.557,40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464,0,13.538,5.059,13.538,11.276v25.028c0,6.217-6.074,11.274-13.538,11.274h-91.827v30.475h55.211l43.941,56.482h39.78Z"/><path d="M462.739,364.464h-64.437v30.929h64.437c21.444,0,38.891,17.448,38.891,38.891v25.34c0,21.444-17.448,38.891-38.891,38.891h-64.437v30.929h64.437c38.499,0,69.82-31.321,69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z"/></g>';
+const KRD_TXT="M598.349,395.231h36.139v4.251h-31.154v18.912h29.174v4.252h-29.174v20.671h31.52v4.251h-36.505v-52.338ZM640.867,409.745h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM712.266,444.491c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.069,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM707.647,428.217c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027ZM721.138,395.231h4.618v7.403h-4.618v-7.403ZM721.138,409.745h4.618v37.824h-4.618v-37.824ZM734.553,409.745h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM776.704,429.903c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.963,13.561-16.493,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM801.187,426.018c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM814.75,429.903c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM839.233,426.018c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM850.085,409.745h4.251v8.87h.146c2.346-6.084,7.477-9.676,14.294-9.383v4.618c-8.356-.439-14.074,5.718-14.074,13.562v20.158h-4.618v-37.824ZM873.249,395.231h4.618v7.403h-4.618v-7.403ZM873.249,409.745h4.618v37.824h-4.618v-37.824ZM886.664,409.745h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM958.063,444.491c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM953.445,428.217c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027ZM598.203,470.63h7.33l18.106,45.888,18.033-45.888h7.33v52.338h-4.984v-45.228h-.146l-17.886,45.228h-4.691l-17.959-45.228h-.147v45.228h-4.984v-52.338ZM658.095,496.726c.439-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM682.725,502.297h-.146c-.587,1.1-2.639,1.466-3.885,1.686-7.843,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011ZM696.507,485.145h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM735.506,496.726c.44-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM760.136,502.297h-.147c-.586,1.1-2.639,1.466-3.885,1.686-7.844,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011ZM805.953,519.89c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM801.334,503.617c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027ZM817.464,505.303c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM841.947,501.418c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM852.798,485.145h4.252v6.377h.22c2.419-4.544,6.377-7.477,12.388-7.477,4.985,0,9.456,2.419,10.849,7.403,2.272-4.984,7.037-7.403,12.021-7.403,8.283,0,12.535,4.325,12.535,13.268v25.656h-4.618v-25.436c0-6.231-2.346-9.603-8.943-9.603-7.99,0-10.262,6.598-10.262,13.635v21.404h-4.618v-25.656c.073-5.131-2.052-9.383-7.917-9.383-7.99,0-11.216,6.011-11.289,13.928v21.111h-4.618v-37.824ZM916.575,505.303c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM941.059,501.418c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483ZM951.836,485.145h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824ZM998.605,485.145h7.697v3.885h-7.697v25.51c0,3.005.44,4.765,3.738,4.984,1.32,0,2.639-.073,3.958-.22v3.958c-1.393,0-2.712.147-4.105.147-6.157,0-8.283-2.053-8.21-8.503v-25.876h-6.597v-3.885h6.597v-11.362h4.618v11.362Z";
+const krdLogo=txt=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 47 980 520" role="img" aria-label="KRD Engineering + Management">${KRD_SYM}<path fill="${txt}" d="${KRD_TXT}"/><path fill="#E3E421" d="M1023.38,425.139v7.843h-14.587v14.587h-7.843v-14.587h-14.587v-7.843h14.587v-14.587h7.843v14.587h14.587Z"/></svg>`;
+const krdLogoUri=()=>"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(krdLogo("#404041"));
+document.getElementById("brandLogo").innerHTML=krdLogo("#fff");
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
+const num=(v,d=0)=>{const n=parseFloat(String(v==null?"":v).replace(",","."));return isFinite(n)?n:d;};
+const has=v=>String(v==null?"":v).trim()!==""&&isFinite(parseFloat(String(v).replace(",",".")));
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=(n,d=0)=>isFinite(n)?(+n).toFixed(d):"–";
+const f1=n=>fmt(n,1),f2=n=>fmt(n,2),f3=n=>fmt(n,3);
+const tr=n=>isFinite(n)?String(+(+n).toFixed(4)):"–";
+const sg=(n,s=4)=>isFinite(n)?String(+(+n).toPrecision(s)):"–";
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),3200);}
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);return true;}catch(e){return false;}},del(k){try{localStorage.removeItem(k);}catch(e){}}};
+
+/* ================= REFERENCE DATA ================= */
+const CALC_TYPE="krd-arc-pressure-calc",DATA_TYPE="krd-arc-pressure-data",HEAT_TYPE="krd-enclosure-heat-calc";
+const KEY="krd-arc-pressure-last",KEY_DATA="krd-arc-pressure-data";
+const CFGS=["VCB","VCBB","HCB"];
+const CFG_L={VCB:"VCB",VCBB:"VCBB",HCB:"HCB"};
+const SRC={tx:"Transformer",gen:"Generator",ibf:"Enter Ibf"};
+const FT={hinge:"Hinge",latch:"Latch",bolt:"Bolt",other:"Other"};
+/* IEEE 1584-2018 model range (check against your copy) */
+const RANGE={voc:[0.208,15],ibfLV:[0.5,106],ibfHV:[0.2,65],gLV:[6.35,76.2],gHV:[19.05,254]};
+const RGAS=287.05;  /* J/kg·K, dry air */
+const DT=5e-5;      /* time step 0.05 ms */
+const TMAX=5000;    /* longest arc duration simulated (ms) */
+
+/* ================= DATA FILE ================= */
+let D=null;
+function validateData(o){
+  if(!o||o.type!==DATA_TYPE)return [`Not a KRD arc pressure data file (type must be "${DATA_TYPE}").`];
+  const e=[];if(!o.configs||typeof o.configs!=="object")return ["Data file has no configs."];
+  const ok=Object.keys(o.configs).filter(k=>CFGS.includes(k));
+  if(!ok.length)e.push("Data file has none of VCB, VCBB or HCB.");
+  ok.forEach(k=>{const c=o.configs[k];
+    ["600","2700","14300"].forEach(v=>{const a=c&&c.ia&&c.ia[v];if(!Array.isArray(a)||a.length!==10||a.some(x=>typeof x!=="number"||!isFinite(x)))e.push(`${k}: ia.${v} must be 10 numbers (k1 to k10).`);});
+    const vf=c&&c.varcf;if(!Array.isArray(vf)||vf.length!==7||vf.some(x=>typeof x!=="number"||!isFinite(x)))e.push(`${k}: varcf must be 7 numbers (k1 to k7).`);});
+  return e;}
+(function(){const raw=store.get(KEY_DATA);if(!raw)return;try{const o=JSON.parse(raw);if(!validateData(o).length)D=o;}catch(e){}})();
+const cfgOK=k=>!!(D&&D.configs&&D.configs[k]&&!validateData({type:DATA_TYPE,configs:{[k]:D.configs[k]}}).length);
+
+/* ================= STATE ================= */
+const newSup=()=>({src:"tx",kva:"",kv:"",z:"",ibf:"",fac:"1",t1:"",t2:""});
+const newComp=(id,name)=>({id,name:name||("Compartment "+id),W:"800",H:"800",D:"400",same:"",sup:newSup(),cfg:"VCB",gap:"",dW:"",dH:"",fast:[],vents:[]});
+function fresh(){return {type:CALC_TYPE,name:"New arc pressure calculation",job:"",rev:"A",calcBy:"",
+  kp:"1",gamma:"1.4",Ta:"40",Pa:"101.3",comps:[newComp(1)],open:[],sel:1,logo:"",logoName:"",krdLogo:false,assum:[]};}
+let S=fresh(),R=null;
+const str=v=>v==null?"":String(v);
+function clean(){
+  ["name","job","rev","calcBy","kp","gamma","Ta","Pa"].forEach(k=>S[k]=str(S[k]));
+  if(!Array.isArray(S.comps)||!S.comps.length)S.comps=fresh().comps;
+  S.comps.forEach(c=>{c.id=+c.id;["name","W","H","D","same","cfg","gap","dW","dH"].forEach(k=>c[k]=str(c[k]));
+    if(!CFGS.includes(c.cfg))c.cfg="VCB";
+    c.sup=Object.assign(newSup(),c.sup&&typeof c.sup==="object"?c.sup:{});Object.keys(c.sup).forEach(k=>c.sup[k]=str(c.sup[k]));if(!SRC[c.sup.src])c.sup.src="tx";
+    if(!Array.isArray(c.fast))c.fast=[];c.fast.forEach((f,i)=>{f.id=+f.id||i+1;if(!FT[f.t])f.t="other";["qty","desc","kn"].forEach(k=>f[k]=str(f[k]));});
+    if(!Array.isArray(c.vents))c.vents=[];c.vents.forEach((v,i)=>{v.id=+v.id||i+1;["desc","area","burst","cd"].forEach(k=>v[k]=str(v[k]));});});
+  const ids=S.comps.map(c=>c.id);
+  S.comps.forEach(c=>{if(c.same!==""&&(!ids.includes(+c.same)||+c.same===c.id))c.same="";});
+  if(!Array.isArray(S.open))S.open=[];
+  S.open=Array.from(new Set(S.open.map(String))).filter(p=>{const [a,b]=p.split("-").map(Number);return a!==b&&ids.includes(a)&&ids.includes(b);});
+  if(!Array.isArray(S.assum))S.assum=[];S.assum=S.assum.map(str);
+  S.krdLogo=!!S.krdLogo;
+  if(!ids.includes(+S.sel))S.sel=S.comps[0].id;S.sel=+S.sel;}
+(function(){const raw=store.get(KEY);if(!raw)return;try{const d=JSON.parse(raw);if(d&&d.type===CALC_TYPE&&Array.isArray(d.comps)&&d.comps.length)S=Object.assign(fresh(),d,{logo:"",logoName:""});}catch(e){}})();
+const autosave=()=>store.set(KEY,JSON.stringify(Object.assign({},S,{logo:"",logoName:""})));
+
+const cById=id=>S.comps.find(c=>c.id===+id);
+const cLab=c=>c?"C"+c.id:"?";
+const cFull=c=>c?`${cLab(c)} ${c.name}`:"?";
+const pk=(a,b)=>(+a<+b?a+"-"+b:b+"-"+a);
+const isOpen=(a,b)=>S.open.includes(pk(a,b));
+const nextId=list=>list.reduce((m,x)=>Math.max(m,+x.id||0),0)+1;
+const volOf=c=>Math.max(0,num(c.W))*Math.max(0,num(c.H))*Math.max(0,num(c.D))/1e9;
+
+/* supply: follow "Same as" links, stop on loops */
+function supOf(c){let cur=c;const seen=[c.id];
+  while(cur.same!==""){const n=cById(cur.same);if(!n||seen.includes(n.id))return {c:cur,loop:true};seen.push(n.id);cur=n;}
+  return {c:cur,loop:false};}
+
+/* ================= CALCULATION ================= */
+function ibfOf(sp){const fac=has(sp.fac)?num(sp.fac):1,kv=num(sp.kv);
+  if(sp.src==="ibf"){const b=num(sp.ibf,NaN);return {ibf:b*fac,base:b,fac,kv};}
+  const kva=num(sp.kva,NaN),z=num(sp.z,NaN);
+  const base=kva>0&&kv>0&&z>0?kva/(Math.sqrt(3)*kv)/(z/100)/1000:NaN;
+  return {ibf:base*fac,base,fac,kv,kva,z};}
+const poly=(k,x,n)=>{let s=0;for(let i=0;i<n;i++)s+=k[i]*Math.pow(x,n-1-i);return s;};
+/* IEEE 1584-2018 Eq 1: intermediate arcing current at 600, 2700 or 14 300 V (kA) */
+const iaV=(k,Ibf,G)=>Math.pow(10,k[0]+k[1]*Math.log10(Ibf)+k[2]*Math.log10(G))*(k[3]*Ibf**6+k[4]*Ibf**5+k[5]*Ibf**4+k[6]*Ibf**3+k[7]*Ibf**2+k[8]*Ibf+k[9]);
+function arcing(cfg,Voc,Ibf,G){const C=D.configs[cfg],o={};
+  o.i600=iaV(C.ia["600"],Ibf,G);o.i2700=iaV(C.ia["2700"],Ibf,G);o.i14300=iaV(C.ia["14300"],Ibf,G);
+  if(Voc<=0.6){o.mode="lv";
+    const inner=1/(o.i600*o.i600)-(0.36-Voc*Voc)/(0.36*Ibf*Ibf);
+    o.ia=inner>0?1/Math.sqrt((0.6/Voc)**2*inner):NaN;}
+  else{o.i1=(o.i2700-o.i600)/2.1*(Voc-2.7)+o.i2700;
+    o.i2=(o.i14300-o.i2700)/11.6*(Voc-14.3)+o.i14300;
+    o.i3=o.i1*(2.7-Voc)/2.1+o.i2*(Voc-0.6)/2.1;
+    if(Voc<=2.7){o.mode="mv1";o.ia=o.i3;}else{o.mode="mv2";o.ia=o.i2;}}
+  o.varcf=poly(C.varcf,Voc,7);
+  o.iamin=o.ia*(1-0.5*o.varcf);
+  return o;}
+/* arc voltage, SR410: Ia in A, gap in mm, line-line voltage in V */
+const arcV=(IaA,G,VllV)=>1.757*0.821*Math.pow(IaA,0.1457)*Math.pow(G,0.2476)*Math.pow(VllV,0.4166);
+
+/* pressure rise: closed volume, or explicit time step with orifice venting */
+function pressure(Pw,tMs,g,G){const kp=G.kp,ga=G.ga,pa=G.pa,t=tMs/1000,V=g.V;
+  const closed=(ga-1)*kp*Pw*t/V;
+  const vents=g.vents;
+  if(!vents.length)return {peak:closed,tPeak:tMs,closed,vented:false,opened:[]};
+  const T0=G.T0,cr=Math.pow(2/(ga+1),ga/(ga-1)),chk=Math.pow(2/(ga+1),(ga+1)/(ga-1));
+  let p=pa,m=p/(RGAS*T0)*V,U=p*V/(ga-1),peak=0,tPeak=0;
+  const open=vents.map(v=>v.burst<=0?0:null);
+  const n=Math.max(1,Math.round(t/DT)),dt=t/n,qin=kp*Pw*dt;
+  for(let i=1;i<=n;i++){U+=qin;p=(ga-1)*U/V;
+    const tt=i*dt;
+    vents.forEach((v,j)=>{if(open[j]==null&&p-pa>=v.burst)open[j]=tt*1000;});
+    let mdot=0;const rho=m/V;
+    if(p>pa)vents.forEach((v,j)=>{if(open[j]==null)return;const r=pa/p;
+      mdot+=r<=cr?v.cd*v.a*Math.sqrt(ga*rho*p*chk):v.cd*v.a*Math.sqrt(2*rho*p*ga/(ga-1)*(Math.pow(r,2/ga)-Math.pow(r,(ga+1)/ga)));});
+    if(mdot>0){const dm=Math.min(mdot*dt,0.5*m),h=ga/(ga-1)*p/rho;U-=h*dm;m-=dm;p=(ga-1)*U/V;}
+    if(p-pa>peak){peak=p-pa;tPeak=tt*1000;}}
+  return {peak,tPeak,closed,vented:true,opened:vents.map((v,j)=>open[j])};}
+
+function groups(){const par={};S.comps.forEach(c=>par[c.id]=c.id);
+  const f=x=>par[x]===x?x:(par[x]=f(par[x]));
+  S.open.forEach(p=>{const [a,b]=p.split("-").map(Number);if(par[a]!=null&&par[b]!=null)par[f(a)]=f(b);});
+  const map={};S.comps.forEach(c=>{const r=f(c.id);(map[r]=map[r]||[]).push(c);});
+  return Object.values(map);}
+
+function compute(){
+  const G={kp:num(S.kp,1),ga:num(S.gamma,1.4),pa:num(S.Pa,101.3)*1000,T0:num(S.Ta,40)+273.15};
+  const out={G,rows:[],groups:[],notes:[]};
+  const W=(t)=>out.notes.push(["warn",t]),I=(t)=>out.notes.push(["info",t]);
+  if(!(G.kp>0&&G.kp<=1))W(`Heat transfer factor kp ${tr(G.kp)} is outside 0 to 1.`);
+  if(!(G.ga>1))W(`Adiabatic constant γ must be above 1.`);
+  if(!(G.pa>0))W("Ambient pressure must be above 0.");
+  if(!D)W("No IEEE 1584-2018 data file loaded, so arcing current and pressure can't be calculated. Load it under Standards data.");
+  /* per compartment: supply, arcing current, arc power */
+  const A={};
+  S.comps.forEach(c=>{const L=cFull(c),a={c,flags:[]};A[c.id]=a;
+    const so=supOf(c);a.supC=so.c;if(so.loop)W(`${L}: "Same as" goes round in a loop, so it uses its own supply fields. Untick "Same as" on one of them.`);
+    const sp=(so.loop?c:so.c).sup;a.sp=sp;a.fault=ibfOf(sp);
+    a.Voc=num(sp.kv,NaN);a.Ibf=a.fault.ibf;a.Gap=num(c.gap,NaN);a.t1=num(sp.t1,NaN);a.t2=num(sp.t2,NaN);
+    if(!(a.Voc>0))a.flags.push("no supply voltage");
+    if(!(a.Ibf>0))a.flags.push(sp.src==="ibf"?"no Ibf":"supply kVA, kV or Z missing");
+    if(!(a.Gap>0))a.flags.push("no conductor gap");
+    if(!(a.t1>0))a.flags.push("no arc duration at Ia");
+    if(!(a.t2>0))a.flags.push("no arc duration at Ia,min");
+    if(a.t1>TMAX||a.t2>TMAX)a.flags.push(`arc duration over ${TMAX} ms`);
+    a.ok=D&&cfgOK(c.cfg)&&a.Voc>0&&a.Ibf>0&&a.Gap>0&&a.t1>0&&a.t2>0&&a.t1<=TMAX&&a.t2<=TMAX;
+    if(D&&!cfgOK(c.cfg))a.flags.push(`${c.cfg} isn't in the data file`);
+    if(a.flags.length)W(`${L}: ${a.flags.join(", ")}.${a.ok?"":" Not calculated."}`);
+    if(a.ok){const lv=a.Voc<=0.6;
+      if(a.Voc<RANGE.voc[0]||a.Voc>RANGE.voc[1])W(`${L}: Voc ${tr(a.Voc)} kV is outside the IEEE 1584-2018 range of ${RANGE.voc[0]} to ${RANGE.voc[1]} kV.`);
+      const ir=lv?RANGE.ibfLV:RANGE.ibfHV,gr=lv?RANGE.gLV:RANGE.gHV;
+      if(a.Ibf<ir[0]||a.Ibf>ir[1])W(`${L}: Ibf ${f2(a.Ibf)} kA is outside the IEEE 1584-2018 range of ${ir[0]} to ${ir[1]} kA at this voltage.`);
+      if(a.Gap<gr[0]||a.Gap>gr[1])W(`${L}: gap ${tr(a.Gap)} mm is outside the IEEE 1584-2018 range of ${gr[0]} to ${gr[1]} mm at this voltage.`);
+      a.arc=arcing(c.cfg,a.Voc,a.Ibf,a.Gap);
+      if(!(a.arc.ia>0)||!(a.arc.iamin>0)){a.ok=false;W(`${L}: arcing current didn't calculate (check the data file and inputs).`);}
+      else{if(a.arc.ia>a.Ibf+1e-9)W(`${L}: arcing current ${f2(a.arc.ia)} kA is above Ibf ${f2(a.Ibf)} kA, which isn't physically possible. Check the inputs and data file.`);
+        a.va1=arcV(a.arc.ia*1000,a.Gap,a.Voc*1000);a.va2=arcV(a.arc.iamin*1000,a.Gap,a.Voc*1000);
+        a.p1=a.arc.ia*1000*a.va1;a.p2=a.arc.iamin*1000*a.va2;}}});
+  /* per gas volume: run each compartment's arc, both scenarios */
+  groups().forEach((cs,gi)=>{const g={cs,V:cs.reduce((s,c)=>s+volOf(c),0),vents:[],bad:[],runs:[]};
+    cs.forEach(c=>c.vents.forEach(v=>{const a=num(v.area,NaN),b=num(v.burst,NaN),cd=num(v.cd,NaN);
+      if(a>0&&b>=0&&cd>0&&cd<=1)g.vents.push({c,v,a,burst:b*1000,cd});else g.bad.push({c,v});}));
+    g.label=cs.length>1?cs.map(cLab).join(" + "):cLab(cs[0]);
+    if(!(g.V>0))W(`${g.label}: volume is 0, check W, H and D.`);
+    g.bad.forEach(x=>W(`${cFull(x.c)}: vent "${x.v.desc||"vent"}" needs an area above 0, a burst pressure of 0 or more and Cd between 0 and 1. It's ignored.`));
+    if(g.V>0)cs.forEach(c=>{const a=A[c.id];if(!a.ok)return;
+      const r1=pressure(a.p1,a.t1,g,G),r2=pressure(a.p2,a.t2,g,G);
+      const gov=r2.peak>r1.peak?2:1;g.runs.push({c,a,r1,r2,gov,peak:Math.max(r1.peak,r2.peak)});});
+    g.run=g.runs.slice().sort((x,y)=>y.peak-x.peak)[0]||null;
+    g.peak=g.run?g.run.peak:NaN;
+    out.groups.push(g);
+    cs.forEach(c=>{const a=A[c.id];
+      const F=c.fast.reduce((s,f)=>s+Math.max(0,num(f.qty,0))*Math.max(0,num(f.kn,0))*1000,0);
+      const Ad=Math.max(0,num(c.dW))*Math.max(0,num(c.dH))/1e6;
+      const miss=c.fast.filter(f=>!(num(f.kn,0)>0)||!(num(f.qty,0)>0));
+      if(miss.length)W(`${cFull(c)}: ${miss.length} fastener row${miss.length>1?"s have":" has"} no quantity or failure force, so ${miss.length>1?"they count":"it counts"} as 0 kN.`);
+      const Pw=Ad>0&&F>0?F/Ad:NaN;
+      if(!(Ad>0))I(`${cFull(c)}: no door size entered, so its door isn't checked.`);
+      else if(!(F>0))W(`${cFull(c)}: door has no fastener strength entered, so its withstand is 0.`);
+      const row={c,a,g,F,Ad,Pw,peak:g.peak};
+      row.checked=Ad>0&&isFinite(g.peak);
+      row.pass=row.checked&&F>0&&g.peak<=Pw;
+      row.margin=row.checked&&F>0?(Pw-g.peak)/Pw:(row.checked?-Infinity:NaN);
+      out.rows.push(row);});});
+  const chk=out.rows.filter(r=>r.checked);
+  out.lim=chk.slice().sort((x,y)=>x.margin-y.margin)[0]||null;
+  out.fails=chk.filter(r=>!r.pass);
+  if(out.rows.some(r=>r.c.fast.length))I("Fastener failure forces must come from datasheet or test values. Use the same basis (yield or proof) for every fastener.");
+  if(out.groups.some(g=>g.vents.length))I("Vented results use orifice flow through each vent once it reaches its burst pressure. Vent inertia and opening time aren't modelled, so check the vent maker's data.");
+  if(D&&D.title&&/TEST|placeholder/i.test(D.title))W(`The loaded data file is "${D.title}". Results are not to IEEE 1584 until your own coefficients are loaded.`);
+  return out;}
+
+/* ================= INPUTS ================= */
+function syncInputs(){$$("[data-k]").forEach(el=>{el.value=S[el.dataset.k]==null?"":S[el.dataset.k];});}
+$$("[data-k]").forEach(el=>el.addEventListener("input",()=>{S[el.dataset.k]=el.value;update();}));
+
+function renderData(){
+  $("#dataStat").innerHTML=D?`<b>${esc(D.title||"Data file")}</b> &middot; ${Object.keys(D.configs).filter(k=>CFGS.includes(k)).join(", ")}`:'<span class="warnrow">No data file loaded. Results need IEEE 1584-2018 coefficients.</span>';
+  $("#btnDataClr").hidden=!D;}
+$("#btnData").addEventListener("click",()=>$("#fileData").click());
+$("#fileData").addEventListener("change",e=>readJSON(e.target,(o,n)=>{
+  if(!o){alert("That file isn't valid JSON.");return;}
+  if(o.type===CALC_TYPE){alert("That's a saved calculation. Use Import at the top.");return;}
+  const er=validateData(o);if(er.length){alert("Data file not loaded:\n\n"+er.slice(0,12).join("\n"));return;}
+  D=o;store.set(KEY_DATA,JSON.stringify(o));renderData();renderEditor();update();toast("Data file loaded: "+n);}));
+$("#btnDataClr").addEventListener("click",()=>{if(!confirm("Remove the data file from this browser?"))return;D=null;store.del(KEY_DATA);renderData();renderEditor();update();});
+
+/* ================= COMPARTMENT LIST ================= */
+function renderTabs(){$("#ctabs").innerHTML=S.comps.map(c=>{const r=R&&R.rows.find(x=>x.c.id===c.id);
+  const t=r&&isFinite(r.peak)?`${f1(r.peak/1000)} kPa`:"–",hot=r&&r.checked&&!r.pass;
+  return `<button type="button" class="ctab" data-sel="${c.id}" aria-pressed="${c.id===S.sel}"><span>${esc(cFull(c))}</span><small class="${hot?"hot":""}">${t}</small></button>`;}).join("");}
+$("#ctabs").addEventListener("click",e=>{const b=e.target.closest("[data-sel]");if(!b)return;S.sel=+b.dataset.sel;renderEditor();update();});
+$("#addComp").addEventListener("click",()=>{const id=nextId(S.comps);S.comps.push(newComp(id));S.sel=id;renderEditor();update();});
+
+/* ================= COMPARTMENT EDITOR ================= */
+const inp=(attr,val,extra="")=>`<input ${attr} value="${esc(val)}" inputmode="decimal"${extra}>`;
+function renderEditor(){const c=cById(S.sel);if(!c)return;const sp=c.sup,others=S.comps.filter(x=>x.id!==c.id);
+  const sameOn=c.same!=="";
+  const cfgSeg=CFGS.map(k=>`<button type="button" data-cfg="${k}" aria-pressed="${c.cfg===k}">${CFG_L[k]}${D&&!cfgOK(k)?" (no data)":""}</button>`).join("");
+  $("#editor").innerHTML=`<h2>${esc(cFull(c))}</h2>
+  <div class="grid4"><label class="f span2">Name<input data-c="name" value="${esc(c.name)}"></label></div>
+  <div class="grid4">
+    <label class="f">Width W (mm)${inp('data-c="W"',c.W)}</label>
+    <label class="f">Height H (mm)${inp('data-c="H"',c.H)}</label>
+    <label class="f">Depth D (mm)${inp('data-c="D"',c.D)}</label>
+    <label class="f">Volume (m³)<div class="sv" data-out="vol"></div></label>
+  </div>
+  ${others.length?`<div class="seg-wrap">Open to (shared gas volume)<div class="chips">${others.map(o=>`<button type="button" class="chip" data-open="${o.id}" aria-pressed="${isOpen(c.id,o.id)}">${esc(cLab(o))}</button>`).join("")}</div></div><p class="hint" data-out="grp"></p>`:""}
+
+  <div class="subhead">Supply and protection</div>
+  ${others.length?`<label class="checkrow sm"><input type="checkbox" id="sameChk"${sameOn?" checked":""}>Same as <select id="sameSel"${sameOn?"":" disabled"}>${others.map(o=>`<option value="${o.id}"${+c.same===o.id?" selected":""}>${esc(cFull(o))}</option>`).join("")}</select></label>`:""}
+  ${sameOn?`<div class="dn" data-out="supsum"></div>`:`
+  <div class="seg-wrap">Source<div class="seg">${Object.keys(SRC).map(k=>`<button type="button" data-src="${k}" aria-pressed="${sp.src===k}">${SRC[k]}</button>`).join("")}</div></div>
+  <div class="grid4">
+    ${sp.src!=="ibf"?`<label class="f">Rating (kVA)${inp('data-s="kva"',sp.kva)}</label>`:""}
+    <label class="f">Voltage Voc (kV)${inp('data-s="kv"',sp.kv)}</label>
+    ${sp.src!=="ibf"?`<label class="f"><span>${sp.src==="gen"?"Subtransient X\"d (%)":"Impedance Z (%)"}</span>${inp('data-s="z"',sp.z)}</label>`:`<label class="f">Bolted fault Ibf (kA)${inp('data-s="ibf"',sp.ibf)}</label>`}
+    <label class="f">Fault factor${inp('data-s="fac"',sp.fac)}</label>
+    ${sp.src!=="ibf"?`<label class="f">Ibf (kA)<div class="sv" data-out="ibf"></div></label>`:""}
+    <label class="f"><span>Arc duration at Ia (ms)</span>${inp('data-s="t1"',sp.t1)}</label>
+    <label class="f"><span>Arc duration at Ia,min (ms)</span>${inp('data-s="t2"',sp.t2)}</label>
+  </div>
+  <p class="hint">${sp.src==="gen"?"Generator Ibf uses X\"d with no decrement, so it's the initial fault level. ":""}Fault factor multiplies Ibf (1 = as calculated). Read both arc durations off the protection curve at the arcing currents in the working.</p>`}
+
+  <div class="subhead">Arc</div>
+  <div class="grid3">
+    <div class="seg-wrap span2">Electrode configuration<div class="seg">${cfgSeg}</div></div>
+    <label class="f">Conductor gap G (mm)${inp('data-c="gap"',c.gap)}</label>
+  </div>
+
+  <div class="subhead">Door</div>
+  <div class="grid4">
+    <label class="f">Door width (mm)${inp('data-c="dW"',c.dW)}</label>
+    <label class="f">Door height (mm)${inp('data-c="dH"',c.dH)}</label>
+    <label class="f">Door area (m²)<div class="sv" data-out="darea"></div></label>
+    <label class="f">Withstand (kPa)<div class="sv" data-out="wst"></div></label>
+  </div>
+  ${c.fast.length?`<div class="table-wrap"><table class="items slim"><tr><th style="width:120px">Type</th><th style="width:70px">Qty</th><th>Description</th><th style="width:150px">Failure force each (kN)</th><th style="width:40px"></th></tr>
+    ${c.fast.map(f=>`<tr><td><select data-f="t" data-id="${f.id}">${Object.keys(FT).map(k=>`<option value="${k}"${f.t===k?" selected":""}>${FT[k]}</option>`).join("")}</select></td>
+    <td><input data-f="qty" data-id="${f.id}" value="${esc(f.qty)}" inputmode="decimal"></td>
+    <td><input data-f="desc" data-id="${f.id}" value="${esc(f.desc)}"></td>
+    <td><input data-f="kn" data-id="${f.id}" value="${esc(f.kn)}" inputmode="decimal"></td>
+    <td><button type="button" class="xbtn" data-fdel="${f.id}" aria-label="Remove fastener">×</button></td></tr>`).join("")}</table></div>`:'<p class="hint">No fasteners entered.</p>'}
+  <div class="addrow"><button class="btn sm" type="button" id="addFast">Add fastener</button></div>
+
+  <div class="subhead">Blast vents</div>
+  ${c.vents.length?`<div class="table-wrap"><table class="items slim"><tr><th>Description</th><th style="width:120px">Area (m²)</th><th style="width:140px">Burst pressure (kPa)</th><th style="width:90px">Cd</th><th style="width:40px"></th></tr>
+    ${c.vents.map(v=>`<tr><td><input data-v="desc" data-id="${v.id}" value="${esc(v.desc)}"></td>
+    <td><input data-v="area" data-id="${v.id}" value="${esc(v.area)}" inputmode="decimal"></td>
+    <td><input data-v="burst" data-id="${v.id}" value="${esc(v.burst)}" inputmode="decimal"></td>
+    <td><input data-v="cd" data-id="${v.id}" value="${esc(v.cd)}" inputmode="decimal"></td>
+    <td><button type="button" class="xbtn" data-vdel="${v.id}" aria-label="Remove vent">×</button></td></tr>`).join("")}</table></div>`:'<p class="hint">No vents, so this is a closed-volume calculation.</p>'}
+  <div class="addrow"><button class="btn sm" type="button" id="addVent">Add vent</button>${S.comps.length>1?`<button class="btn sm" type="button" id="delComp">Remove ${esc(cLab(c))}</button>`:""}</div>
+  <p class="hint">Burst pressure is gauge (0 = always open). Vents in compartments sharing a volume act together.</p>`;
+  updEditorOut();}
+function updEditorOut(){const c=cById(S.sel);if(!c)return;const o=k=>$(`#editor [data-out="${k}"]`);
+  if(o("vol"))o("vol").textContent=f3(volOf(c));
+  if(o("grp")){const g=groups().find(x=>x.includes(c));o("grp").textContent=g.length>1?`Shared volume ${g.map(cLab).join(" + ")} = ${f3(g.reduce((s,x)=>s+volOf(x),0))} m³.`:"Not open to another compartment.";}
+  if(o("ibf")){const fl=ibfOf(c.sup);o("ibf").textContent=isFinite(fl.ibf)?f2(fl.ibf):"–";}
+  if(o("supsum")){const so=supOf(c),s=so.c.sup,fl=ibfOf(s);
+    o("supsum").textContent=so.loop?"\"Same as\" goes round in a loop. Untick it on one compartment.":`From ${cFull(so.c)}: ${SRC[s.src]}${s.src!=="ibf"?` ${tr(num(s.kva))} kVA`:""}, ${tr(num(s.kv))} kV${s.src!=="ibf"?`, Z ${tr(num(s.z))} %`:""}, factor ${tr(fl.fac)} → Ibf ${isFinite(fl.ibf)?f2(fl.ibf)+" kA":"–"} · arc duration ${tr(num(s.t1,NaN))} ms at Ia, ${tr(num(s.t2,NaN))} ms at Ia,min`;}
+  const Ad=Math.max(0,num(c.dW))*Math.max(0,num(c.dH))/1e6,F=c.fast.reduce((s,f)=>s+Math.max(0,num(f.qty,0))*Math.max(0,num(f.kn,0)),0);
+  if(o("darea"))o("darea").textContent=Ad>0?f3(Ad):"–";
+  if(o("wst"))o("wst").textContent=Ad>0&&F>0?f1(F/Ad):"–";}
+const ed=$("#editor");
+ed.addEventListener("input",e=>{const el=e.target,c=cById(S.sel);if(!c)return;
+  if(el.dataset.c){c[el.dataset.c]=el.value;if(el.dataset.c==="name")renderTabs();}
+  else if(el.dataset.s){c.sup[el.dataset.s]=el.value;}
+  else if(el.dataset.f){const f=c.fast.find(x=>x.id===+el.dataset.id);if(f)f[el.dataset.f]=el.value;}
+  else if(el.dataset.v){const v=c.vents.find(x=>x.id===+el.dataset.id);if(v)v[el.dataset.v]=el.value;}
+  else return;
+  updEditorOut();update();});
+ed.addEventListener("change",e=>{const el=e.target,c=cById(S.sel);if(!c)return;
+  if(el.id==="sameChk"){c.same=el.checked?String($("#sameSel").value):"";renderEditor();update();}
+  else if(el.id==="sameSel"){c.same=String(el.value);renderEditor();update();}
+  else if(el.dataset.f==="t"){const f=c.fast.find(x=>x.id===+el.dataset.id);if(f)f.t=el.value;update();}});
+ed.addEventListener("click",e=>{const c=cById(S.sel);if(!c)return;let b;
+  if((b=e.target.closest("[data-open]"))){const k=pk(c.id,+b.dataset.open);S.open=isOpen(c.id,+b.dataset.open)?S.open.filter(x=>x!==k):S.open.concat(k);renderEditor();update();}
+  else if((b=e.target.closest("[data-src]"))){c.sup.src=b.dataset.src;renderEditor();update();}
+  else if((b=e.target.closest("[data-cfg]"))){c.cfg=b.dataset.cfg;renderEditor();update();}
+  else if(e.target.closest("#addFast")){c.fast.push({id:nextId(c.fast),t:c.fast.length?"latch":"hinge",qty:"1",desc:"",kn:""});renderEditor();update();}
+  else if((b=e.target.closest("[data-fdel]"))){c.fast=c.fast.filter(f=>f.id!==+b.dataset.fdel);renderEditor();update();}
+  else if(e.target.closest("#addVent")){c.vents.push({id:nextId(c.vents),desc:"",area:"",burst:"",cd:"0.6"});renderEditor();update();}
+  else if((b=e.target.closest("[data-vdel]"))){c.vents=c.vents.filter(v=>v.id!==+b.dataset.vdel);renderEditor();update();}
+  else if(e.target.closest("#delComp")){if(!confirm(`Remove ${cFull(c)}?`))return;
+    S.comps=S.comps.filter(x=>x.id!==c.id);S.comps.forEach(x=>{if(+x.same===c.id)x.same="";});
+    S.open=S.open.filter(p=>!p.split("-").map(Number).includes(c.id));S.sel=S.comps[0].id;renderEditor();update();}});
+
+/* ================= ASSUMPTIONS ================= */
+function renderAssum(){
+  $("#assumSec").innerHTML=`<h2>Assumptions</h2>
+  <p class="lead">Anything the calculation relies on that isn't an input above, e.g. protection settings or datasheet sources. These print as a numbered list in the PDF.</p>
+  ${S.assum.length?S.assum.map((a,i)=>`<div class="arow"><b>${i+1}.</b><input data-as="${i}" value="${esc(a)}" aria-label="Assumption ${i+1}"><button type="button" class="xbtn" data-asdel="${i}" aria-label="Remove assumption ${i+1}">×</button></div>`).join(""):'<p class="hint">No assumptions added.</p>'}
+  <div class="addrow"><button class="btn sm" type="button" id="addAssum">Add assumption</button></div>`;}
+$("#assumSec").addEventListener("input",e=>{const el=e.target.closest("[data-as]");if(!el)return;S.assum[+el.dataset.as]=el.value;autosave();});
+$("#assumSec").addEventListener("click",e=>{
+  if(e.target.closest("#addAssum")){S.assum.push("");renderAssum();autosave();const ins=$$("#assumSec [data-as]");if(ins.length)ins[ins.length-1].focus();return;}
+  const d=e.target.closest("[data-asdel]");if(d){S.assum.splice(+d.dataset.asdel,1);renderAssum();autosave();}});
+
+/* ================= RESULTS ================= */
+const kPa=p=>isFinite(p)?f1(p/1000):"–";
+const pct=m=>m===-Infinity?"–":isFinite(m)?`${m>=0?"":"−"}${fmt(Math.abs(m)*100,0)} %`:"–";
+function renderResults(){const A=$("#answer"),chk=R.rows.filter(r=>r.checked);
+  if(!chk.length)A.innerHTML=`<div><div class="k">Door withstand</div><div class="v">Not calculated</div></div><div class="gov">${D?"Complete the inputs":"Load the data file"}</div>`;
+  else{const L=R.lim,fail=R.fails.length;
+    A.innerHTML=`<div><div class="k">Door withstand${chk.length<R.rows.length?` (${chk.length} of ${R.rows.length} checked)`:""}</div><div class="v"><b>${fail?"Fail":"Pass"}</b> &middot; margin ${pct(L.margin)}</div></div><div class="gov">${fail?"Worst":"Least margin"}<br><b>${esc(cFull(L.c))}</b><br>${kPa(L.peak)} vs ${kPa(L.Pw)} kPa</div>`;}
+  $("#resTable").innerHTML=`<table class="bal"><thead><tr><th>Compartment</th><th>Ia (kA)</th><th>Peak ΔP (kPa)</th><th>Withstand (kPa)</th><th>Status</th></tr></thead><tbody>${R.rows.map(r=>{
+    const sub=(r.g.cs.length>1?`shared ${r.g.label}, `:"")+(r.g.vents.length?"vented":"closed volume");
+    const st=!r.checked?'<span class="na">–</span>':r.pass?'<span class="tag pass">Pass</span>':'<span class="tag fail">Fail</span>';
+    return `<tr class="${R.lim&&r===R.lim?"limrow":""}"><td>${esc(cFull(r.c))}<small>${esc(sub)}</small></td><td>${r.a.ok?f2(r.a.arc.ia):"–"}</td><td class="${r.checked&&!r.pass?"bad":""}">${kPa(r.peak)}</td><td>${kPa(r.Pw)}${r.checked?`<small>margin ${pct(r.margin)}</small>`:""}</td><td>${st}</td></tr>`;}).join("")}</tbody></table>`;
+  const notes=R.notes.slice();
+  R.fails.slice().reverse().forEach(r=>notes.unshift(["warn",`${cFull(r.c)}: peak ΔP ${kPa(r.peak)} kPa is above the door withstand of ${kPa(r.Pw)} kPa. Add vent area, add fasteners or strengthen the door.`]));
+  $("#notes").innerHTML=notes.map(n=>`<p class="${n[0]==="warn"?"warnnote":"infonote"}">${esc(n[1])}</p>`).join("");
+  $("#working").innerHTML=`<div class="wk">${R.groups.map(workGroup).join("")}</div>`;}
+
+/* ================= WORKING ================= */
+const H=(t,st,cls)=>`<h3>${t}${st?`<small class="${cls||""}">${st}</small>`:""}</h3>`;
+const EQ=(l,v)=>`<div class="eq"><span>${l}</span><b>${v}</b></div>`;
+const UL=items=>`<ul>${items.filter(Boolean).map(x=>`<li>${x}</li>`).join("")}</ul>`;
+const K=(k,n)=>k.map((x,i)=>`k${i+1} ${sg(x)}`).slice(0,n).join(", ");
+function workComp(c,g,run){const a=run?run.a:null,sp=a?a.sp:c.sup,L=esc(cFull(c));let h="";
+  if(!a){h+=H(`${L}: arcing current`,"Not calculated","mute");return h;}
+  h+=H(`${L}: arcing current`,"IEEE 1584-2018","mute");
+  if(a.supC.id!==c.id)h+=UL([`Supply and arc durations are the same as ${esc(cFull(a.supC))}.`]);
+  const fl=a.fault;
+  if(sp.src==="ibf")h+=EQ(`Ibf = ${tr(fl.base)} kA × fault factor ${tr(fl.fac)}`,`${f2(a.Ibf)} kA`);
+  else h+=EQ(`Ibf = S ÷ (√3 × V × ${sp.src==="gen"?"X\"d":"Z"}) × factor = ${tr(fl.kva)} kVA ÷ (√3 × ${tr(fl.kv)} kV × ${tr(fl.z/100)}) × ${tr(fl.fac)}`,`${f2(a.Ibf)} kA`);
+  const C=D.configs[c.cfg],o=a.arc;
+  h+=UL([`${esc(c.cfg)}, Voc ${tr(a.Voc)} kV, G ${tr(a.Gap)} mm. Coefficients from the data file: ${esc(D.title||"untitled")}.`]);
+  h+=EQ(`Iarc,600 = 10^(k1 + k2 lg Ibf + k3 lg G) × (k4 Ibf⁶ + k5 Ibf⁵ + k6 Ibf⁴ + k7 Ibf³ + k8 Ibf² + k9 Ibf + k10)<br><span class="sub">${K(C.ia["600"],10)}</span>`,`${f3(o.i600)} kA`);
+  if(o.mode==="lv")h+=EQ(`Ia = 1 ÷ √[(0.6 ÷ Voc)² × (1 ÷ Iarc,600² − (0.6² − Voc²) ÷ (0.6² × Ibf²))] = 1 ÷ √[(0.6 ÷ ${tr(a.Voc)})² × (1 ÷ ${f3(o.i600)}² − (0.36 − ${tr(a.Voc)}²) ÷ (0.36 × ${f3(a.Ibf)}²))]`,`${f3(o.ia)} kA`);
+  else{h+=EQ(`Iarc,2700, same form<br><span class="sub">${K(C.ia["2700"],10)}</span>`,`${f3(o.i2700)} kA`);
+    h+=EQ(`Iarc,14300, same form<br><span class="sub">${K(C.ia["14300"],10)}</span>`,`${f3(o.i14300)} kA`);
+    h+=EQ(`Iarc,1 = (Iarc,2700 − Iarc,600) ÷ 2.1 × (Voc − 2.7) + Iarc,2700 = (${f3(o.i2700)} − ${f3(o.i600)}) ÷ 2.1 × (${tr(a.Voc)} − 2.7) + ${f3(o.i2700)}`,`${f3(o.i1)} kA`);
+    h+=EQ(`Iarc,2 = (Iarc,14300 − Iarc,2700) ÷ 11.6 × (Voc − 14.3) + Iarc,14300 = (${f3(o.i14300)} − ${f3(o.i2700)}) ÷ 11.6 × (${tr(a.Voc)} − 14.3) + ${f3(o.i14300)}`,`${f3(o.i2)} kA`);
+    if(o.mode==="mv1")h+=EQ(`Ia = Iarc,1 × (2.7 − Voc) ÷ 2.1 + Iarc,2 × (Voc − 0.6) ÷ 2.1 = ${f3(o.i1)} × ${tr(2.7-a.Voc)} ÷ 2.1 + ${f3(o.i2)} × ${tr(a.Voc-0.6)} ÷ 2.1`,`${f3(o.ia)} kA`);
+    else h+=EQ(`Ia = Iarc,2 (Voc above 2.7 kV)`,`${f3(o.ia)} kA`);}
+  h+=EQ(`VarCf = k1 Voc⁶ + k2 Voc⁵ + … + k7<br><span class="sub">${K(C.varcf,7)}</span>`,f3(o.varcf));
+  h+=EQ(`Ia,min = Ia × (1 − 0.5 × VarCf) = ${f3(o.ia)} × (1 − 0.5 × ${f3(o.varcf)})`,`${f3(o.iamin)} kA`);
+  h+=H(`${L}: arc energy`,"","");
+  h+=EQ(`Va = 1.757 × 0.821 × Ia^0.1457 × G^0.2476 × Vll^0.4166 = 1.757 × 0.821 × ${fmt(o.ia*1000,0)}^0.1457 × ${tr(a.Gap)}^0.2476 × ${fmt(a.Voc*1000,0)}^0.4166`,`${f1(a.va1)} V`);
+  h+=EQ(`Va at Ia,min = 1.757 × 0.821 × ${fmt(o.iamin*1000,0)}^0.1457 × ${tr(a.Gap)}^0.2476 × ${fmt(a.Voc*1000,0)}^0.4166`,`${f1(a.va2)} V`);
+  h+=EQ(`Arc power at Ia = ${fmt(o.ia*1000,0)} A × ${f1(a.va1)} V`,`${f3(a.p1/1e6)} MW`);
+  h+=EQ(`Arc power at Ia,min = ${fmt(o.iamin*1000,0)} A × ${f1(a.va2)} V`,`${f3(a.p2/1e6)} MW`);
+  h+=EQ(`Energy at Ia = ${f3(a.p1/1e6)} MW × ${tr(a.t1)} ms`,`${f1(a.p1*a.t1/1e6)} kJ`);
+  h+=EQ(`Energy at Ia,min = ${f3(a.p2/1e6)} MW × ${tr(a.t2)} ms`,`${f1(a.p2*a.t2/1e6)} kJ`);
+  h+=UL(["Arc voltage from SR410 (not part of IEEE 1584), with Ia in A, G in mm and Vll in V."]);
+  return h;}
+const arcKey=r=>[r.a.supC.id,r.c.cfg,num(r.c.gap,NaN)].join("|");
+function workGroup(g){const multi=g.cs.length>1,L=esc(g.label),Gp=R.G;let h="";const seen={},runs=[];
+  g.cs.forEach(c=>{const r=g.runs.find(x=>x.c===c);const k=r?arcKey(r):null;
+    if(k&&seen[k]){h+=H(`${esc(cFull(c))}: arcing current`,"","");h+=UL([`Same supply, electrode configuration and gap as ${esc(cFull(seen[k]))}, so the same arcing current and arc energy.`]);return;}
+    if(k){seen[k]=c;runs.push(r);}h+=workComp(c,g,r);});
+  h+=H(`${L}: pressure rise`,g.run?(g.vents.length?"Vented":"Closed volume"):"Not calculated","mute");
+  if(multi)h+=UL([`${g.cs.map(c=>esc(cFull(c))).join(", ")} are open to each other, so they share one gas volume and every arc in them is checked.`]);
+  h+=EQ(`V = ${g.cs.map(c=>`${tr(num(c.W)/1000)} × ${tr(num(c.H)/1000)} × ${tr(num(c.D)/1000)}`).join(" + ")}`,`${f3(g.V)} m³`);
+  if(g.vents.length)h+=`<table class="ft"><tr><th>Vent</th><th>Area × Cd</th><th>Burst</th></tr>${g.vents.map(v=>`<tr><td>${esc(v.v.desc||"Vent")}${multi?` <span class="sub">(${esc(cLab(v.c))})</span>`:""}</td><td>${tr(v.a)} m² × ${tr(v.cd)}</td><td>${tr(v.burst/1000)} kPa</td></tr>`).join("")}</table>`;
+  runs.forEach(r=>{const a=r.a,arcIn=multi?` in ${esc(cLab(r.c))}`:"";
+    [[r.r1,"Ia",a.p1,a.t1],[r.r2,"Ia,min",a.p2,a.t2]].forEach(([x,l,P,t],i)=>{
+      h+=EQ(`Closed ΔP, arc at ${l}${arcIn} = (γ − 1) × kp × E ÷ V = (${tr(Gp.ga)} − 1) × ${tr(Gp.kp)} × ${f1(P*t/1e6)} kJ ÷ ${f3(g.V)} m³`,`${kPa(x.closed)} kPa`);
+      if(x.vented){const op=x.opened.map((t0,j)=>t0==null?`${esc(g.vents[j].v.desc||"vent "+(j+1))} didn't open`:`${esc(g.vents[j].v.desc||"vent "+(j+1))} opened at ${f1(t0)} ms`).join(", ");
+        h+=EQ(`Vented peak ΔP, arc at ${l}${arcIn}, Δt ${DT*1000} ms <br><span class="sub">${op}</span>`,`${kPa(x.peak)} kPa at ${f1(x.tPeak)} ms`);}});});
+  if(g.run)h+=`<table class="ft"><tr class="gov"><td>Peak ΔP for this volume: arc in ${esc(cLab(g.run.c))} at ${g.run.gov===1?"Ia":"Ia,min"}</td><td>${kPa(g.peak)} kPa</td></tr></table>`;
+  if(g.vents.length)h+=UL([`Vented model: dU = kp × P<sub>arc</sub> × Δt − h × ṁ × Δt, p = (γ − 1) U ÷ V, h = γ ÷ (γ − 1) × p ÷ ρ. Ambient ${tr(num(S.Ta,40))} °C, ${tr(Gp.pa/1000)} kPa absolute, air R = ${RGAS} J/kg·K.`,
+    "Vent flow ṁ = Cd × A × √(γ ρ p (2 ÷ (γ + 1))^((γ + 1) ÷ (γ − 1))) when choked (p<sub>a</sub> ÷ p ≤ 0.528), otherwise Cd × A × √(2 ρ p γ ÷ (γ − 1) × (r^(2/γ) − r^((γ + 1)/γ))), r = p<sub>a</sub> ÷ p."]);
+  g.cs.forEach(c=>{const row=R.rows.find(x=>x.c===c);if(!row)return;
+    h+=H(`${esc(cFull(c))}: door withstand`,!row.checked?"Not checked":row.pass?"Pass":"Fail",!row.checked?"mute":row.pass?"pass":"fail");
+    if(!(row.Ad>0)){h+=UL(["No door size entered."]);return;}
+    h+=`<table class="ft"><tr><th>Fastener</th><th>Qty × kN</th><th>Force (kN)</th></tr>${c.fast.map(f=>`<tr><td>${FT[f.t]}${f.desc?", "+esc(f.desc):""}</td><td>${tr(num(f.qty,0))} × ${tr(num(f.kn,0))}</td><td>${f2(num(f.qty,0)*num(f.kn,0))}</td></tr>`).join("")}
+      <tr class="gov"><td>Withstand = ${f2(row.F/1000)} kN ÷ (${tr(num(c.dW)/1000)} × ${tr(num(c.dH)/1000)} m)</td><td></td><td>${kPa(row.Pw)} kPa</td></tr></table>`;
+    if(row.checked)h+=EQ(`Margin = (withstand − peak ΔP) ÷ withstand = (${kPa(row.Pw)} − ${kPa(row.peak)}) ÷ ${kPa(row.Pw)}`,pct(row.margin));
+    h+=UL(["Withstand assumes the pressure on the door is shared evenly by its fasteners."]);});
+  return h;}
+
+/* ================= UPDATE ================= */
+function update(){R=compute();renderTabs();renderResults();autosave();}
+
+/* ================= FILES ================= */
+const safeName=n=>(String(n||"calculation").trim().replace(/[\\/:*?"<>|]+/g,"").replace(/\s+/g," ")||"calculation");
+function download(name,obj){const b=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+function readJSON(input,cb){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{let d=null;try{d=JSON.parse(rd.result);}catch(e){}cb(d,f.name);input.value="";};rd.readAsText(f);}
+function loadState(d){S=Object.assign(fresh(),d);clean();syncInputs();renderEditor();renderAssum();update();}
+$("#btnSave").addEventListener("click",()=>{download(safeName(S.name)+".krdarc.json",{type:CALC_TYPE,version:1,saved:new Date().toISOString(),calc:Object.assign({},S,{logo:"",logoName:""})});toast("Calculation saved");});
+$("#btnImport").addEventListener("click",()=>$("#fileImport").click());
+$("#fileImport").addEventListener("change",e=>readJSON(e.target,(d,n)=>{
+  if(d&&d.type===DATA_TYPE){toast("That's a data file. Use Load data file under Standards data.");return;}
+  if(d&&d.type===HEAT_TYPE){toast("That's an enclosure heat file. Use Import from enclosure heat file under Compartments.");return;}
+  if(!d||d.type!==CALC_TYPE||!d.calc||!Array.isArray(d.calc.comps)){toast("That file isn't a saved arc pressure calculation.");return;}
+  loadState(Object.assign({},d.calc,{type:CALC_TYPE}));toast("Opened "+n);}));
+$("#btnNew").addEventListener("click",()=>{if(!confirm("Start a new calculation? Anything not saved to a file will be cleared."))return;loadState(fresh());toast("New calculation started");});
+
+/* enclosure heat import: names, W/H/D and shared air */
+$("#btnHeat").addEventListener("click",()=>$("#fileHeat").click());
+$("#fileHeat").addEventListener("change",e=>readJSON(e.target,(d,n)=>{
+  const h=d&&d.type===HEAT_TYPE?(d.calc&&Array.isArray(d.calc.comps)?d.calc:Array.isArray(d.comps)?d:null):null;
+  if(!h||!h.comps.length){toast("That file isn't a saved enclosure heat calculation.");return;}
+  if(!confirm(`Replace the compartments with the ${h.comps.length} in ${n}? Doors, fasteners, vents and supplies are kept for compartments with the same number.`))return;
+  importHeat(h);toast(`Imported ${h.comps.length} compartment${h.comps.length>1?"s":""} from ${n}`);}));
+function importHeat(h){const old=S.comps;
+  S.comps=h.comps.map(hc=>{const id=+hc.id,keep=old.find(c=>c.id===id)||newComp(id);
+    return Object.assign({},keep,{id,name:str(hc.name)||("Compartment "+id),W:str(hc.W),H:str(hc.H),D:str(hc.D)});});
+  const ids=S.comps.map(c=>c.id),pairs=(Array.isArray(h.vent)?h.vent:[]).map(String);
+  h.comps.forEach(hc=>{if(hc.merge)pairs.push(pk(+hc.id,+hc.merge));});
+  S.open=pairs.filter(p=>p.split("-").map(Number).every(x=>ids.includes(x)));
+  clean();renderEditor();update();}
+
+/* ================= PDF ================= */
+const dlg=$("#pdfDlg");
+const reportLogo=()=>S.krdLogo?krdLogoUri():S.logo;
+function showLogo(){$("#pdfKrd").checked=!!S.krdLogo;$("#logoPick").style.display=S.krdLogo?"none":"flex";$("#logoPrev").innerHTML=reportLogo()?`<img src="${reportLogo()}" alt="Selected logo">`:"Logo preview";$("#logoName").textContent=S.logo?(S.logoName||"Logo selected"):"No file chosen";$("#logoRemove").hidden=!S.logo;}
+$("#btnPdf").addEventListener("click",()=>{$("#pdfName").value=safeName(S.name);$("#pdfBy").value=S.calcBy||"";showLogo();dlg.showModal();});
+$("#logoBtn").addEventListener("click",()=>$("#pdfLogo").click());
+$("#pdfKrd").addEventListener("change",e=>{S.krdLogo=e.target.checked;showLogo();autosave();});
+$("#logoRemove").addEventListener("click",()=>{S.logo="";S.logoName="";showLogo();});
+$("#pdfLogo").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{S.logo=rd.result;S.logoName=f.name;showLogo();e.target.value="";};rd.readAsDataURL(f);});
+$("#pdfCancel").addEventListener("click",()=>dlg.close());
+function goPdf(){S.calcBy=$("#pdfBy").value;autosave();buildReport($("#pdfWork").checked);dlg.close();
+  const old=document.title;document.title=safeName($("#pdfName").value);setTimeout(()=>{window.print();document.title=old;},60);}
+$("#pdfGo").addEventListener("click",goPdf);
+dlg.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"&&e.target.type!=="checkbox"){e.preventDefault();goPdf();}});
+function buildReport(showWork){R=compute();renderResults();
+  const chk=R.rows.filter(r=>r.checked),L=R.lim;
+  const ans=chk.length?`${R.fails.length?"Fail":"Pass"}, margin ${pct(L.margin)}`:"Not calculated";
+  const sub=chk.length?`Door withstand, ${R.fails.length?"worst":"least margin"}: ${cFull(L.c)}`:"Door withstand";
+  const kv=[["Heat transfer factor kp",tr(R.G.kp)],["Adiabatic constant γ",tr(R.G.ga)],["Ambient",`${tr(num(S.Ta,40))} °C, ${tr(R.G.pa/1000)} kPa abs`],["Data file",D?(D.title||"untitled"):"None loaded"]];
+  const comps=S.comps.map(c=>{const a=R.rows.find(r=>r.c===c),so=supOf(c),sp=so.c.sup,fl=ibfOf(sp),row=a;
+    const g=row.g,meta=`${tr(num(c.W))} W × ${tr(num(c.H))} H × ${tr(num(c.D))} D mm${g.cs.length>1?`, shared volume ${g.label}`:""}`;
+    return `<div class="r-sub">${esc(cFull(c))} <span style="font-weight:400;color:#66666A">${esc(meta)}</span></div>
+    <div class="r-kv">${[["Supply",`${so.c!==c?"Same as "+cLab(so.c)+": ":""}${SRC[sp.src]}${sp.src!=="ibf"?` ${tr(num(sp.kva))} kVA, ${sp.src==="gen"?"X\"d":"Z"} ${tr(num(sp.z))} %`:""}, ${tr(num(sp.kv))} kV, factor ${tr(fl.fac)}, Ibf ${isFinite(fl.ibf)?f2(fl.ibf)+" kA":"–"}`],
+      ["Arc duration",`${tr(num(sp.t1,NaN))} ms at Ia, ${tr(num(sp.t2,NaN))} ms at Ia,min`],["Electrode configuration, gap",`${c.cfg}, ${tr(num(c.gap,NaN))} mm`],
+      ["Door",num(c.dW)>0&&num(c.dH)>0?`${tr(num(c.dW))} × ${tr(num(c.dH))} mm`:"None entered"]].map(k=>`<div><span>${esc(k[0])}</span><b>${esc(k[1])}</b></div>`).join("")}</div>
+    ${c.fast.length?`<table class="r-items"><tr><th>Fastener</th><th>Description</th><th class="n">Qty</th><th class="n">kN each</th></tr>${c.fast.map(f=>`<tr><td>${FT[f.t]}</td><td>${esc(f.desc)}</td><td class="n">${tr(num(f.qty,0))}</td><td class="n">${tr(num(f.kn,0))}</td></tr>`).join("")}</table>`:""}
+    ${c.vents.length?`<table class="r-items"><tr><th>Vent</th><th class="n">Area (m²)</th><th class="n">Burst (kPa)</th><th class="n">Cd</th></tr>${c.vents.map(v=>`<tr><td>${esc(v.desc)}</td><td class="n">${esc(v.area)}</td><td class="n">${esc(v.burst)}</td><td class="n">${esc(v.cd)}</td></tr>`).join("")}</table>`:""}`;}).join("");
+  $("#report").innerHTML=`<table class="r-page"><thead><tr><td></td></tr></thead><tfoot><tr><td></td></tr></tfoot><tbody><tr><td>
+  <div class="r-block"><div class="r-logo">${reportLogo()?`<img src="${reportLogo()}" alt="">`:""}</div>
+   <div><div class="r-title"><small>Arc pressure calculation</small><b>${esc(S.name)}</b></div>
+   <div class="r-meta"><div><small>Job no.</small>${esc(S.job||"–")}</div><div><small>Rev</small>${esc(S.rev||"–")}</div><div><small>Calculated by</small>${esc(S.calcBy||"–")}</div><div><small>Date</small>${new Date().toLocaleDateString("en-AU")}</div></div></div></div>
+  <div class="r-answer"><div><small>${esc(sub)}</small><b>${esc(ans)}</b></div><div style="text-align:right;font-size:10pt">${L?`Peak ΔP ${kPa(L.peak)} kPa<br>Withstand ${kPa(L.Pw)} kPa`:""}</div></div>
+  <div class="r-h">General</div><div class="r-kv">${kv.map(k=>`<div><span>${esc(k[0])}</span><b>${esc(k[1])}</b></div>`).join("")}</div>
+  ${S.assum.some(a=>a.trim())?`<div class="r-h">Assumptions</div><ol class="r-ass">${S.assum.filter(a=>a.trim()).map(a=>`<li>${esc(a)}</li>`).join("")}</ol>`:""}
+  <div class="r-h">Results</div>${$("#resTable").innerHTML}<div class="notes">${$("#notes").innerHTML}</div>
+  <div class="r-h">Compartments</div>${comps}
+  ${showWork?`<div class="r-h">Calculations</div><div class="r-work">${$("#working").innerHTML}</div>`:""}
+  <div class="r-foot">Design aid only. Arcing current to IEEE 1584-2018, arc voltage from SR410, pressure by energy balance with orifice venting. Fastener forces and vent data from datasheets. Verify against the relevant standard and test data (e.g. IEC TR 61641, AS/NZS 61439).</div></td></tr></tbody></table>`;}
+
+/* ================= START ================= */
+clean();syncInputs();renderData();renderEditor();renderAssum();update();
+})();
+</script>
+</body>
+</html>
