@@ -20,6 +20,7 @@ body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:var(--bg
 header{background:var(--grey);color:#fff;position:sticky;top:0;z-index:1000;padding-top:env(safe-area-inset-top)}
 .brand{display:flex;align-items:center;gap:12px;padding:10px 16px 6px}
 .mark{flex:0 0 auto;display:block}
+.homelink{flex:0 0 auto;display:block;line-height:0}
 .brand b{display:block;font-size:17px;font-weight:500}
 .brand small{color:#cfcfcf;font-size:12px}
 .brand small i{color:var(--lime);font-style:normal}
@@ -140,7 +141,9 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
 <body>
 <header>
   <div class="brand">
-    <svg class="mark" viewBox="0 0 1080 1080" width="44" height="44" role="img" aria-label="KRD Engineering + Management"><circle fill="#e3e41e" cx="540" cy="540" r="498.581"/><polygon fill="#fff" points="424.361 672.765 291.445 539.846 424.051 407.236 354.927 407.236 232.178 529.982 232.178 407.235 183.297 407.235 183.297 597.507 231.906 549.437 355.236 672.765 424.361 672.765"/><path fill="#fff" d="M664.076,672.266l-70.665-90.834c36.643-2.401,65.704-31.37,65.704-66.73v-40.146c0-36.926-31.671-66.969-70.597-66.969h-147.292v48.882h147.292c11.973,0,21.716,8.115,21.716,18.088v40.146c0,9.972-9.742,18.083-21.716,18.083h-147.292v48.882h88.559l70.482,90.599h63.808Z"/><path fill="#fff" d="M784.71,407.691h-103.358v49.611h103.358c34.396,0,62.382,27.986,62.382,62.382v40.645c0,34.396-27.986,62.382-62.382,62.382h-103.358v49.611h103.358c61.753,0,111.993-50.24,111.993-111.993v-40.645c0-61.753-50.24-111.993-111.993-111.993Z"/></svg>
+    <a href="/" class="homelink" aria-label="KRD Engineering + Management home page">
+    <svg class="mark" viewBox="0 0 1080 1080" width="44" height="44" aria-hidden="true"><circle fill="#e3e41e" cx="540" cy="540" r="498.581"/><polygon fill="#fff" points="424.361 672.765 291.445 539.846 424.051 407.236 354.927 407.236 232.178 529.982 232.178 407.235 183.297 407.235 183.297 597.507 231.906 549.437 355.236 672.765 424.361 672.765"/><path fill="#fff" d="M664.076,672.266l-70.665-90.834c36.643-2.401,65.704-31.37,65.704-66.73v-40.146c0-36.926-31.671-66.969-70.597-66.969h-147.292v48.882h147.292c11.973,0,21.716,8.115,21.716,18.088v40.146c0,9.972-9.742,18.083-21.716,18.083h-147.292v48.882h88.559l70.482,90.599h63.808Z"/><path fill="#fff" d="M784.71,407.691h-103.358v49.611h103.358c34.396,0,62.382,27.986,62.382,62.382v40.645c0,34.396-27.986,62.382-62.382,62.382h-103.358v49.611h103.358c61.753,0,111.993-50.24,111.993-111.993v-40.645c0-61.753-50.24-111.993-111.993-111.993Z"/></svg>
+    </a>
     <div><b>Wind Segments</b><small>KOM finder <i>+</i> Mackay</small></div>
     <span class="syncbadge" id="syncBadge"></span>
   </div>
@@ -157,7 +160,7 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
 <div id="gate" hidden>
   <div class="card">
     <h2>Welcome</h2>
-    <div class="seg2"><button id="gTabIn" class="on">Sign in</button><button id="gTabJoin">Join with invite</button></div>
+    <div class="seg2"><button id="gTabIn" class="on">Sign in</button><button id="gTabJoin">Join with invite</button><button id="gTabReq">Request invite</button></div>
     <div id="gIn">
       <label>Email<input id="inEmail" type="email" autocomplete="email"></label>
       <label>Password<input id="inPass" type="password" autocomplete="current-password"></label>
@@ -172,6 +175,18 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
       <div class="privacy" id="privacyText"></div>
       <label class="chk"><input type="checkbox" id="jAgree"> I've read this and agree</label>
       <div class="actions" style="margin-top:6px"><button class="btn lime" id="jGo">Create account</button></div>
+    </div>
+    <div id="gReq" hidden>
+      <div id="reqStatus"></div>
+      <div id="reqForm">
+        <p class="small" style="margin-top:0">Segments is invite-only. Send a request and the site admin will review it. Come back to this page on this device to see if you're approved.</p>
+        <label>Your name<input id="rName" maxlength="60" autocomplete="name"></label>
+        <label>Email<input id="rEmail" type="email" maxlength="120" autocomplete="email"></label>
+        <label>Note for the admin (optional)<textarea id="rNote" rows="2" maxlength="500" placeholder="Who you are and who you ride with"></textarea></label>
+        <input id="rWebsite" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+        <div class="privacy">Your name, email and note are stored so the site admin can review your request. They're deleted 30 days after it's approved or declined.</div>
+        <div class="actions" style="margin-top:8px"><button class="btn lime" id="rGo">Send request</button></div>
+      </div>
     </div>
     <div id="gateStatus" class="small"></div>
   </div>
@@ -259,6 +274,9 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
     <h2 style="margin-top:14px" id="sharedTitle">Shared with me</h2>
     <div id="sharedLists"></div>
     <div id="adminBox" hidden>
+      <h2 style="margin-top:14px">Invite requests <span id="reqCount" class="small"></span></h2>
+      <div id="reqList"></div>
+      <div id="reqMsg" class="small"></div>
       <h2 style="margin-top:14px">Invites (admin)</h2>
       <div class="grid2">
         <label>Who it's for<input id="invNote" placeholder="e.g. Sam"></label>
@@ -329,6 +347,12 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
       <button class="btn ghost" id="connSetup">Open setup guide</button>
       <button class="btn ghost" id="authClear">Forget Strava login</button>
     </div>
+    <div id="appShareBox" hidden>
+      <h2 style="margin-top:14px">Let members use my Strava app</h2>
+      <p class="small" style="margin-top:0">People you tick can connect through your Strava app instead of making their own. First raise your app's athlete limit on <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener">strava.com/settings/api</a> (up to 10, including you). They can read your Client ID and Secret, and you all share your app's Strava limits. Unticking stops new connections; to cut someone off completely, also reset your Client Secret on Strava.</p>
+      <div id="appShareWith"></div>
+    </div>
+    <p class="small" id="appShareNote" hidden></p>
   </div>
 
   <div class="card">
@@ -350,6 +374,7 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
   <div class="card guide">
     <h2>Get started</h2>
     <p class="small" style="margin-top:0">A one-off setup, about 5 minutes. Your Strava details stay on this device only.</p>
+    <div class="privacy" id="appOffer" hidden style="margin:0 0 10px"></div>
     <div class="gstep" id="g1"><div class="gn">1</div><div class="gb">
       <b>Create your own Strava API app</b>
       <div class="small">Open <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener">strava.com/settings/api</a> (log in to Strava first) and fill in:</div>
@@ -701,7 +726,7 @@ async function api(path, retry = true) {
   if (r.status === 401 && retry) { await getToken(true); return api(path, false); }
   if (r.status === 401) { S.authProblem = true; save(); renderAuthState(); }
   if (r.status === 429) throw new RateError('Strava rate limit reached. Try again after the next 15-minute window.');
-  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error('Strava error ' + r.status + (j.message ? ': ' + j.message : '')); }
+  if (!r.ok) { const j = await r.json().catch(() => ({})); const err = new Error('Strava error ' + r.status + (j.message ? ': ' + j.message : '')); err.status = r.status; throw err; }
   return r.json();
 }
 
@@ -815,16 +840,18 @@ async function addIdList(ids, onDone) {
   const fresh = ids.filter(id => !S.segments[id]), have = ids.length - fresh.length;
   if (!fresh.length) { setStatus(`All ${ids.length} segment${ids.length === 1 ? ' is' : 's are'} already in your list.`); if (onDone) onDone(); return; }
   setBusy(true); abortFlag = false;
-  let ok = 0, msg = '', isErr = false;
+  let ok = 0, missing = 0, msg = '', isErr = false;
   setStatus(`${have ? have + ' already in your list. ' : ''}Adding ${fresh.length} new…`);
   try {
     await runPool(fresh, async id => {
-      const d = await api('/segments/' + id);
+      let d;
+      try { d = await api('/segments/' + id); }
+      catch (e) { if (e.status === 404) { missing++; return; } throw e; }   // deleted or private: skip it
       storeDetail(id, d); ok++;
       setStatus(`Adding segment ${ok}/${fresh.length}…`); setProgress(ok / fresh.length);
       saveSoon();
     }, 4);
-    msg = `Added ${ok} new segment${ok === 1 ? '' : 's'} with KOM times.` + (have ? ` ${have} were already in your list.` : '');
+    msg = `Added ${ok} new segment${ok === 1 ? '' : 's'} with KOM times.` + (have ? ` ${have} were already in your list.` : '') + (missing ? ` ${missing} not found on Strava (deleted or private).` : '');
     if (onDone) onDone();
   } catch (e) { msg = `${e.message} (${ok}/${fresh.length} added)`; isErr = !(e instanceof RateError); }
   save(); setBusy(false); renderAll(); setStatus(msg, isErr);
@@ -876,18 +903,25 @@ async function fetchKoms(onlyIds) {
   const maxAge = (+S.settings.komMaxAgeDays || 14) * 86400e3;
   const ids = onlyIds ? onlyIds.slice() : komRefreshQueue(maxAge);
   if (!ids.length) { setStatus('All segments already have up-to-date KOM times.'); setBusy(false); return; }
-  let done = 0, lastRender = Date.now(), msg = '', isErr = false;
+  let done = 0, missing = 0, lastRender = Date.now(), msg = '', isErr = false;
   setStatus(`Getting KOM times for ${ids.length} segment${ids.length === 1 ? '' : 's'}${onlyIds ? '' : ' (go and maybe first)'}…`);
   try {
     await runPool(ids, async id => {
-      const d = await api('/segments/' + id);
+      let d;
+      try { d = await api('/segments/' + id); }
+      catch (e) {
+        if (e.status !== 404) throw e;
+        // Deleted or private: note it, don't retry until the normal refresh age, carry on with the rest
+        S.details[id] = { ...(S.details[id] || {}), notFound: true, fetchedAt: Date.now() };
+        missing++; done++; saveSoon(); return;
+      }
       storeDetail(id, d);
       done++;
       setStatus(`Getting KOM times ${done}/${ids.length}…`); setProgress(done / ids.length);
       saveSoon();
       if (Date.now() - lastRender > 2000) { lastRender = Date.now(); renderList(); }
     }, 4);
-    msg = `Got KOM times for ${done} segment${done === 1 ? '' : 's'}.` + (done < ids.length ? ` ${ids.length - done} left.` : '');
+    msg = `Got KOM times for ${done - missing} segment${done - missing === 1 ? '' : 's'}.` + (missing ? ` ${missing} not found on Strava (deleted or private).` : '') + (done < ids.length ? ` ${ids.length - done} left.` : '');
   } catch (e) { msg = `${e.message} (${done}/${ids.length} done)`; isErr = !(e instanceof RateError); }
   save(); setBusy(false); renderAll(); setStatus(msg, isErr);
 }
@@ -915,20 +949,26 @@ function allKomLists() {
     const ex = Object.keys(out).find(k => k.toLowerCase() === l.name.toLowerCase());
     if (ex) {
       const m = new Map(out[ex].rows.map(r => [r.key + '|' + r.km, r]));
-      l.rows.forEach(r => m.set(r.key + '|' + r.km, r));
+      l.rows.forEach(r => {
+        // A shared KOM with no distance is the same KOM as a pasted row of the same name: just attach its ID
+        const same = r.km == null && Array.from(m.values()).find(x => x.key === r.key);
+        if (same) m.set(same.key + '|' + same.km, { ...same, id: r.id || same.id });
+        else m.set(r.key + '|' + r.km, r);
+      });
       out[ex] = { rows: Array.from(m.values()), importedAt: Math.max(out[ex].importedAt || 0, l.at || 0) };
     } else out[l.name] = { rows: l.rows, importedAt: l.at || 0, shared: true };
   }
   allKomMemo = out; allKomVer = ver;
   return out;
 }
-let komIndex = null, komIndexVer = '';
+let komIndex = null, komIndexVer = '', komIdIndex = new Map();
 function getKomIndex() {
   const lists = allKomLists();
   const ver = allKomVer;
   if (komIndex && ver === komIndexVer) return komIndex;
-  komIndex = new Map(); komIndexVer = ver;
+  komIndex = new Map(); komIdIndex = new Map(); komIndexVer = ver;
   for (const [owner, l] of Object.entries(lists)) for (const r of l.rows) {
+    if (r.id) komIdIndex.set(String(r.id), { ...r, owner });
     if (!komIndex.has(r.key)) komIndex.set(r.key, []);
     komIndex.get(r.key).push({ ...r, owner });
   }
@@ -936,9 +976,10 @@ function getKomIndex() {
 }
 // Who holds this segment's KOM, from a pasted list? {owner, listTime, taken}
 function komListMatch(seg, det, komS) {
-  const cands = getKomIndex().get(normName(seg.name)); if (!cands) return null;
+  const cands = getKomIndex().get(normName(seg.name));
   const km = (seg.distance || 0) / 1000;
-  const hit = cands.find(r => Math.abs(r.km - km) <= Math.max(0.02, km * 0.03));
+  // Shared KOMs carry the segment ID, so match on that first; pasted lists match on name + distance
+  const hit = komIdIndex.get(String(seg.id)) || (cands || []).find(r => r.km != null && Math.abs(r.km - km) <= Math.max(0.02, km * 0.03));
   if (!hit) return null;
   const taken = !!(komS && hit.timeS && komS < hit.timeS - 0.5);
   return { owner: hit.owner, listTime: hit.timeS, date: hit.date, taken };
@@ -1096,7 +1137,9 @@ function renderList() {
     const away = r.away != null ? ` · ${r.away.toFixed(1)} km away` : '';
     const windTxt = env ? `${r.tail >= 0 ? 'Tail' : 'Head'}wind ${Math.abs(r.tail).toFixed(0)} km/h avg · wind ${r.gainPct >= 0 ? 'saves' : 'costs'} ${fmtTime(Math.abs(r.tCalm - r.tWind))} (${Math.abs(r.gainPct).toFixed(1)}%)` : 'No wind data';
     const dirTxt = r.g.dirs.map(x => `${compassName(x.brg)} ${(x.share * 100).toFixed(0)}%`).join(' / ');
-    const detTxt = d
+    const detTxt = d && d.notFound
+      ? `Strava can't find this segment any more (deleted, or private to whoever made it). Checked ${new Date(d.fetchedAt).toLocaleDateString('en-AU')}; you can hide it below.`
+      : d
       ? `KOM ${esc(d.kom || '–')} · QOM ${esc(d.qom || '–')} · Overall ${esc(d.overall || '–')} · Your PR ${d.prS ? fmtTime(d.prS) : '–'} (${d.efforts || 0} efforts) · checked ${new Date(d.fetchedAt).toLocaleDateString('en-AU')}`
       : 'KOM times not fetched yet.';
     return `<article class="seg ${r.tag}${r.ignored ? ' ignored' : ''}" data-id="${id}">
@@ -1301,6 +1344,7 @@ function komRowsFor(who) {
   const statusFor = (seg, listTime) => {
     if (!seg) return 'untracked';
     const d = S.details[seg.id]; if (!d) return 'refresh';
+    if (d.notFound) return 'untracked';
     const komS = parseTime(d.kom);
     if (listTime && komS && komS < listTime - 0.5) return 'check';
     if (isMe && !listTime && d.prS && komS && d.prS > komS + 0.5) return 'check';
@@ -1309,9 +1353,9 @@ function komRowsFor(who) {
   };
   for (const r of (allKomLists()[who]?.rows || [])) {
     const cands = byName.get(r.key) || [];
-    const seg = cands.find(s => Math.abs((s.distance || 0) / 1000 - r.km) <= Math.max(0.02, r.km * 0.03)) || null;
+    const seg = (r.id && S.segments[r.id]) || (r.km != null ? cands.find(s => Math.abs((s.distance || 0) / 1000 - r.km) <= Math.max(0.02, r.km * 0.03)) : null) || null;
     if (seg) seen.add(String(seg.id));
-    out.push({ name: r.name, km: r.km, listTime: r.timeS, date: r.date, seg, status: statusFor(seg, r.timeS), src: 'list' });
+    out.push({ name: r.name, km: r.km != null ? r.km : (seg ? (seg.distance || 0) / 1000 : null), listTime: r.timeS, date: r.date, seg, status: statusFor(seg, r.timeS), src: 'list' });
   }
   if (isMe) {
     for (const s of Object.values(S.segments)) {
@@ -1347,7 +1391,7 @@ function renderKoms() {
     const listed = r.listTime ? `${r.src === 'pr' ? 'your PR' : 'listed'} ${fmtTime(r.listTime)} (${kmh(r.km * 1000, r.listTime)})` : '';
     const name = r.seg ? `<a href="https://www.strava.com/segments/${r.seg.id}" target="_blank" rel="noopener">${esc(r.name)}</a>` : esc(r.name);
     return `<div class="komrow"><span class="st ${r.status}">${STL[r.status]}</span><div class="txt"><b>${name}</b>
-      <div class="sub">${r.km.toFixed(2)} km · ${listed}${listed ? ' · ' : ''}${now}${r.date ? ' · ' + esc(r.date) : ''}</div></div></div>`;
+      <div class="sub">${r.km != null ? r.km.toFixed(2) + ' km · ' : ''}${listed}${listed ? ' · ' : ''}${now}${r.date ? ' · ' + esc(r.date) : ''}</div></div></div>`;
   }).join('') : '<div class="small">Nothing in this filter.</div>';
   const stale = rows.filter(r => r.seg && (r.status === 'refresh' || r.status === 'check')).length;
   $('#komRefresh').disabled = busy || !rows.some(r => r.seg);
@@ -1385,7 +1429,7 @@ function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderLo
 
 /* ---------------- Accounts and sync (Supabase) ---------------- */
 const cloudOn = () => !!(SUPABASE_URL && SUPABASE_KEY);
-const PRIVACY = `Your account stores your email, your display name and what this page saves for you (segments, KOM times, settings and your own Strava app login) so it syncs across your devices. Your Strava details and KOM times are visible only to you. Your pasted KOM list and your segment list (links and names) are visible to the site admin and to members you choose to share with. Data is stored with Supabase in Sydney, Australia. You can delete your account and all its data at any time from Settings.`;
+const PRIVACY = `Your account stores your email, your display name and what this page saves for you (segments, KOM times, settings and your own Strava app login) so it syncs across your devices. Your Strava details and KOM times are visible only to you. Your pasted KOM list and your segment list (links and names) are visible to the site admin and to members you choose to share with. So are the segments where you hold the KOM (segment ID and name only, never times), which this page works out from your own Strava data. Data is stored with Supabase in Sydney, Australia. You can delete your account and all its data at any time from Settings.`;
 function hashStr(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + '.' + s.length; }
 function setSyncBadge(txt, err) { const b = $('#syncBadge'); b.textContent = txt; b.classList.toggle('err', !!err); }
 
@@ -1393,7 +1437,7 @@ function setSyncBadge(txt, err) { const b = $('#syncBadge'); b.textContent = txt
 const SYNC_GROUPS = ['riders', 'settings', 'ignoredOwners', 'komLists', 'ratings', 'myName', 'home', 'auth'];
 function groupVal(g) {
   if (g === 'riders') return { profiles: S.profiles, activeProfile: S.activeProfile };
-  if (g === 'auth') { const a = S.auth; return { clientId: a.clientId, clientSecret: a.clientSecret, refreshToken: a.refreshToken, accessToken: a.accessToken, expiresAt: a.expiresAt, scope: a.scope || '', athleteName: a.athleteName || '' }; }
+  if (g === 'auth') { const a = S.auth; return { clientId: a.clientId, clientSecret: a.clientSecret, refreshToken: a.refreshToken, accessToken: a.accessToken, expiresAt: a.expiresAt, scope: a.scope || '', athleteName: a.athleteName || '', sharedFrom: a.sharedFrom || '' }; }
   return S[g] ?? null;
 }
 function setGroup(g, v) {
@@ -1484,9 +1528,24 @@ function ownKomRows() {
   const k = Object.keys(S.komLists || {}).find(o => names.includes(o.toLowerCase()));
   return k ? S.komLists[k].rows : [];
 }
+// Segments where my PR is as fast as the KOM time (using my rider profile's Compare against)
+function myDetectedKoms() {
+  const me = (S.myName || '').trim().toLowerCase();
+  const pr = S.profiles.find(p => (p.name || '').trim().toLowerCase() === me) || S.profiles[0] || {};
+  const tgt = pr.target || 'kom', out = new Set();
+  for (const [id, d] of Object.entries(S.details || {})) {
+    if (!d || d.notFound || !d.prS) continue;
+    const k = parseTime(d[tgt]);
+    if (k && d.prS <= k + 0.5) out.add(String(id));
+  }
+  return out;
+}
 async function pushPublic() {
   const m = syncMeta();
-  const segs = Object.values(S.segments).filter(s => !(S.ratings[s.id] || {}).hidden).map(s => ({ id: s.id, name: s.name || '' }));
+  const mine = myDetectedKoms();
+  // Shared: segment ID and name, plus a flag where I hold the KOM. Never times or PRs.
+  const segs = Object.values(S.segments).filter(s => !(S.ratings[s.id] || {}).hidden || mine.has(String(s.id)))
+    .map(s => mine.has(String(s.id)) ? { id: s.id, name: s.name || '', kom: true } : { id: s.id, name: s.name || '' });
   const pub = { kom_rows: ownKomRows(), segments: segs };
   const ph = hashStr(JSON.stringify(pub));
   if (ph === m.pubHash) return;
@@ -1507,14 +1566,42 @@ async function loadShared() {
   S.remoteLists = {};
   for (const l of pl.data || []) {
     if (l.user_id === cloudUser.id) continue;
-    S.remoteLists[l.user_id] = { name: names.get(l.user_id) || 'Member', rows: l.kom_rows || [], segments: l.segments || [], at: Date.parse(l.updated_at) || 0 };
+    // KOMs = their pasted list plus the segments their page found they hold (ID + name only)
+    const pasted = l.kom_rows || [];
+    const flagged = (l.segments || []).filter(s => s.kom).map(s => ({ name: s.name || '', key: normName(s.name), km: null, timeS: null, date: '', id: String(s.id) }));
+    const byKey = new Map(flagged.map(f => [f.key, f]));
+    const rows = pasted.map(r => byKey.has(r.key) ? { ...r, id: byKey.get(r.key).id } : r);
+    const pastedKeys = new Set(pasted.map(r => r.key));
+    flagged.forEach(f => { if (!pastedKeys.has(f.key)) rows.push(f); });
+    S.remoteLists[l.user_id] = { name: names.get(l.user_id) || 'Member', rows, segments: l.segments || [], at: Date.parse(l.updated_at) || 0 };
   }
   S.remoteListsAt = Date.now();
+  const [ash, akey] = await Promise.all([
+    sb.from('app_shares').select('owner,viewer'),
+    sb.from('app_keys').select('owner,client_id,client_secret')
+  ]);
+  S.appFeature = !ash.error && !akey.error;
+  if (S.appFeature) {
+    S.myAppShares = (ash.data || []).filter(x => x.owner === cloudUser.id).map(x => x.viewer);
+    S.appOffers = (akey.data || []).filter(k => k.owner !== cloudUser.id).map(k => ({ owner: k.owner, name: names.get(k.owner) || 'A member', client_id: k.client_id, client_secret: k.client_secret }));
+  }
   if (isAdmin()) {
     const inv = await sb.from('invites').select('code,note,max_uses,uses,revoked,created_at').order('created_at', { ascending: false });
     S.invites = inv.error ? [] : (inv.data || []);
+    const rq = await sb.from('invite_requests').select('id,name,email,note,status,code,created_at,decided_at').order('created_at', { ascending: false });
+    S.reqFeature = !rq.error;
+    S.inviteRequests = rq.error ? [] : (rq.data || []);
   }
   saveLocal();
+}
+// Keep the shared copy of my Strava app details current (only while someone is ticked)
+async function pushAppKeys() {
+  if (!S.appFeature || !(S.myAppShares || []).length || !S.auth.clientId || !S.auth.clientSecret || S.auth.sharedFrom) return;
+  const m = syncMeta(), kh = hashStr(S.auth.clientId + '|' + S.auth.clientSecret);
+  if (kh === m.appKeyHash) return;
+  const { error } = await sb.from('app_keys').upsert({ owner: cloudUser.id, client_id: S.auth.clientId, client_secret: S.auth.clientSecret, updated_at: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+  m.appKeyHash = kh; saveLocal();
 }
 const isAdmin = () => !!(cloudUser && (S.members || []).find(x => x.id === cloudUser.id && x.is_admin));
 async function syncNow(full) {
@@ -1525,6 +1612,7 @@ async function syncNow(full) {
     if (full) { await pullNow(); renderAll(); }
     await pushNow();
     await pushPublic();
+    await pushAppKeys();
     if (full) { await loadShared(); renderAll(); }
     setSyncBadge('Synced ✓');
   } catch (e) { setSyncBadge('Offline', true); console.warn('sync', e); }
@@ -1557,7 +1645,11 @@ async function startCloud() {
   try { sb = await loadSupabase(); }
   catch (e) { if (!syncMeta().uid) { showGate(true); $('#gateStatus').textContent = e.message; } else setSyncBadge('Offline', true); return !!syncMeta().uid; }
   const { data } = await sb.auth.getSession();
-  if (!data || !data.session) { showGate(true); return true; }
+  if (!data || !data.session) {
+    showGate(true);
+    if (/[?&]request\b/.test(location.search) || loadReq()) gateTab('req');
+    return true;
+  }
   await afterSignIn(data.session.user);
   return true;
 }
@@ -1569,8 +1661,69 @@ async function afterSignIn(user) {
   if (!hasLogin()) showTab('setup');
 }
 function gateMsg(t) { $('#gateStatus').textContent = t; }
-$('#gTabIn').onclick = () => { $('#gTabIn').classList.add('on'); $('#gTabJoin').classList.remove('on'); $('#gIn').hidden = false; $('#gJoin').hidden = true; gateMsg(''); };
-$('#gTabJoin').onclick = () => { $('#gTabJoin').classList.add('on'); $('#gTabIn').classList.remove('on'); $('#gIn').hidden = true; $('#gJoin').hidden = false; gateMsg(''); };
+let reqOpenedAt = 0;
+function gateTab(which) {
+  [['in', '#gTabIn', '#gIn'], ['join', '#gTabJoin', '#gJoin'], ['req', '#gTabReq', '#gReq']].forEach(([k, b, s]) => { $(b).classList.toggle('on', k === which); $(s).hidden = k !== which; });
+  gateMsg('');
+  if (which === 'req') { reqOpenedAt = Date.now(); renderRequestStatus(); }
+}
+$('#gTabIn').onclick = () => gateTab('in');
+$('#gTabJoin').onclick = () => gateTab('join');
+$('#gTabReq').onclick = () => gateTab('req');
+
+/* ---------------- Invite requests (visitor side) ---------------- */
+const REQ_KEY = 'krd-segments-request';
+const loadReq = () => { try { return JSON.parse(localStorage.getItem(REQ_KEY)); } catch (e) { return null; } };
+const saveReq = r => { try { r ? localStorage.setItem(REQ_KEY, JSON.stringify(r)) : localStorage.removeItem(REQ_KEY); } catch (e) {} };
+function randomHex(n) { const b = new Uint8Array(n); crypto.getRandomValues(b); return Array.from(b, x => x.toString(16).padStart(2, '0')).join(''); }
+function newUuid() { if (crypto.randomUUID) return crypto.randomUUID(); const h = randomHex(16); return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`; }
+// Check the request this browser sent; returns {status, code} or null
+async function checkMyRequest() {
+  const r = loadReq(); if (!r || !sb) return null;
+  if (r.fake) return { status: 'pending' };
+  const { data, error } = await sb.rpc('check_invite_request', { p_id: r.id, p_secret: r.secret });
+  if (error) return { status: 'unknown' };
+  if (!data) { saveReq(null); return null; }   // deleted by the admin or tidied up
+  return data;
+}
+async function renderRequestStatus() {
+  const r = loadReq(), box = $('#reqStatus');
+  if (!r) { box.innerHTML = ''; $('#reqForm').hidden = false; return; }
+  const st = await checkMyRequest();
+  if (!st) { box.innerHTML = ''; $('#reqForm').hidden = false; return; }
+  const when = new Date(r.at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  if (st.status === 'approved' && st.code) {
+    box.innerHTML = `<div class="privacy" style="font-size:14px;color:var(--ink)"><b>You're approved.</b> Your invite code is <code class="inv">${esc(st.code)}</code>.<div class="actions" style="margin-top:8px"><button class="btn lime" id="reqJoin">Create my account</button></div></div>`;
+    $('#reqForm').hidden = true;
+    $('#reqJoin').onclick = () => { gateTab('join'); $('#jCode').value = st.code; $('#jName').value = r.name || ''; $('#jEmail').value = r.email || ''; $('#jPass').focus(); };
+  } else if (st.status === 'declined') {
+    box.innerHTML = `<div class="privacy" style="font-size:14px;color:var(--ink)">Your request from ${when} wasn't approved.</div>`;
+    saveReq(null); $('#reqForm').hidden = false;
+  } else {
+    box.innerHTML = `<div class="privacy" style="font-size:14px;color:var(--ink)"><b>Request sent ${when}.</b> It's waiting for the admin. Check back here on this device later.<div style="margin-top:6px"><a href="#" id="reqForget">Send a new request instead</a></div></div>`;
+    $('#reqForm').hidden = true;
+    $('#reqForget').onclick = e => { e.preventDefault(); saveReq(null); renderRequestStatus(); };
+  }
+}
+$('#rGo').onclick = async () => {
+  const name = $('#rName').value.trim(), email = $('#rEmail').value.trim(), note = $('#rNote').value.trim();
+  if (!name) return gateMsg('Enter your name.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return gateMsg('Enter a valid email.');
+  // Bot filter: a hidden field people never fill, and forms sent within 2 seconds, are quietly ignored
+  if ($('#rWebsite').value || Date.now() - reqOpenedAt < 2000) { saveReq({ id: newUuid(), secret: '', name, email, at: Date.now(), fake: true }); renderRequestStatus(); return; }
+  gateMsg('Sending…');
+  const id = newUuid(), secret = randomHex(20);
+  const { error } = await sb.from('invite_requests').insert({ id, name, email, note: note || null, secret });
+  if (error) {
+    if (/ALREADY_REQUESTED/.test(error.message)) return gateMsg('There\'s already a request waiting for this email.');
+    if (/TOO_MANY/.test(error.message)) return gateMsg('Too many requests are waiting right now. Try again later.');
+    if (/fetch|network/i.test(error.message)) return gateMsg('Can\'t reach the account service. Check your connection and try again.');
+    if (/does not exist|schema cache/i.test(error.message)) return gateMsg('Invite requests aren\'t switched on yet. Ask the admin for a code instead.');
+    return gateMsg(error.message);
+  }
+  saveReq({ id, secret, name, email, at: Date.now() });
+  gateMsg(''); renderRequestStatus();
+};
 $('#inGo').onclick = async () => {
   const email = $('#inEmail').value.trim(), password = $('#inPass').value;
   if (!email || !password) return gateMsg('Enter your email and password.');
@@ -1621,8 +1774,29 @@ function renderAccount() {
       ${missing ? `<button class="btn" data-addmissing="${uid}">Add ${missing} missing</button>` : ''}
       ${l.rows.length ? `<label class="chk" style="margin:0"><input type="checkbox" data-hideowner="${esc(l.name)}"${ign.has(l.name.toLowerCase()) ? ' checked' : ''}> Hide their KOMs</label>` : ''}</div>`;
   }).join('') : '<p class="small">Nobody has shared their lists with you yet.</p>';
+  const canShareApp = S.appFeature && hasLogin() && !S.auth.sharedFrom;
+  $('#appShareBox').hidden = !canShareApp;
+  $('#appShareNote').hidden = S.appFeature !== false;
+  if (S.appFeature === false) $('#appShareNote').textContent = 'Sharing your Strava app needs update 2 in Supabase (segments-update-2.sql).';
+  if (canShareApp) {
+    const as = new Set(S.myAppShares || []);
+    $('#appShareWith').innerHTML = others.length
+      ? others.map(x => `<label class="chk"><input type="checkbox" data-appshare="${x.id}"${as.has(x.id) ? ' checked' : ''}> ${esc(x.display_name)}</label>`).join('')
+      : '<p class="small">No other members yet.</p>';
+  }
   $('#adminBox').hidden = !isAdmin();
   if (isAdmin()) {
+    const reqs = S.inviteRequests || [], pending = reqs.filter(q => q.status === 'pending').length;
+    $('#reqCount').textContent = pending ? `(${pending} waiting)` : '';
+    $('#reqList').innerHTML = S.reqFeature === false
+      ? '<p class="small">Invite requests need update 3 in Supabase (segments-update-3.sql).</p>'
+      : reqs.length ? reqs.map(q => {
+        const d = new Date(q.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+        const head = `<div class="txt"><b>${esc(q.name)}</b> · <a href="mailto:${esc(q.email)}">${esc(q.email)}</a><div class="sub">${d}${q.note ? ' · ' + esc(q.note) : ''}</div>`;
+        return q.status === 'pending'
+          ? `<div class="mrow">${head}</div><button class="btn" data-reqok="${q.id}">Approve</button><button class="btn ghost" data-reqno="${q.id}">Decline</button></div>`
+          : `<div class="mrow">${head}<div class="sub">${q.status === 'approved' ? 'Approved · code ' + esc(q.code || '') : 'Declined'}</div></div><button class="btn ghost" data-reqdel="${q.id}">Delete</button></div>`;
+      }).join('') : '<p class="small">No requests.</p>';
     $('#invList').innerHTML = (S.invites || []).map(i => `<div class="mrow"><div class="txt"><code class="inv">${esc(i.code)}</code> ${esc(i.note || '')}
       <div class="sub">${i.revoked ? 'revoked' : `${i.uses}/${i.max_uses} used`}</div></div>
       ${!i.revoked && i.uses < i.max_uses ? `<button class="btn ghost" data-copyinv="${esc(i.code)}">Copy</button><button class="btn ghost" data-revoke="${esc(i.code)}">Revoke</button>` : ''}</div>`).join('');
@@ -1653,6 +1827,25 @@ $('#acctDelete').onclick = async () => {
   alert('Your account has been deleted.');
   location.reload();
 };
+$('#appShareWith').addEventListener('change', async e => {
+  const cb = e.target.closest('[data-appshare]'); if (!cb) return;
+  const viewer = cb.dataset.appshare, on = cb.checked;
+  cb.disabled = true;
+  let err = null;
+  if (on) {
+    const k = await sb.from('app_keys').upsert({ owner: cloudUser.id, client_id: S.auth.clientId, client_secret: S.auth.clientSecret, updated_at: new Date().toISOString() });
+    err = k.error || (await sb.from('app_shares').insert({ owner: cloudUser.id, viewer })).error;
+    if (!err) syncMeta().appKeyHash = hashStr(S.auth.clientId + '|' + S.auth.clientSecret);
+  } else {
+    err = (await sb.from('app_shares').delete().eq('owner', cloudUser.id).eq('viewer', viewer)).error;
+    const left = (S.myAppShares || []).filter(x => x !== viewer);
+    if (!err && !left.length) { await sb.from('app_keys').delete().eq('owner', cloudUser.id); syncMeta().appKeyHash = ''; }
+  }
+  cb.disabled = false;
+  if (err) { cb.checked = !on; return alert('Could not change this: ' + err.message); }
+  S.myAppShares = on ? [...(S.myAppShares || []), viewer] : (S.myAppShares || []).filter(x => x !== viewer);
+  saveLocal();
+});
 $('#shareWith').addEventListener('change', async e => {
   const cb = e.target.closest('[data-share]'); if (!cb) return;
   const viewer = cb.dataset.share;
@@ -1689,6 +1882,24 @@ $('#invMake').onclick = async () => {
   renderAccount();
   try { await navigator.clipboard.writeText(code); alert(`Invite code ${code} copied. Send it with the link to this page.`); } catch (e) { alert(`Invite code: ${code}`); }
 };
+$('#reqList').addEventListener('click', async e => {
+  const ok = e.target.closest('[data-reqok]'), no = e.target.closest('[data-reqno]'), del = e.target.closest('[data-reqdel]');
+  const el = ok || no || del; if (!el) return;
+  const id = el.dataset.reqok || el.dataset.reqno || el.dataset.reqdel;
+  const q = (S.inviteRequests || []).find(x => x.id === id);
+  if (!q) return;
+  e.target.disabled = true;
+  if (del) {
+    const { error } = await sb.from('invite_requests').delete().eq('id', q.id);
+    if (error) { e.target.disabled = false; return alert(error.message); }
+    $('#reqMsg').textContent = `Deleted ${q.name}'s request.`;
+  } else {
+    const { data, error } = await sb.rpc('decide_invite_request', { p_id: q.id, p_approve: !!ok });
+    if (error) { e.target.disabled = false; return alert(error.message); }
+    $('#reqMsg').textContent = ok ? `Approved ${q.name}: code ${data}. They'll see it next time they open the page.` : `Declined ${q.name}'s request.`;
+  }
+  await loadShared(); renderAccount();
+});
 $('#invList').addEventListener('click', async e => {
   const c = e.target.closest('[data-copyinv]');
   if (c) { try { await navigator.clipboard.writeText(c.dataset.copyinv); c.textContent = 'Copied'; } catch (err) { prompt('Invite code', c.dataset.copyinv); } return; }
@@ -1716,13 +1927,16 @@ function renderAuthState() {
     $('#authBannerTxt').textContent = S.authProblem ? 'Strava needs reconnecting. Your segments are safe.' : 'Connect Strava to import segments and get KOM times.';
     $('#authFix').textContent = S.authProblem ? 'Reconnect' : 'Set up';
   }
+  const offers = !ok ? (S.appOffers || []) : [];
+  $('#appOffer').hidden = !offers.length;
+  if (offers.length) $('#appOffer').innerHTML = offers.map((o, i) => `<b>${esc(o.name)} has shared their Strava app with you.</b> Skip steps 1 and 2: <button class="btn lime" data-useapp="${i}" style="margin-top:6px">Use ${esc(o.name)}'s Strava app</button>`).join('<br>') + '<div style="margin-top:6px">Then do step 3.</div>';
   $('#g1').classList.toggle('done', !!S.auth.clientId);
   $('#g2').classList.toggle('done', !!(S.auth.clientId && S.auth.clientSecret));
   $('#g3').classList.toggle('done', ok);
   $('#g4').classList.toggle('done', ok && Object.keys(S.segments).length > 0);
   $$('.siteurl').forEach(el => el.textContent = /^https?:/.test(location.protocol) ? location.origin : 'https://krdgroup.com.au');
   const cl = $('#connLine');
-  if (cl) cl.textContent = ok ? `Connected${S.auth.athleteName ? ' as ' + S.auth.athleteName : ''} (Strava app ${S.auth.clientId}).` : S.authProblem ? 'Strava rejected the saved login. Open the setup guide to reconnect.' : 'Not connected.';
+  if (cl) cl.textContent = ok ? `Connected${S.auth.athleteName ? ' as ' + S.auth.athleteName : ''} (${S.auth.sharedFrom ? S.auth.sharedFrom + '\'s Strava app' : 'Strava app ' + S.auth.clientId}).` : S.authProblem ? 'Strava rejected the saved login. Open the setup guide to reconnect.' : 'Not connected.';
 }
 
 /* ---------------- Tabs ---------------- */
@@ -1808,6 +2022,7 @@ $('#authExchange').onclick = async () => {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) {
       const why = (j.errors || []).map(x => x.field + ' ' + x.code).join(', ');
+      if (/limit|capacity|exceed/i.test((j.message || '') + ' ' + why) && S.auth.sharedFrom) throw new Error(`${S.auth.sharedFrom}'s Strava app has reached its athlete limit. Ask them to raise it on strava.com/settings/api, or make your own app (steps 1 and 2).`);
       throw new Error(/code/.test(why) ? 'That code has expired or was already used. Tap Authorise again and paste the new address straight away.' : 'Strava said: ' + (j.message || r.status) + (why ? ' (' + why + ')' : ''));
     }
     Object.assign(S.auth, { accessToken: j.access_token, expiresAt: j.expires_at, refreshToken: j.refresh_token, scope: j.scope || '' });
@@ -1841,10 +2056,19 @@ $('#klSummary').addEventListener('click', e => {
 });
 $('#authClear').onclick = () => { if (!confirm('Forget the Strava login on this device? Your segments and lists stay.')) return; S.auth = defaults().auth; S.authProblem = false; save(); renderSettings(); renderAuthState(); $('#authStatus').textContent = 'Strava login removed.'; };
 $('#connSetup').onclick = () => showTab('setup');
+$('#appOffer').addEventListener('click', e => {
+  const b = e.target.closest('[data-useapp]'); if (!b) return;
+  const o = (S.appOffers || [])[+b.dataset.useapp]; if (!o) return;
+  Object.assign(S.auth, { clientId: o.client_id, clientSecret: o.client_secret, sharedFrom: o.name, refreshToken: '', accessToken: '', expiresAt: 0 });
+  S.authProblem = false;
+  save(); renderSettings(); renderAuthState();
+  $('#authStatus').textContent = `Using ${o.name}'s Strava app. Now step 3: tap Authorise with Strava.`;
+  $('#g3').scrollIntoView({ block: 'center' });
+});
 $('#authFix').onclick = () => showTab('setup');
 $('#gStarred').onclick = () => { showTab('ride'); importStarred(); };
 $('#gRides').onclick = () => { showTab('ride'); importRides(); };
-['#clientId', '#clientSecret'].forEach(s => $(s).addEventListener('change', () => { S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); save(); renderAuthState(); }));
+['#clientId', '#clientSecret'].forEach(s => $(s).addEventListener('change', () => { S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); S.auth.sharedFrom = ''; save(); renderAuthState(); }));
 
 /* ---------------- Backup / share files ---------------- */
 async function deliverFile(obj, filename) {
