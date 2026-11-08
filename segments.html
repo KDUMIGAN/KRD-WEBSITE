@@ -106,6 +106,10 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
 .gstep ul{margin:6px 0 0;padding-left:18px}
 .warnbar{background:#fff4e0;border-color:#efc27a;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .warnbar span{flex:1;min-width:180px;font-size:14px}
+.demobar{background:var(--grey);color:#fff;border:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.demobar span{flex:1;min-width:180px;font-size:14px}
+.demobar b{color:var(--lime)}
+.demobar a{color:#ddd}
 .syncbadge{margin-left:auto;font-size:12px;color:#cfcfcf;white-space:nowrap}
 .syncbadge.err{color:#f2b8a8}
 #gate{max-width:460px;margin:0 auto}
@@ -189,10 +193,12 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
       </div>
     </div>
     <div id="gateStatus" class="small"></div>
+    <p class="small" style="text-align:center;margin:12px 0 0">Not sure yet? <a href="?demo" id="tryDemo">Try the demo</a> with made-up segments.</p>
   </div>
 </div>
 <!-- ============ RIDE ============ -->
 <section id="tab-ride">
+  <div class="card demobar" id="demoBar" hidden><span><b>Demo</b> with made-up segments around Mackay. Live wind, real predictions.</span><button class="btn lime" id="demoReq">Request access</button><a href="#" id="demoOut" class="small"></a></div>
   <div class="card warnbar" id="authBanner" hidden><span id="authBannerTxt"></span><button class="btn" id="authFix">Set up</button></div>
   <div class="card wind" id="windCard"><div>Loading wind…</div></div>
   <details class="card" id="locBox"><summary class="locline">📍 Start: <b id="locName">not set</b></summary>
@@ -340,7 +346,7 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
     <p class="small" id="usageLine" style="margin-top:0"></p>
   </div>
 
-  <div class="card">
+  <div class="card" id="connCard">
     <h2>Strava connection</h2>
     <p class="small" id="connLine" style="margin-top:0"></p>
     <div class="actions">
@@ -355,7 +361,7 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
     <p class="small" id="appShareNote" hidden></p>
   </div>
 
-  <div class="card">
+  <div class="card" id="dataCard">
     <h2>Data</h2>
     <div class="actions">
       <button class="btn lime" id="backupBtn">Full backup (my devices)</button>
@@ -433,6 +439,7 @@ const LS_KEY = 'krd-wind-segments-v1';
    Leave both blank and the page works as before, on this device only. */
 const SUPABASE_URL = (window.__SB_TEST && window.__SB_TEST.url) || 'https://egizmfsaljkalwvvtgcw.supabase.co';
 const SUPABASE_KEY = (window.__SB_TEST && window.__SB_TEST.key) || 'sb_publishable_uz1UwCanAM38rF4E_LJJpQ_3B4aCiQ5';
+const DEMO = /[?&]demo\b/.test(location.search);
 let sb = null, cloudUser = null;          // cloudUser: {id, email} once signed in
 let syncTimer = null, syncing = false, syncAgain = false;
 const DEFAULT_BOUNDS = { s: -21.22, w: 149.03, n: -20.99, e: 149.25 }; // Mackay area: default wind spot and address-search bias
@@ -501,6 +508,7 @@ function load() {
 let S = load();
 let saveWarned = false;
 function save() {
+  if (DEMO) return;   // demo data is never stored
   if (typeof scheduleSync === 'function') scheduleSync();
   try { localStorage.setItem(LS_KEY, JSON.stringify(S)); }
   catch (e) { if (!saveWarned) { saveWarned = true; setStatus('Could not save to browser storage: ' + e.message, true); } }
@@ -717,6 +725,7 @@ async function getToken(force) {
   return a.accessToken;
 }
 async function api(path, retry = true) {
+  if (DEMO) throw new Error('This is the demo. Request access to use your own Strava segments.');
   const u = usageState();
   if (u.left15 <= 0 || u.leftDay <= 0) throw new RateError(u.leftDay <= 0 ? 'Daily Strava budget used. Try again tomorrow.' : 'Strava budget for this 15-min window used. Try again after ' + new Date(u.next15).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }) + '.');
   const tok = await getToken(false);
@@ -1449,7 +1458,7 @@ function setGroup(g, v) {
 }
 const ghash = g => hashStr(JSON.stringify(groupVal(g)));
 function syncMeta() { if (!S.sync) S.sync = { uid: null, version: 0, hash: {}, at: {}, docHash: '', pubHash: '' }; return S.sync; }
-function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+function saveLocal() { if (DEMO) return; try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
 
 // Strava caches merge item by item (newest / most detailed wins)
 function mergeCaches(doc) {
@@ -1917,6 +1926,12 @@ setInterval(() => { if (cloudUser && !document.hidden) syncNow(true); }, 5 * 60e
 const hasLogin = () => !!(S.auth.clientId && S.auth.clientSecret && S.auth.refreshToken);
 const isConnected = () => hasLogin() && !S.authProblem;
 function renderAuthState() {
+  if (DEMO) {
+    $('#authBanner').hidden = true;
+    const sbtn = document.querySelector('nav.tabs button[data-tab="setup"]'); if (sbtn) sbtn.hidden = true;
+    $('#connCard').hidden = true; $('#dataCard').hidden = true; $('#acctCard').hidden = true;
+    return;
+  }
   const ok = isConnected();
   // Setup tab only shows while setup is needed (or while you're on it)
   const setupBtn = document.querySelector('nav.tabs button[data-tab="setup"]');
@@ -2163,9 +2178,64 @@ $('#importFile').onchange = async e => {
 };
 $('#resetAll').onclick = () => { if (!confirm('Reset everything on this device, including credentials and ratings?')) return; S = defaults(); save(); geomCache.clear(); renderAll(); };
 
+/* ---------------- Demo (made-up segments, never saved) ---------------- */
+// Waypoints sit on real Mackay roads; the visitor's browser snaps them to the road with OpenStreetMap routing.
+// Names, KOM times and riders are invented. kmh = the made-up KOM average speed.
+const DEMO_SEGMENTS = [
+  { id: 'd1', name: 'Harbour Road Hammer', grade: 0.3, kmh: 47, holder: 'Jess', way: [[-21.1240, 149.2010], [-21.1165, 149.2095], [-21.1090, 149.2180]] },
+  { id: 'd2', name: 'River Street Cruise', grade: 0.1, kmh: 42, holder: 'me', way: [[-21.1395, 149.1840], [-21.1388, 149.1905], [-21.1380, 149.1975]] },
+  { id: 'd3', name: 'Nebo Road Drag', grade: 0.4, kmh: 45, holder: 'Tom', way: [[-21.1520, 149.1740], [-21.1585, 149.1670], [-21.1650, 149.1600]] },
+  { id: 'd4', name: 'Bucasia Beach Blast', grade: 0.2, kmh: 44, holder: 'Jess', way: [[-21.0440, 149.1605], [-21.0360, 149.1595], [-21.0280, 149.1580]] },
+  { id: 'd5', name: 'Shoal Point Sprint', grade: 0.1, kmh: 49, holder: '', way: [[-21.0150, 149.1450], [-21.0080, 149.1480], [-21.0010, 149.1520]] },
+  { id: 'd6', name: 'Eimeo Rollers', grade: 1.2, kmh: 40, holder: 'Tom', way: [[-21.0640, 149.1580], [-21.0600, 149.1635], [-21.0560, 149.1690]] },
+  { id: 'd7', name: 'Walkerston Straight', grade: 0.2, kmh: 46, holder: 'Jess', way: [[-21.1500, 149.0800], [-21.1560, 149.0710], [-21.1620, 149.0620]] },
+  { id: 'd8', name: 'Glenella Highway Push', grade: 0.5, kmh: 43, holder: '', way: [[-21.1100, 149.1500], [-21.1000, 149.1475], [-21.0900, 149.1450]] },
+  { id: 'd9', name: 'Lookout Kick', grade: 6.5, kmh: 21, holder: 'Tom', way: [[-21.0705, 149.2245], [-21.0710, 149.2268], [-21.0715, 149.2290]] },
+  { id: 'd10', name: 'Slade Point Return', grade: 0.3, kmh: 44, holder: '', way: [[-21.0760, 149.2150], [-21.0870, 149.2110], [-21.0980, 149.2070]] }
+];
+function encodePolyline(pts) {
+  let out = '', pl = 0, pg = 0;
+  const enc = v => { v = v < 0 ? ~(v << 1) : v << 1; let s = ''; while (v >= 0x20) { s += String.fromCharCode((0x20 | (v & 0x1f)) + 63); v >>= 5; } return s + String.fromCharCode(v + 63); };
+  for (const [la, lo] of pts) { const a = Math.round(la * 1e5), b = Math.round(lo * 1e5); out += enc(a - pl) + enc(b - pg); pl = a; pg = b; }
+  return out;
+}
+function demoKom(seg, kmh) { const s = Math.round(seg.distance / (kmh / 3.6)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+function startDemo() {
+  const now = Date.now(), segments = {}, details = {}, hadAccount = !!(S.sync && S.sync.uid);
+  for (const d of DEMO_SEGMENTS) {
+    let dist = 0; for (let i = 1; i < d.way.length; i++) dist += hav(d.way[i - 1], d.way[i]);
+    segments[d.id] = { id: d.id, name: d.name, distance: Math.round(dist * 1.04), avg_grade: d.grade, climb_category: d.grade >= 3 ? 1 : 0, start: d.way[0], end: d.way[d.way.length - 1], points: encodePolyline(d.way), hiRes: false, fetchedAt: now };
+    details[d.id] = { kom: demoKom(segments[d.id], d.kmh), fetchedAt: now };
+    if (d.holder === 'me') details[d.id].prS = parseTime(details[d.id].kom);
+  }
+  const listFor = who => ({ rows: DEMO_SEGMENTS.filter(d => d.holder === who).map(d => ({ name: d.name, key: normName(d.name), km: null, timeS: null, date: '', id: d.id })), importedAt: now });
+  S = { ...defaults(), segments, details, komLists: { Jess: listFor('Jess'), Tom: listFor('Tom') }, ignoredOwners: [],
+    myName: 'Demo rider', home: { lat: -21.1425, lng: 149.1860, name: 'Mackay City (demo)' },
+    profiles: [{ id: 'p1', name: 'Demo rider', riderKg: 75, bikeKg: 9, cda: 0.32, crr: 0.0045, p60: 650, p300: 380, p1200: 300, target: 'kom' }], activeProfile: 'p1',
+    auth: defaults().auth };
+  S.settings.sortBy = 'best';
+  $('#demoBar').hidden = false;
+  $('#demoOut').textContent = hadAccount ? 'Back to my segments' : 'Sign in';
+  geomCache.clear(); renderAll(); showTab('ride');
+  // Snap each made-up segment onto the real road
+  Promise.allSettled(DEMO_SEGMENTS.map(async d => {
+    const url = 'https://routing.openstreetmap.de/routed-bike/route/v1/driving/' + d.way.map(p => p[1] + ',' + p[0]).join(';') + '?overview=full&geometries=polyline';
+    const r = await fetch(url); if (!r.ok) return;
+    const j = await r.json(), rt = j.routes && j.routes[0]; if (!rt) return;
+    const seg = S.segments[d.id];
+    seg.points = rt.geometry; seg.distance = Math.round(rt.distance); seg.hiRes = true;
+    const pts = decodePolyline(rt.geometry); seg.start = pts[0]; seg.end = pts[pts.length - 1];
+    S.details[d.id].kom = demoKom(seg, d.kmh);
+    if (d.holder === 'me') S.details[d.id].prS = parseTime(S.details[d.id].kom);
+  })).then(() => { geomCache.clear(); renderAll(); });
+}
+$('#demoReq').onclick = () => { location.href = location.pathname + '?request'; };
+$('#demoOut').onclick = e => { e.preventDefault(); location.href = location.pathname; };
+
 /* ---------------- Start ---------------- */
 renderAll();
-startCloud().then(usingCloud => { if (!usingCloud && !hasLogin()) showTab('setup'); });
+if (DEMO) startDemo();
+else startCloud().then(usingCloud => { if (!usingCloud && !hasLogin()) showTab('setup'); });
 fetchWeather(false).then(renderAll).catch(e => setStatus('Wind: ' + e.message, true));
 setInterval(() => { if (S.hourKey === 'now') { fetchWeather(false).then(() => { renderWind(); renderList(); renderMap(); }).catch(() => {}); } }, 10 * 60e3);
 </script>
