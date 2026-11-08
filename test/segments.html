@@ -329,6 +329,12 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
       <button class="btn ghost" id="connSetup">Open setup guide</button>
       <button class="btn ghost" id="authClear">Forget Strava login</button>
     </div>
+    <div id="appShareBox" hidden>
+      <h2 style="margin-top:14px">Let members use my Strava app</h2>
+      <p class="small" style="margin-top:0">People you tick can connect through your Strava app instead of making their own. First raise your app's athlete limit on <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener">strava.com/settings/api</a> (up to 10, including you). They can read your Client ID and Secret, and you all share your app's Strava limits. Unticking stops new connections; to cut someone off completely, also reset your Client Secret on Strava.</p>
+      <div id="appShareWith"></div>
+    </div>
+    <p class="small" id="appShareNote" hidden></p>
   </div>
 
   <div class="card">
@@ -350,6 +356,7 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
   <div class="card guide">
     <h2>Get started</h2>
     <p class="small" style="margin-top:0">A one-off setup, about 5 minutes. Your Strava details stay on this device only.</p>
+    <div class="privacy" id="appOffer" hidden style="margin:0 0 10px"></div>
     <div class="gstep" id="g1"><div class="gn">1</div><div class="gb">
       <b>Create your own Strava API app</b>
       <div class="small">Open <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener">strava.com/settings/api</a> (log in to Strava first) and fill in:</div>
@@ -924,20 +931,26 @@ function allKomLists() {
     const ex = Object.keys(out).find(k => k.toLowerCase() === l.name.toLowerCase());
     if (ex) {
       const m = new Map(out[ex].rows.map(r => [r.key + '|' + r.km, r]));
-      l.rows.forEach(r => m.set(r.key + '|' + r.km, r));
+      l.rows.forEach(r => {
+        // A shared KOM with no distance is the same KOM as a pasted row of the same name: just attach its ID
+        const same = r.km == null && Array.from(m.values()).find(x => x.key === r.key);
+        if (same) m.set(same.key + '|' + same.km, { ...same, id: r.id || same.id });
+        else m.set(r.key + '|' + r.km, r);
+      });
       out[ex] = { rows: Array.from(m.values()), importedAt: Math.max(out[ex].importedAt || 0, l.at || 0) };
     } else out[l.name] = { rows: l.rows, importedAt: l.at || 0, shared: true };
   }
   allKomMemo = out; allKomVer = ver;
   return out;
 }
-let komIndex = null, komIndexVer = '';
+let komIndex = null, komIndexVer = '', komIdIndex = new Map();
 function getKomIndex() {
   const lists = allKomLists();
   const ver = allKomVer;
   if (komIndex && ver === komIndexVer) return komIndex;
-  komIndex = new Map(); komIndexVer = ver;
+  komIndex = new Map(); komIdIndex = new Map(); komIndexVer = ver;
   for (const [owner, l] of Object.entries(lists)) for (const r of l.rows) {
+    if (r.id) komIdIndex.set(String(r.id), { ...r, owner });
     if (!komIndex.has(r.key)) komIndex.set(r.key, []);
     komIndex.get(r.key).push({ ...r, owner });
   }
@@ -945,9 +958,10 @@ function getKomIndex() {
 }
 // Who holds this segment's KOM, from a pasted list? {owner, listTime, taken}
 function komListMatch(seg, det, komS) {
-  const cands = getKomIndex().get(normName(seg.name)); if (!cands) return null;
+  const cands = getKomIndex().get(normName(seg.name));
   const km = (seg.distance || 0) / 1000;
-  const hit = cands.find(r => Math.abs(r.km - km) <= Math.max(0.02, km * 0.03));
+  // Shared KOMs carry the segment ID, so match on that first; pasted lists match on name + distance
+  const hit = komIdIndex.get(String(seg.id)) || (cands || []).find(r => r.km != null && Math.abs(r.km - km) <= Math.max(0.02, km * 0.03));
   if (!hit) return null;
   const taken = !!(komS && hit.timeS && komS < hit.timeS - 0.5);
   return { owner: hit.owner, listTime: hit.timeS, date: hit.date, taken };
@@ -1321,9 +1335,9 @@ function komRowsFor(who) {
   };
   for (const r of (allKomLists()[who]?.rows || [])) {
     const cands = byName.get(r.key) || [];
-    const seg = cands.find(s => Math.abs((s.distance || 0) / 1000 - r.km) <= Math.max(0.02, r.km * 0.03)) || null;
+    const seg = (r.id && S.segments[r.id]) || (r.km != null ? cands.find(s => Math.abs((s.distance || 0) / 1000 - r.km) <= Math.max(0.02, r.km * 0.03)) : null) || null;
     if (seg) seen.add(String(seg.id));
-    out.push({ name: r.name, km: r.km, listTime: r.timeS, date: r.date, seg, status: statusFor(seg, r.timeS), src: 'list' });
+    out.push({ name: r.name, km: r.km != null ? r.km : (seg ? (seg.distance || 0) / 1000 : null), listTime: r.timeS, date: r.date, seg, status: statusFor(seg, r.timeS), src: 'list' });
   }
   if (isMe) {
     for (const s of Object.values(S.segments)) {
@@ -1359,7 +1373,7 @@ function renderKoms() {
     const listed = r.listTime ? `${r.src === 'pr' ? 'your PR' : 'listed'} ${fmtTime(r.listTime)} (${kmh(r.km * 1000, r.listTime)})` : '';
     const name = r.seg ? `<a href="https://www.strava.com/segments/${r.seg.id}" target="_blank" rel="noopener">${esc(r.name)}</a>` : esc(r.name);
     return `<div class="komrow"><span class="st ${r.status}">${STL[r.status]}</span><div class="txt"><b>${name}</b>
-      <div class="sub">${r.km.toFixed(2)} km · ${listed}${listed ? ' · ' : ''}${now}${r.date ? ' · ' + esc(r.date) : ''}</div></div></div>`;
+      <div class="sub">${r.km != null ? r.km.toFixed(2) + ' km · ' : ''}${listed}${listed ? ' · ' : ''}${now}${r.date ? ' · ' + esc(r.date) : ''}</div></div></div>`;
   }).join('') : '<div class="small">Nothing in this filter.</div>';
   const stale = rows.filter(r => r.seg && (r.status === 'refresh' || r.status === 'check')).length;
   $('#komRefresh').disabled = busy || !rows.some(r => r.seg);
@@ -1397,7 +1411,7 @@ function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderLo
 
 /* ---------------- Accounts and sync (Supabase) ---------------- */
 const cloudOn = () => !!(SUPABASE_URL && SUPABASE_KEY);
-const PRIVACY = `Your account stores your email, your display name and what this page saves for you (segments, KOM times, settings and your own Strava app login) so it syncs across your devices. Your Strava details and KOM times are visible only to you. Your pasted KOM list and your segment list (links and names) are visible to the site admin and to members you choose to share with. Data is stored with Supabase in Sydney, Australia. You can delete your account and all its data at any time from Settings.`;
+const PRIVACY = `Your account stores your email, your display name and what this page saves for you (segments, KOM times, settings and your own Strava app login) so it syncs across your devices. Your Strava details and KOM times are visible only to you. Your pasted KOM list and your segment list (links and names) are visible to the site admin and to members you choose to share with. So are the segments where you hold the KOM (segment ID and name only, never times), which this page works out from your own Strava data. Data is stored with Supabase in Sydney, Australia. You can delete your account and all its data at any time from Settings.`;
 function hashStr(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + '.' + s.length; }
 function setSyncBadge(txt, err) { const b = $('#syncBadge'); b.textContent = txt; b.classList.toggle('err', !!err); }
 
@@ -1405,7 +1419,7 @@ function setSyncBadge(txt, err) { const b = $('#syncBadge'); b.textContent = txt
 const SYNC_GROUPS = ['riders', 'settings', 'ignoredOwners', 'komLists', 'ratings', 'myName', 'home', 'auth'];
 function groupVal(g) {
   if (g === 'riders') return { profiles: S.profiles, activeProfile: S.activeProfile };
-  if (g === 'auth') { const a = S.auth; return { clientId: a.clientId, clientSecret: a.clientSecret, refreshToken: a.refreshToken, accessToken: a.accessToken, expiresAt: a.expiresAt, scope: a.scope || '', athleteName: a.athleteName || '' }; }
+  if (g === 'auth') { const a = S.auth; return { clientId: a.clientId, clientSecret: a.clientSecret, refreshToken: a.refreshToken, accessToken: a.accessToken, expiresAt: a.expiresAt, scope: a.scope || '', athleteName: a.athleteName || '', sharedFrom: a.sharedFrom || '' }; }
   return S[g] ?? null;
 }
 function setGroup(g, v) {
@@ -1496,9 +1510,24 @@ function ownKomRows() {
   const k = Object.keys(S.komLists || {}).find(o => names.includes(o.toLowerCase()));
   return k ? S.komLists[k].rows : [];
 }
+// Segments where my PR is as fast as the KOM time (using my rider profile's Compare against)
+function myDetectedKoms() {
+  const me = (S.myName || '').trim().toLowerCase();
+  const pr = S.profiles.find(p => (p.name || '').trim().toLowerCase() === me) || S.profiles[0] || {};
+  const tgt = pr.target || 'kom', out = new Set();
+  for (const [id, d] of Object.entries(S.details || {})) {
+    if (!d || d.notFound || !d.prS) continue;
+    const k = parseTime(d[tgt]);
+    if (k && d.prS <= k + 0.5) out.add(String(id));
+  }
+  return out;
+}
 async function pushPublic() {
   const m = syncMeta();
-  const segs = Object.values(S.segments).filter(s => !(S.ratings[s.id] || {}).hidden).map(s => ({ id: s.id, name: s.name || '' }));
+  const mine = myDetectedKoms();
+  // Shared: segment ID and name, plus a flag where I hold the KOM. Never times or PRs.
+  const segs = Object.values(S.segments).filter(s => !(S.ratings[s.id] || {}).hidden || mine.has(String(s.id)))
+    .map(s => mine.has(String(s.id)) ? { id: s.id, name: s.name || '', kom: true } : { id: s.id, name: s.name || '' });
   const pub = { kom_rows: ownKomRows(), segments: segs };
   const ph = hashStr(JSON.stringify(pub));
   if (ph === m.pubHash) return;
@@ -1519,14 +1548,39 @@ async function loadShared() {
   S.remoteLists = {};
   for (const l of pl.data || []) {
     if (l.user_id === cloudUser.id) continue;
-    S.remoteLists[l.user_id] = { name: names.get(l.user_id) || 'Member', rows: l.kom_rows || [], segments: l.segments || [], at: Date.parse(l.updated_at) || 0 };
+    // KOMs = their pasted list plus the segments their page found they hold (ID + name only)
+    const pasted = l.kom_rows || [];
+    const flagged = (l.segments || []).filter(s => s.kom).map(s => ({ name: s.name || '', key: normName(s.name), km: null, timeS: null, date: '', id: String(s.id) }));
+    const byKey = new Map(flagged.map(f => [f.key, f]));
+    const rows = pasted.map(r => byKey.has(r.key) ? { ...r, id: byKey.get(r.key).id } : r);
+    const pastedKeys = new Set(pasted.map(r => r.key));
+    flagged.forEach(f => { if (!pastedKeys.has(f.key)) rows.push(f); });
+    S.remoteLists[l.user_id] = { name: names.get(l.user_id) || 'Member', rows, segments: l.segments || [], at: Date.parse(l.updated_at) || 0 };
   }
   S.remoteListsAt = Date.now();
+  const [ash, akey] = await Promise.all([
+    sb.from('app_shares').select('owner,viewer'),
+    sb.from('app_keys').select('owner,client_id,client_secret')
+  ]);
+  S.appFeature = !ash.error && !akey.error;
+  if (S.appFeature) {
+    S.myAppShares = (ash.data || []).filter(x => x.owner === cloudUser.id).map(x => x.viewer);
+    S.appOffers = (akey.data || []).filter(k => k.owner !== cloudUser.id).map(k => ({ owner: k.owner, name: names.get(k.owner) || 'A member', client_id: k.client_id, client_secret: k.client_secret }));
+  }
   if (isAdmin()) {
     const inv = await sb.from('invites').select('code,note,max_uses,uses,revoked,created_at').order('created_at', { ascending: false });
     S.invites = inv.error ? [] : (inv.data || []);
   }
   saveLocal();
+}
+// Keep the shared copy of my Strava app details current (only while someone is ticked)
+async function pushAppKeys() {
+  if (!S.appFeature || !(S.myAppShares || []).length || !S.auth.clientId || !S.auth.clientSecret || S.auth.sharedFrom) return;
+  const m = syncMeta(), kh = hashStr(S.auth.clientId + '|' + S.auth.clientSecret);
+  if (kh === m.appKeyHash) return;
+  const { error } = await sb.from('app_keys').upsert({ owner: cloudUser.id, client_id: S.auth.clientId, client_secret: S.auth.clientSecret, updated_at: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+  m.appKeyHash = kh; saveLocal();
 }
 const isAdmin = () => !!(cloudUser && (S.members || []).find(x => x.id === cloudUser.id && x.is_admin));
 async function syncNow(full) {
@@ -1537,6 +1591,7 @@ async function syncNow(full) {
     if (full) { await pullNow(); renderAll(); }
     await pushNow();
     await pushPublic();
+    await pushAppKeys();
     if (full) { await loadShared(); renderAll(); }
     setSyncBadge('Synced ✓');
   } catch (e) { setSyncBadge('Offline', true); console.warn('sync', e); }
@@ -1633,6 +1688,16 @@ function renderAccount() {
       ${missing ? `<button class="btn" data-addmissing="${uid}">Add ${missing} missing</button>` : ''}
       ${l.rows.length ? `<label class="chk" style="margin:0"><input type="checkbox" data-hideowner="${esc(l.name)}"${ign.has(l.name.toLowerCase()) ? ' checked' : ''}> Hide their KOMs</label>` : ''}</div>`;
   }).join('') : '<p class="small">Nobody has shared their lists with you yet.</p>';
+  const canShareApp = S.appFeature && hasLogin() && !S.auth.sharedFrom;
+  $('#appShareBox').hidden = !canShareApp;
+  $('#appShareNote').hidden = S.appFeature !== false;
+  if (S.appFeature === false) $('#appShareNote').textContent = 'Sharing your Strava app needs update 2 in Supabase (segments-update-2.sql).';
+  if (canShareApp) {
+    const as = new Set(S.myAppShares || []);
+    $('#appShareWith').innerHTML = others.length
+      ? others.map(x => `<label class="chk"><input type="checkbox" data-appshare="${x.id}"${as.has(x.id) ? ' checked' : ''}> ${esc(x.display_name)}</label>`).join('')
+      : '<p class="small">No other members yet.</p>';
+  }
   $('#adminBox').hidden = !isAdmin();
   if (isAdmin()) {
     $('#invList').innerHTML = (S.invites || []).map(i => `<div class="mrow"><div class="txt"><code class="inv">${esc(i.code)}</code> ${esc(i.note || '')}
@@ -1665,6 +1730,25 @@ $('#acctDelete').onclick = async () => {
   alert('Your account has been deleted.');
   location.reload();
 };
+$('#appShareWith').addEventListener('change', async e => {
+  const cb = e.target.closest('[data-appshare]'); if (!cb) return;
+  const viewer = cb.dataset.appshare, on = cb.checked;
+  cb.disabled = true;
+  let err = null;
+  if (on) {
+    const k = await sb.from('app_keys').upsert({ owner: cloudUser.id, client_id: S.auth.clientId, client_secret: S.auth.clientSecret, updated_at: new Date().toISOString() });
+    err = k.error || (await sb.from('app_shares').insert({ owner: cloudUser.id, viewer })).error;
+    if (!err) syncMeta().appKeyHash = hashStr(S.auth.clientId + '|' + S.auth.clientSecret);
+  } else {
+    err = (await sb.from('app_shares').delete().eq('owner', cloudUser.id).eq('viewer', viewer)).error;
+    const left = (S.myAppShares || []).filter(x => x !== viewer);
+    if (!err && !left.length) { await sb.from('app_keys').delete().eq('owner', cloudUser.id); syncMeta().appKeyHash = ''; }
+  }
+  cb.disabled = false;
+  if (err) { cb.checked = !on; return alert('Could not change this: ' + err.message); }
+  S.myAppShares = on ? [...(S.myAppShares || []), viewer] : (S.myAppShares || []).filter(x => x !== viewer);
+  saveLocal();
+});
 $('#shareWith').addEventListener('change', async e => {
   const cb = e.target.closest('[data-share]'); if (!cb) return;
   const viewer = cb.dataset.share;
@@ -1728,13 +1812,16 @@ function renderAuthState() {
     $('#authBannerTxt').textContent = S.authProblem ? 'Strava needs reconnecting. Your segments are safe.' : 'Connect Strava to import segments and get KOM times.';
     $('#authFix').textContent = S.authProblem ? 'Reconnect' : 'Set up';
   }
+  const offers = !ok ? (S.appOffers || []) : [];
+  $('#appOffer').hidden = !offers.length;
+  if (offers.length) $('#appOffer').innerHTML = offers.map((o, i) => `<b>${esc(o.name)} has shared their Strava app with you.</b> Skip steps 1 and 2: <button class="btn lime" data-useapp="${i}" style="margin-top:6px">Use ${esc(o.name)}'s Strava app</button>`).join('<br>') + '<div style="margin-top:6px">Then do step 3.</div>';
   $('#g1').classList.toggle('done', !!S.auth.clientId);
   $('#g2').classList.toggle('done', !!(S.auth.clientId && S.auth.clientSecret));
   $('#g3').classList.toggle('done', ok);
   $('#g4').classList.toggle('done', ok && Object.keys(S.segments).length > 0);
   $$('.siteurl').forEach(el => el.textContent = /^https?:/.test(location.protocol) ? location.origin : 'https://krdgroup.com.au');
   const cl = $('#connLine');
-  if (cl) cl.textContent = ok ? `Connected${S.auth.athleteName ? ' as ' + S.auth.athleteName : ''} (Strava app ${S.auth.clientId}).` : S.authProblem ? 'Strava rejected the saved login. Open the setup guide to reconnect.' : 'Not connected.';
+  if (cl) cl.textContent = ok ? `Connected${S.auth.athleteName ? ' as ' + S.auth.athleteName : ''} (${S.auth.sharedFrom ? S.auth.sharedFrom + '\'s Strava app' : 'Strava app ' + S.auth.clientId}).` : S.authProblem ? 'Strava rejected the saved login. Open the setup guide to reconnect.' : 'Not connected.';
 }
 
 /* ---------------- Tabs ---------------- */
@@ -1820,6 +1907,7 @@ $('#authExchange').onclick = async () => {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) {
       const why = (j.errors || []).map(x => x.field + ' ' + x.code).join(', ');
+      if (/limit|capacity|exceed/i.test((j.message || '') + ' ' + why) && S.auth.sharedFrom) throw new Error(`${S.auth.sharedFrom}'s Strava app has reached its athlete limit. Ask them to raise it on strava.com/settings/api, or make your own app (steps 1 and 2).`);
       throw new Error(/code/.test(why) ? 'That code has expired or was already used. Tap Authorise again and paste the new address straight away.' : 'Strava said: ' + (j.message || r.status) + (why ? ' (' + why + ')' : ''));
     }
     Object.assign(S.auth, { accessToken: j.access_token, expiresAt: j.expires_at, refreshToken: j.refresh_token, scope: j.scope || '' });
@@ -1853,10 +1941,19 @@ $('#klSummary').addEventListener('click', e => {
 });
 $('#authClear').onclick = () => { if (!confirm('Forget the Strava login on this device? Your segments and lists stay.')) return; S.auth = defaults().auth; S.authProblem = false; save(); renderSettings(); renderAuthState(); $('#authStatus').textContent = 'Strava login removed.'; };
 $('#connSetup').onclick = () => showTab('setup');
+$('#appOffer').addEventListener('click', e => {
+  const b = e.target.closest('[data-useapp]'); if (!b) return;
+  const o = (S.appOffers || [])[+b.dataset.useapp]; if (!o) return;
+  Object.assign(S.auth, { clientId: o.client_id, clientSecret: o.client_secret, sharedFrom: o.name, refreshToken: '', accessToken: '', expiresAt: 0 });
+  S.authProblem = false;
+  save(); renderSettings(); renderAuthState();
+  $('#authStatus').textContent = `Using ${o.name}'s Strava app. Now step 3: tap Authorise with Strava.`;
+  $('#g3').scrollIntoView({ block: 'center' });
+});
 $('#authFix').onclick = () => showTab('setup');
 $('#gStarred').onclick = () => { showTab('ride'); importStarred(); };
 $('#gRides').onclick = () => { showTab('ride'); importRides(); };
-['#clientId', '#clientSecret'].forEach(s => $(s).addEventListener('change', () => { S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); save(); renderAuthState(); }));
+['#clientId', '#clientSecret'].forEach(s => $(s).addEventListener('change', () => { S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); S.auth.sharedFrom = ''; save(); renderAuthState(); }));
 
 /* ---------------- Backup / share files ---------------- */
 async function deliverFile(obj, filename) {
