@@ -56,6 +56,13 @@ button.btn:disabled{opacity:.5;cursor:default}
 .seg.go{border-left-color:var(--lime)}
 .seg.maybe{border-left-color:var(--maybe)}
 .seg.ignored{opacity:.55}
+.seg.flash{box-shadow:0 0 0 3px var(--lime),0 0 0 5px var(--grey);transition:box-shadow .3s}
+.segpop{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:13px;line-height:1.4;min-width:200px}
+.segpop .nm{display:flex;gap:6px;align-items:center;margin-bottom:4px}
+.segpop .nm b{font-size:14px}
+.segpop .acts{display:flex;gap:10px;align-items:center;margin-top:8px}
+.segpop .btn{padding:8px 12px;font-size:13px}
+.segpop a{color:var(--grey)}
 .row1{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .pill{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 7px;border-radius:3px;white-space:nowrap}
 .pill.go{background:var(--lime);color:var(--grey)}
@@ -89,21 +96,31 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
 .empty{text-align:center;color:var(--muted);padding:30px 10px}
 .prog{height:4px;background:#ddd;border-radius:2px;overflow:hidden;margin-bottom:8px}
 .prog>div{height:100%;background:var(--lime);width:0}
+.gstep{display:flex;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.gstep .gn{flex:0 0 28px;height:28px;border-radius:50%;background:var(--grey);color:var(--lime);font-weight:700;display:flex;align-items:center;justify-content:center}
+.gstep.done .gn{background:var(--lime);color:var(--grey)}
+.gstep.done .gn::before{content:"✓";font-size:15px}
+.gstep.done .gn{font-size:0}
+.gstep .gb{flex:1;min-width:0}
+.gstep ul{margin:6px 0 0;padding-left:18px}
+.warnbar{background:#fff4e0;border-color:#efc27a;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.warnbar span{flex:1;min-width:180px;font-size:14px}
+.syncbadge{margin-left:auto;font-size:12px;color:#cfcfcf;white-space:nowrap}
+.syncbadge.err{color:#f2b8a8}
+#gate{max-width:460px;margin:0 auto}
+.seg2{display:flex;gap:0;margin-bottom:10px;border:1px solid var(--grey);border-radius:4px;overflow:hidden}
+.seg2 button{flex:1;border:0;background:#fff;color:var(--grey);padding:9px;font:inherit;font-size:14px;cursor:pointer}
+.seg2 button.on{background:var(--grey);color:#fff}
+.privacy{font-size:12px;color:var(--muted);background:#fafaf8;border:1px solid var(--line);border-radius:4px;padding:8px;margin-top:8px}
+.mrow{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.mrow .txt{flex:1;min-width:150px}
+.mrow .sub{font-size:12px;color:var(--muted)}
+.mrow .btn{padding:6px 10px;font-size:13px}
+.danger{color:var(--err)!important;border-color:var(--err)!important}
+code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
 .locline{display:flex;align-items:center;gap:8px;font-size:14px}
 .locline b{font-weight:600}
 .results button{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:8px;margin-top:6px;font:inherit;font-size:13px;cursor:pointer}
-#routeMap{height:340px;border:1px solid var(--line);border-radius:6px;margin-bottom:10px}
-.stop{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
-.stop .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--grey);color:var(--lime);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
-.stop .n.home{background:var(--lime);color:var(--grey)}
-.stop .txt{flex:1;min-width:0}
-.stop .sub{font-size:12px;color:var(--muted)}
-.stop button{background:none;border:1px solid var(--line);border-radius:4px;padding:4px 8px;cursor:pointer;font-size:13px}
-.cand{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
-.cand .txt{flex:1;min-width:0;font-size:14px}
-.cand .sub{font-size:12px;color:var(--muted)}
-.totals{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;margin:6px 0}
-.totals b{font-size:18px}
 .komsum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
 .komsum div{background:#fafaf8;border:1px solid var(--line);border-radius:6px;padding:8px;text-align:center;font-size:12px;color:var(--muted)}
 .komsum b{display:block;font-size:20px;color:var(--ink)}
@@ -125,10 +142,10 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
   <div class="brand">
     <svg class="mark" viewBox="0 0 1080 1080" width="44" height="44" role="img" aria-label="KRD Engineering + Management"><circle fill="#e3e41e" cx="540" cy="540" r="498.581"/><polygon fill="#fff" points="424.361 672.765 291.445 539.846 424.051 407.236 354.927 407.236 232.178 529.982 232.178 407.235 183.297 407.235 183.297 597.507 231.906 549.437 355.236 672.765 424.361 672.765"/><path fill="#fff" d="M664.076,672.266l-70.665-90.834c36.643-2.401,65.704-31.37,65.704-66.73v-40.146c0-36.926-31.671-66.969-70.597-66.969h-147.292v48.882h147.292c11.973,0,21.716,8.115,21.716,18.088v40.146c0,9.972-9.742,18.083-21.716,18.083h-147.292v48.882h88.559l70.482,90.599h63.808Z"/><path fill="#fff" d="M784.71,407.691h-103.358v49.611h103.358c34.396,0,62.382,27.986,62.382,62.382v40.645c0,34.396-27.986,62.382-62.382,62.382h-103.358v49.611h103.358c61.753,0,111.993-50.24,111.993-111.993v-40.645c0-61.753-50.24-111.993-111.993-111.993Z"/></svg>
     <div><b>Wind Segments</b><small>KOM finder <i>+</i> Mackay</small></div>
+    <span class="syncbadge" id="syncBadge"></span>
   </div>
   <nav class="tabs">
     <button data-tab="ride" class="on">Ride</button>
-    <button data-tab="route">Route</button>
     <button data-tab="map">Map</button>
     <button data-tab="koms">KOMs</button>
     <button data-tab="settings">Settings</button>
@@ -137,8 +154,31 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
 </header>
 
 <main>
+<div id="gate" hidden>
+  <div class="card">
+    <h2>Welcome</h2>
+    <div class="seg2"><button id="gTabIn" class="on">Sign in</button><button id="gTabJoin">Join with invite</button></div>
+    <div id="gIn">
+      <label>Email<input id="inEmail" type="email" autocomplete="email"></label>
+      <label>Password<input id="inPass" type="password" autocomplete="current-password"></label>
+      <div class="actions" style="margin-top:10px"><button class="btn lime" id="inGo">Sign in</button></div>
+      <p class="small">Forgotten your password? Ask the site admin to reset it.</p>
+    </div>
+    <div id="gJoin" hidden>
+      <label>Invite code<input id="jCode" autocomplete="off" placeholder="KRD-XXXXXX" style="text-transform:uppercase"></label>
+      <label>Your name (shown to other members)<input id="jName" maxlength="40" autocomplete="nickname"></label>
+      <label>Email<input id="jEmail" type="email" autocomplete="email"></label>
+      <label>Password (8+ characters)<input id="jPass" type="password" autocomplete="new-password"></label>
+      <div class="privacy" id="privacyText"></div>
+      <label class="chk"><input type="checkbox" id="jAgree"> I've read this and agree</label>
+      <div class="actions" style="margin-top:6px"><button class="btn lime" id="jGo">Create account</button></div>
+    </div>
+    <div id="gateStatus" class="small"></div>
+  </div>
+</div>
 <!-- ============ RIDE ============ -->
 <section id="tab-ride">
+  <div class="card warnbar" id="authBanner" hidden><span id="authBannerTxt"></span><button class="btn" id="authFix">Set up</button></div>
   <div class="card wind" id="windCard"><div>Loading wind…</div></div>
   <details class="card" id="locBox"><summary class="locline">📍 Start: <b id="locName">not set</b></summary>
     <label>Search address or suburb<input id="locQuery" placeholder="e.g. Devereux Creek QLD or 12 Smith St Mackay"></label>
@@ -165,34 +205,17 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
       <option value="best">Best KOM chance</option><option value="near">Nearest to start</option><option value="wind">Most wind help</option>
     </select></label>
   </div>
-  <details class="card addbox"><summary>Add segments by link or ID</summary>
-    <label>Paste Strava segment links or IDs (one per line or comma-separated)<textarea id="addIds" rows="3" placeholder="https://www.strava.com/segments/1651142"></textarea></label>
-    <div class="actions" style="margin-top:8px"><button class="btn" id="btnAdd">Add segments</button></div>
+  <details class="card addbox"><summary>Add or share segments</summary>
+    <label>Paste Strava segment links or IDs, or a list a mate shared with you. Segments you already have are skipped.<textarea id="addIds" rows="3" placeholder="https://www.strava.com/segments/1651142"></textarea></label>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn" id="btnAdd">Add segments</button>
+      <button class="btn ghost" id="btnShareIds">Share my segment list</button>
+    </div>
+    <p class="small">Share sends only the segment links and names, not your times or Strava details.</p>
   </details>
   <div class="prog" id="prog" hidden><div></div></div>
   <div id="status"></div>
   <div id="list"></div>
-</section>
-
-<!-- ============ ROUTE ============ -->
-<section id="tab-route" hidden>
-  <div id="routeMap"></div>
-  <div class="card">
-    <h2>Route plan</h2>
-    <div class="totals" id="routeTotals"></div>
-    <div id="routeStops"></div>
-    <div class="actions" style="margin-top:10px">
-      <button class="btn lime" id="routeFinish">Finish back at start</button>
-      <button class="btn ghost" id="routeUndo">Undo last</button>
-      <button class="btn ghost" id="routeClear">Clear route</button>
-    </div>
-    <p class="small">Legs between segments follow the roads (OpenStreetMap routing). They're for rough planning, not turn-by-turn. Legs marked "approx" are straight lines because routing wasn't available.</p>
-  </div>
-  <div class="card" id="candCard">
-    <h2 id="candTitle">Pick your next segment</h2>
-    <div class="small" id="candHint" style="margin-top:0"></div>
-    <div id="candList"></div>
-  </div>
 </section>
 
 <!-- ============ KOMS ============ -->
@@ -222,6 +245,32 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
 
 <!-- ============ SETTINGS ============ -->
 <section id="tab-settings" hidden>
+  <div class="card" id="acctCard" hidden>
+    <h2>Account</h2>
+    <p class="small" id="acctLine" style="margin-top:0"></p>
+    <label>Your name (shown to other members)<input id="acctName" maxlength="40"></label>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn ghost" id="acctSync">Sync now</button>
+      <button class="btn ghost" id="acctOut">Sign out</button>
+    </div>
+    <h2 style="margin-top:14px">Share my lists</h2>
+    <p class="small" style="margin-top:0">Shares your pasted KOM list and your segment list (links and names only) with the people you tick. The site admin can always see them.</p>
+    <div id="shareWith"></div>
+    <h2 style="margin-top:14px" id="sharedTitle">Shared with me</h2>
+    <div id="sharedLists"></div>
+    <div id="adminBox" hidden>
+      <h2 style="margin-top:14px">Invites (admin)</h2>
+      <div class="grid2">
+        <label>Who it's for<input id="invNote" placeholder="e.g. Sam"></label>
+        <label>Uses<input id="invUses" type="number" min="1" max="100" value="1"></label>
+      </div>
+      <div class="actions" style="margin-top:8px"><button class="btn" id="invMake">Create invite code</button></div>
+      <div id="invList"></div>
+    </div>
+    <details style="margin-top:12px"><summary class="small">Privacy</summary><div class="privacy" id="privacyText2"></div></details>
+    <div class="actions" style="margin-top:12px"><button class="btn ghost danger" id="acctDelete">Delete my account</button></div>
+  </div>
+
   <div class="card">
     <h2>Rider profiles</h2>
     <div class="grid2">
@@ -238,22 +287,9 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
       <label>Power 1 min (W)<input data-pf="p60" type="number"></label>
       <label>Power 5 min (W)<input data-pf="p300" type="number"></label>
       <label>Power 20 min (W)<input data-pf="p1200" type="number"></label>
-      <label>CdA (m²)<input data-pf="cda" type="number" step="0.005"></label>
-      <label>Crr<input data-pf="crr" type="number" step="0.0005"></label>
       <label>Compare against<select data-pf="target"><option value="kom">KOM</option><option value="qom">QOM</option><option value="overall">Overall</option></select></label>
     </div>
-    <p class="small">CdA guide: hoods ≈ 0.32–0.36, drops ≈ 0.28–0.30, TT position ≈ 0.22–0.25. Crr: good road tyres on chip-seal ≈ 0.005, smooth hotmix ≈ 0.004. Power is your best effort for that duration. The model interpolates between them for each segment's predicted time.</p>
-  </div>
-
-  <div class="card">
-    <h2>Model</h2>
-    <div class="grid2">
-      <label>Wind exposure factor<input data-set="windExposure" type="number" step="0.05" min="0" max="1.2"></label>
-      <label>Gust weighting (0–1)<input data-set="gustWeight" type="number" step="0.05" min="0" max="1"></label>
-      <label>Drivetrain efficiency<input data-set="eff" type="number" step="0.005" min="0.9" max="1"></label>
-      <label>Calibration (% of power)<input data-set="calib" type="number" step="1" min="50" max="150"></label>
-    </div>
-    <p class="small">Open-Meteo wind is at 10 m. At rider height it's lower, so it's scaled by the exposure factor (0.75 suits suburban roads; use 0.9 for open cane-field roads). Gust weighting blends the gust toward the sustained speed. Calibration: if predictions are faster than your real PRs on calm days, lower it.</p>
+    <p class="small">Power is your best effort for that duration. The page works out the right power for each segment's length from these three.</p>
   </div>
 
   <div class="card">
@@ -261,10 +297,7 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
     <div class="grid2">
       <label>Go if predicted ≤ % of KOM<input data-set="goPct" type="number" step="0.5"></label>
       <label>Maybe if ≤ % of KOM<input data-set="maybePct" type="number" step="0.5"></label>
-      <label>No KOM time: go if wind saves ≥ %<input data-set="windGoPct" type="number" step="0.5"></label>
-      <label>No KOM time: maybe if saves ≥ %<input data-set="windMaybePct" type="number" step="0.5"></label>
     </div>
-    <label class="chk"><input type="checkbox" data-set="trafficDowngrade"> High traffic drops a segment one level</label>
     <label class="chk"><input type="checkbox" data-set="hideMyKoms"> Hide segments where I already hold the KOM</label>
     <label class="chk"><input type="checkbox" data-set="showIgnored"> Show hidden and ignored-owner segments (faded)</label>
   </div>
@@ -285,84 +318,79 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
   </div>
 
   <div class="card">
-    <h2>Area &amp; ride import</h2>
-    <div class="grid2">
-      <label>South (lat)<input data-bound="s" type="number" step="0.001"></label>
-      <label>North (lat)<input data-bound="n" type="number" step="0.001"></label>
-      <label>West (lng)<input data-bound="w" type="number" step="0.001"></label>
-      <label>East (lng)<input data-bound="e" type="number" step="0.001"></label>
-      <label>Look back over rides from the last (days)<input data-set="activityDays" type="number" min="1" max="3650"></label>
-      <label>Max rides to read per import<input data-set="maxActivities" type="number" min="1" max="500"></label>
-    </div>
-    <label class="chk"><input type="checkbox" data-set="areaFilter"> Only keep ride segments that start inside the area</label>
-    <div class="actions"><button class="btn ghost" id="boundsReset">Reset area to Mackay–Shoal Pt–Walkerston</button></div>
-    <p class="small">The area sets where the wind forecast is taken from and filters segments imported from your rides. Starred and pasted segments are always kept. Each ride costs one Strava call and is only read once.</p>
+    <h2>Strava usage</h2>
+    <p class="small" id="usageLine" style="margin-top:0"></p>
   </div>
 
   <div class="card">
-    <h2>API budget</h2>
-    <div class="grid2">
-      <label>Max Strava calls / 15 min<input data-set="limit15" type="number" min="1"></label>
-      <label>Max Strava calls / day<input data-set="limitDay" type="number" min="1"></label>
-      <label>Refresh KOM times after (days)<input data-set="komMaxAgeDays" type="number" min="1"></label>
+    <h2>Strava connection</h2>
+    <p class="small" id="connLine" style="margin-top:0"></p>
+    <div class="actions">
+      <button class="btn ghost" id="connSetup">Open setup guide</button>
+      <button class="btn ghost" id="authClear">Forget Strava login</button>
     </div>
-    <p class="small" id="usageLine"></p>
-  </div>
-
-  <div class="card">
-    <h2>Traffic</h2>
-    <p class="small">Traffic is a manual rating per segment, set from each segment's "Rate &amp; details" panel. Peak-hour weighting is off. Live traffic provider: <b>none</b> (slot reserved in the code at <code>liveTrafficRating()</code>).</p>
   </div>
 
   <div class="card">
     <h2>Data</h2>
     <div class="actions">
       <button class="btn lime" id="backupBtn">Full backup (my devices)</button>
-      <button class="btn ghost" id="exportBtn">Share settings (for a mate)</button>
       <button class="btn ghost" id="importBtn">Import file</button>
       <input type="file" id="importFile" accept="application/json,.json" hidden>
-      <button class="btn ghost" id="clearCache">Clear segment cache</button>
       <button class="btn ghost" id="resetAll">Reset everything</button>
     </div>
-    <p class="small"><b>Full backup</b> saves everything: segments, KOM times, PRs, ratings, KOM lists, ignore list, rider profiles, settings, area, rides already read and your Client ID/Secret. It leaves out your Strava tokens, so after importing on another device just tap <b>Authorise with Strava</b> once. Keep this file to yourself. It holds your Client Secret and Strava data.</p>
-    <p class="small"><b>Share settings</b> is for your mate. It holds profiles, settings, traffic ratings, KOM holders, KOM lists and the ignore list, with no Strava data and no credentials.</p>
-    <p class="small">Importing <b>merges</b> into this device: newer KOM times win, and ratings and lists are combined.</p>
+    <p class="small"><b>Full backup</b> saves everything: segments, KOM times, PRs, KOM holders, KOM lists, ignore list, rider profiles, settings, rides already read and your Client ID/Secret. It leaves out your Strava tokens, so after importing on another device just tap <b>Authorise with Strava</b> once. Keep this file to yourself. It holds your Client Secret and Strava data.</p>
+    <p class="small">Importing <b>merges</b> into this device: newer KOM times win, and lists are combined.</p>
     <p class="small" id="lastBackup"></p>
   </div>
 </section>
 
 <!-- ============ SETUP ============ -->
 <section id="tab-setup" hidden>
-  <div class="card">
-    <h2>Strava connection</h2>
-    <div class="help">
-      <ol>
-        <li>Create an API app at <b>strava.com/settings/api</b> (callback domain <code>localhost</code>).</li>
-        <li>Enter your <b>Client ID</b> and <b>Client Secret</b> below.</li>
-        <li>Tap <b>Authorise with Strava</b> and approve. The page it lands on will fail to load. That's expected.</li>
-        <li>Copy the <b>whole address</b> from the address bar, paste it in the box below and tap <b>Connect</b>.</li>
-      </ol>
-      The page refreshes tokens itself from then on. Each rider uses their own Strava API app on their own phone.
-    </div>
-    <label>Client ID<input id="clientId" inputmode="numeric" autocomplete="off"></label>
-    <label>Client Secret<input id="clientSecret" type="password" autocomplete="off"></label>
-    <div class="actions" style="margin-top:10px">
-      <button class="btn" id="authOpen">Authorise with Strava ↗</button>
-    </div>
-    <label>Address from the failed page (or just the code)<input id="authCode" autocomplete="off" placeholder="http://localhost/?state=&code=…&scope=…"></label>
-    <div class="actions" style="margin-top:10px">
-      <button class="btn lime" id="authExchange">Connect</button>
-    </div>
-    <details style="margin-top:4px"><summary>Already have a refresh token?</summary>
-      <label>Refresh Token<input id="refreshToken" type="password" autocomplete="off"></label>
-      <div class="actions" style="margin-top:8px"><button class="btn" id="authSave">Save &amp; test</button></div>
-    </details>
-    <div class="actions" style="margin-top:10px"><button class="btn ghost" id="authClear">Forget credentials</button></div>
+  <div class="card guide">
+    <h2>Get started</h2>
+    <p class="small" style="margin-top:0">A one-off setup, about 5 minutes. Your Strava details stay on this device only.</p>
+    <div class="gstep" id="g1"><div class="gn">1</div><div class="gb">
+      <b>Create your own Strava API app</b>
+      <div class="small">Open <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener">strava.com/settings/api</a> (log in to Strava first) and fill in:</div>
+      <ul class="small">
+        <li><b>Application name:</b> anything, e.g. Segments</li>
+        <li><b>Category:</b> Training</li>
+        <li><b>Website:</b> <span class="siteurl"></span></li>
+        <li><b>Authorization Callback Domain:</b> <code>localhost</code></li>
+        <li>Upload any image as the icon. Strava won't save the app without one.</li>
+      </ul>
+    </div></div>
+    <div class="gstep" id="g2"><div class="gn">2</div><div class="gb">
+      <b>Copy your Client ID and Client Secret</b>
+      <div class="small">They're shown on that same Strava page once the app is saved. Tap "show" to reveal the secret.</div>
+      <label>Client ID<input id="clientId" inputmode="numeric" autocomplete="off"></label>
+      <label>Client Secret<input id="clientSecret" type="password" autocomplete="off"></label>
+    </div></div>
+    <div class="gstep" id="g3"><div class="gn">3</div><div class="gb">
+      <b>Connect to Strava</b>
+      <div class="small">Tap Authorise and approve. The page it lands on <b>will fail to load. That's expected.</b> Copy the whole address from the address bar, paste it below and tap Connect.</div>
+      <div class="actions" style="margin-top:8px"><button class="btn" id="authOpen">Authorise with Strava ↗</button></div>
+      <label>Address from the failed page<input id="authCode" autocomplete="off" placeholder="http://localhost/?state=&code=…&scope=…"></label>
+      <div class="actions" style="margin-top:8px"><button class="btn lime" id="authExchange">Connect</button></div>
+      <details style="margin-top:4px"><summary class="small">Already have a refresh token?</summary>
+        <label>Refresh Token<input id="refreshToken" type="password" autocomplete="off"></label>
+        <div class="actions" style="margin-top:8px"><button class="btn" id="authSave">Save &amp; test</button></div>
+      </details>
+    </div></div>
+    <div class="gstep" id="g4"><div class="gn">4</div><div class="gb">
+      <b>Bring in your segments</b>
+      <div class="small">Pick one or both. Then tap <b>Get KOM times</b> on the Ride tab.</div>
+      <div class="actions" style="margin-top:8px">
+        <button class="btn" id="gStarred">Import starred</button>
+        <button class="btn" id="gRides">Import from my rides</button>
+      </div>
+    </div></div>
     <div id="authStatus" class="small"></div>
   </div>
   <div class="card help">
     <h2>Notes</h2>
-    Credentials and data stay in this browser only (local storage). Strava's API terms restrict this data to personal use, so don't publish screenshots of the lists or share your cached data. Wind comes from Open-Meteo (free, no key). The map uses OpenStreetMap.
+    Everything stays in this browser (local storage). Strava's API terms restrict this data to personal use, so don't publish the lists. Wind comes from Open-Meteo and the map from OpenStreetMap.
   </div>
 </section>
 </main>
@@ -374,7 +402,15 @@ code{background:#eee;padding:1px 4px;border-radius:3px;font-size:12px;overflow-w
    KRD Wind Segments – personal Strava KOM finder for Mackay
    ===================================================================== */
 const LS_KEY = 'krd-wind-segments-v1';
-const DEFAULT_BOUNDS = { s: -21.22, w: 149.03, n: -20.99, e: 149.25 }; // Mackay, Shoal Point, Walkerston
+
+/* ===== Accounts (Supabase) =====
+   Paste your Supabase Project URL and publishable/anon key here to switch accounts on.
+   Leave both blank and the page works as before, on this device only. */
+const SUPABASE_URL = (window.__SB_TEST && window.__SB_TEST.url) || 'https://egizmfsaljkalwvvtgcw.supabase.co';
+const SUPABASE_KEY = (window.__SB_TEST && window.__SB_TEST.key) || 'sb_publishable_uz1UwCanAM38rF4E_LJJpQ_3B4aCiQ5';
+let sb = null, cloudUser = null;          // cloudUser: {id, email} once signed in
+let syncTimer = null, syncing = false, syncAgain = false;
+const DEFAULT_BOUNDS = { s: -21.22, w: 149.03, n: -20.99, e: 149.25 }; // Mackay area: default wind spot and address-search bias
 const G = 9.80665;
 const TZ_OFFSET_H = 10; // Queensland, no daylight saving
 
@@ -405,13 +441,14 @@ function defaults() {
       goPct: 100, maybePct: 105, windGoPct: 5, windMaybePct: 1.5,
       trafficDowngrade: true, hideMyKoms: false, showIgnored: false,
       typeFilter: 'all', sortBy: 'best', activityDays: 90, maxActivities: 60, areaFilter: true,
-      limit15: 180, limitDay: 1800, komMaxAgeDays: 7
+      limit15: 180, limitDay: 1800, komMaxAgeDays: 14
     },
+    settingsVer: 2,
+    limits: null,  // real Strava limits from response headers
     doneActivities: [],
     komLists: {},  // owner -> {rows:[{name,key,km,timeS,date,type}], importedAt}
     home: null,    // {name, lat, lng}
-    route: { stops: [], finished: false },
-    legCache: {},  // 'lat,lng>lat,lng' -> {d, poly, at}
+    authProblem: false,  // true when Strava rejects the saved login
     myName: '',
     usage: { w15: 0, c15: 0, day: 0, cDay: 0 },
     weather: null,
@@ -430,6 +467,8 @@ function load() {
         bounds: { ...d.bounds, ...(p.bounds || {}) },
         usage: { ...d.usage, ...(p.usage || {}) } };
       if (!Array.isArray(d.profiles) || !d.profiles.length) d.profiles = defaults().profiles;
+      delete d.route; delete d.legCache;  // route planner removed
+      if (!(p.settingsVer >= 2)) { if (+d.settings.komMaxAgeDays === 7) d.settings.komMaxAgeDays = 14; d.settingsVer = 2; }
     }
   } catch (e) { /* storage blocked or corrupt – run with defaults */ }
   return d;
@@ -437,9 +476,12 @@ function load() {
 let S = load();
 let saveWarned = false;
 function save() {
+  if (typeof scheduleSync === 'function') scheduleSync();
   try { localStorage.setItem(LS_KEY, JSON.stringify(S)); }
   catch (e) { if (!saveWarned) { saveWarned = true; setStatus('Could not save to browser storage: ' + e.message, true); } }
 }
+let saveTimer = null;
+function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 1000); }
 const activeProfile = () => S.profiles.find(p => p.id === S.activeProfile) || S.profiles[0];
 
 /* ---------------- UI helpers ---------------- */
@@ -569,16 +611,21 @@ function predict(g, seg, pr, env, withWind) {
 
 /* ---------------- Weather (Open-Meteo) ---------------- */
 function brisbaneHourKey(ms) { return new Date(ms + TZ_OFFSET_H * 3600e3).toISOString().slice(0, 13) + ':00'; }
+// Wind is taken at your start location, or central Mackay if none is set
+function weatherSpot() {
+  if (S.home) return [S.home.lat, S.home.lng];
+  const b = DEFAULT_BOUNDS; return [(b.s + b.n) / 2, (b.w + b.e) / 2];
+}
 async function fetchWeather(force) {
-  if (!force && S.weather && Date.now() - S.weather.fetchedAt < 30 * 60e3) return;
-  const b = S.bounds, lat = (b.s + b.n) / 2, lon = (b.w + b.e) / 2;
+  const [lat, lon] = weatherSpot(), at = lat.toFixed(2) + ',' + lon.toFixed(2);
+  if (!force && S.weather && S.weather.at === at && Date.now() - S.weather.fetchedAt < 30 * 60e3) return;
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
     `&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,surface_pressure` +
     `&wind_speed_unit=kmh&timezone=Australia%2FBrisbane&forecast_days=3`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('Open-Meteo error ' + r.status);
   const j = await r.json();
-  S.weather = { fetchedAt: Date.now(), hourly: j.hourly };
+  S.weather = { fetchedAt: Date.now(), hourly: j.hourly, at };
   save();
 }
 function hourIndex() {
@@ -606,7 +653,21 @@ function usageState() {
   const now = Date.now(), w = Math.floor(now / 900e3), d = Math.floor(now / 86400e3), u = S.usage;
   if (u.w15 !== w) { u.w15 = w; u.c15 = 0; }
   if (u.day !== d) { u.day = d; u.cDay = 0; }
-  return { left15: S.settings.limit15 - u.c15, leftDay: S.settings.limitDay - u.cDay, next15: (w + 1) * 900e3 };
+  // Use Strava's own limits (from response headers) when known, with a small safety margin for calls in flight
+  const L = S.limits;
+  const lim15 = L?.l15 ? L.l15 - 5 : S.settings.limit15;
+  const limDay = L?.lD ? L.lD - 10 : S.settings.limitDay;
+  return { left15: lim15 - u.c15, leftDay: limDay - u.cDay, next15: (w + 1) * 900e3, real: !!L?.l15, lim15, limDay };
+}
+function readLimits(r) {
+  const lim = r.headers.get('X-ReadRateLimit-Limit') || r.headers.get('X-RateLimit-Limit');
+  const use = r.headers.get('X-ReadRateLimit-Usage') || r.headers.get('X-RateLimit-Usage');
+  if (!lim || !use) return;
+  const [l15, lD] = lim.split(',').map(Number), [u15, uD] = use.split(',').map(Number);
+  if (![l15, lD, u15, uD].every(Number.isFinite)) return;
+  usageState();
+  S.limits = { l15, lD, at: Date.now() };
+  S.usage.c15 = Math.max(S.usage.c15, u15); S.usage.cDay = Math.max(S.usage.cDay, uD);
 }
 async function getToken(force) {
   const a = S.auth;
@@ -617,10 +678,16 @@ async function getToken(force) {
   try { r = await fetch('https://www.strava.com/oauth/token', { method: 'POST', body }); }
   catch (e) { throw new Error('Could not reach Strava to refresh the token (' + e.message + '). If you opened this as a local file, try hosting it instead.'); }
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error('Token refresh failed (' + (j.message || r.status) + '). Check Client ID, Secret and Refresh Token.');
+  if (!r.ok && (r.status === 400 || r.status === 401) && cloudUser && !force) {
+    const used = a.refreshToken;
+    try { await pullNow(); } catch (e) {}
+    if (S.auth.refreshToken && S.auth.refreshToken !== used) return getToken(true);
+  }
+  if (!r.ok) { if (r.status === 400 || r.status === 401) { S.authProblem = true; save(); renderAuthState(); } throw new Error('Strava rejected the saved login (' + (j.message || r.status) + '). Tap Reconnect at the top of the Ride tab.'); }
   a.accessToken = j.access_token; a.expiresAt = j.expires_at;
   if (j.refresh_token) a.refreshToken = j.refresh_token;
   if (j.scope) a.scope = j.scope;
+  if (S.authProblem) { S.authProblem = false; renderAuthState(); }
   save();
   return a.accessToken;
 }
@@ -628,9 +695,11 @@ async function api(path, retry = true) {
   const u = usageState();
   if (u.left15 <= 0 || u.leftDay <= 0) throw new RateError(u.leftDay <= 0 ? 'Daily Strava budget used. Try again tomorrow.' : 'Strava budget for this 15-min window used. Try again after ' + new Date(u.next15).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }) + '.');
   const tok = await getToken(false);
-  S.usage.c15++; S.usage.cDay++; save();
+  S.usage.c15++; S.usage.cDay++; saveSoon();
   const r = await fetch('https://www.strava.com/api/v3' + path, { headers: { Authorization: 'Bearer ' + tok } });
+  readLimits(r);
   if (r.status === 401 && retry) { await getToken(true); return api(path, false); }
+  if (r.status === 401) { S.authProblem = true; save(); renderAuthState(); }
   if (r.status === 429) throw new RateError('Strava rate limit reached. Try again after the next 15-minute window.');
   if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error('Strava error ' + r.status + (j.message ? ': ' + j.message : '')); }
   return r.json();
@@ -640,10 +709,6 @@ async function api(path, retry = true) {
 let busy = false, abortFlag = false;
 function setBusy(b) { busy = b; ['#btnStarred', '#btnRides', '#btnKom', '#btnAdd'].forEach(s => $(s).disabled = b); $('#btnStop').hidden = !b; if (!b) setProgress(null); }
 
-function inBounds(ll) {
-  const b = S.bounds;
-  return Array.isArray(ll) && ll[0] >= b.s && ll[0] <= b.n && ll[1] >= b.w && ll[1] <= b.e;
-}
 // Add or update a segment from any Strava segment object (starred, effort, or detail)
 function upsertSeg(sg) {
   const prev = S.segments[sg.id] || {}, isNew = !S.segments[sg.id];
@@ -689,7 +754,7 @@ async function importStarred() {
 
 async function importRides() {
   if (busy) return; setBusy(true); abortFlag = false;
-  const days = +S.settings.activityDays || 90, max = +S.settings.maxActivities || 60;
+  const days = 90, max = 60;
   const after = Math.floor((Date.now() - days * 86400e3) / 1000);
   const done = new Set(S.doneActivities || []);
   let added = 0, skipped = 0, read = 0, todo = [];
@@ -714,7 +779,6 @@ async function importRides() {
       const d = await api(`/activities/${a.id}?include_all_efforts=true`);
       for (const ef of d.segment_efforts || []) {
         const sg = ef.segment; if (!sg) continue;
-        if (S.settings.areaFilter && !inBounds(sg.start_latlng)) { skipped++; continue; }
         if (upsertSeg(sg)) added++;
       }
       done.add(a.id); read++;
@@ -733,57 +797,102 @@ async function importRides() {
   setBusy(false); renderAll();
 }
 
+// Pull segment IDs out of pasted text. If it contains Strava links, use only those
+// (so numbers inside segment names aren't mistaken for IDs).
+function parseSegmentIds(text) {
+  const links = Array.from(String(text).matchAll(/segments\/(\d+)/g), m => m[1]);
+  const ids = links.length ? links : Array.from(String(text).matchAll(/\b(\d{4,})\b/g), m => m[1]);
+  return Array.from(new Set(ids));
+}
 async function addByIds() {
   if (busy) return;
-  const text = $('#addIds').value;
-  const ids = Array.from(new Set(Array.from(text.matchAll(/segments\/(\d+)|\b(\d{4,})\b/g), m => m[1] || m[2])));
+  const ids = parseSegmentIds($('#addIds').value);
   if (!ids.length) { setStatus('No segment IDs found. Paste a link like strava.com/segments/1651142', true); return; }
+  await addIdList(ids, () => { $('#addIds').value = ''; });
+}
+async function addIdList(ids, onDone) {
+  if (busy) return;
+  const fresh = ids.filter(id => !S.segments[id]), have = ids.length - fresh.length;
+  if (!fresh.length) { setStatus(`All ${ids.length} segment${ids.length === 1 ? ' is' : 's are'} already in your list.`); if (onDone) onDone(); return; }
   setBusy(true); abortFlag = false;
-  let ok = 0;
+  let ok = 0, msg = '', isErr = false;
+  setStatus(`${have ? have + ' already in your list. ' : ''}Adding ${fresh.length} new…`);
   try {
-    for (const id of ids) {
-      if (abortFlag) break;
-      setStatus(`Adding segment ${ok + 1}/${ids.length}…`); setProgress(ok / ids.length);
+    await runPool(fresh, async id => {
       const d = await api('/segments/' + id);
-      storeDetail(id, d); ok++; save();
-      await sleep(150);
-    }
-    setStatus(`Added ${ok} segment${ok === 1 ? '' : 's'} with KOM times.`);
-    $('#addIds').value = '';
-  } catch (e) { setStatus(`${e.message} (${ok}/${ids.length} added)`, !(e instanceof RateError)); }
-  setBusy(false); renderAll();
+      storeDetail(id, d); ok++;
+      setStatus(`Adding segment ${ok}/${fresh.length}…`); setProgress(ok / fresh.length);
+      saveSoon();
+    }, 4);
+    msg = `Added ${ok} new segment${ok === 1 ? '' : 's'} with KOM times.` + (have ? ` ${have} were already in your list.` : '');
+    if (onDone) onDone();
+  } catch (e) { msg = `${e.message} (${ok}/${fresh.length} added)`; isErr = !(e instanceof RateError); }
+  save(); setBusy(false); renderAll(); setStatus(msg, isErr);
+}
+async function shareSegmentList() {
+  const segs = Object.values(S.segments).filter(s => !(S.ratings[s.id] || {}).hidden).sort((a, b) => String(a.name).localeCompare(b.name));
+  if (!segs.length) { setStatus('No segments to share yet.', true); return; }
+  const page = /^https?:/.test(location.protocol) ? location.origin + location.pathname : 'krdgroup.com.au/segments.html';
+  const text = `My ${segs.length} Strava segments. Paste this into "Add or share segments" on ${page}\n\n` +
+    segs.map(s => `https://www.strava.com/segments/${s.id}  ${s.name || ''}`).join('\n');
+  try { if (navigator.share) { await navigator.share({ title: 'My segments', text }); setStatus('Segment list shared.'); return; } }
+  catch (e) { if (e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(text); setStatus(`Copied ${segs.length} segment links. Paste them into a message to your mate.`); return; } catch (e) {}
+  $('#addIds').value = text; $('#addIds').select();
+  setStatus('Copy the list from the box above and send it to your mate.');
 }
 
+// Run a worker over ids with a few requests in flight at once. Stops on abort or first error.
+async function runPool(ids, worker, conc = 4) {
+  let i = 0, err = null;
+  const lane = async () => {
+    while (!abortFlag && !err && i < ids.length) {
+      const id = ids[i++];
+      try { await worker(id); } catch (e) { err = err || e; }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(conc, ids.length) }, lane));
+  if (err) throw err;
+}
+// Which segments need KOM times, most useful first:
+// 1) go/maybe segments, 2) segments in a pasted KOM list, 3) everything else. Missing/oldest first within each.
+function komRefreshQueue(maxAge) {
+  const now = Date.now();
+  const rows = computeRows({ typeFilter: 'all', showIgnored: true, hideMyKoms: false });
+  const out = [];
+  for (const r of rows) {
+    const d = S.details[r.seg.id];
+    if (d && now - d.fetchedAt <= maxAge) continue;
+    const inList = !!komListMatch(r.seg, null, null);
+    if (r.rt.hidden && !inList) continue;
+    const grp = (!r.ignored && r.rank >= 1) ? 0 : inList ? 1 : 2;
+    out.push({ id: r.seg.id, grp, age: d ? d.fetchedAt : 0 });
+  }
+  out.sort((a, b) => a.grp - b.grp || a.age - b.age);
+  return out.map(x => x.id);
+}
 async function fetchKoms(onlyIds) {
   if (busy) return; setBusy(true); abortFlag = false;
-  const maxAge = (+S.settings.komMaxAgeDays || 7) * 86400e3;
-  let ids;
-  if (onlyIds) ids = onlyIds;
-  else {
-    // Visible segments missing/stale KOM data, best wind first
-    ids = computeRows().filter(r => { const d = S.details[r.seg.id]; return !d || Date.now() - d.fetchedAt > maxAge; })
-      .sort((a, b) => b.gainPct - a.gainPct).map(r => r.seg.id);
-  }
-  if (!ids.length) { setStatus('All visible segments already have KOM times.'); setBusy(false); return; }
-  let done = 0;
+  const maxAge = (+S.settings.komMaxAgeDays || 14) * 86400e3;
+  const ids = onlyIds ? onlyIds.slice() : komRefreshQueue(maxAge);
+  if (!ids.length) { setStatus('All segments already have up-to-date KOM times.'); setBusy(false); return; }
+  let done = 0, lastRender = Date.now(), msg = '', isErr = false;
+  setStatus(`Getting KOM times for ${ids.length} segment${ids.length === 1 ? '' : 's'}${onlyIds ? '' : ' (go and maybe first)'}…`);
   try {
-    for (const id of ids) {
-      if (abortFlag) break;
-      setStatus(`Getting KOM times ${done + 1}/${ids.length}…`); setProgress(done / ids.length);
+    await runPool(ids, async id => {
       const d = await api('/segments/' + id);
       storeDetail(id, d);
-      done++; save();
-      if (done % 5 === 0) renderList();
-      await sleep(250);
-    }
-    setStatus(`Got KOM times for ${done} segment${done === 1 ? '' : 's'}.` + (done < ids.length ? ` ${ids.length - done} left.` : ''));
-  } catch (e) { setStatus(`${e.message} (${done}/${ids.length} done)`, !(e instanceof RateError)); }
-  setBusy(false); renderAll();
+      done++;
+      setStatus(`Getting KOM times ${done}/${ids.length}…`); setProgress(done / ids.length);
+      saveSoon();
+      if (Date.now() - lastRender > 2000) { lastRender = Date.now(); renderList(); }
+    }, 4);
+    msg = `Got KOM times for ${done} segment${done === 1 ? '' : 's'}.` + (done < ids.length ? ` ${ids.length - done} left.` : '');
+  } catch (e) { msg = `${e.message} (${done}/${ids.length} done)`; isErr = !(e instanceof RateError); }
+  save(); setBusy(false); renderAll(); setStatus(msg, isErr);
 }
 
 /* ---------------- Traffic ---------------- */
-// Placeholder for a future live traffic API. Return 'low'|'medium'|'high' or null.
-function liveTrafficRating(seg, env) { return null; }
 
 /* ---------------- KOM lists (pasted from Strava profile) ---------------- */
 const normName = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -795,12 +904,31 @@ function parseKomTable(text) {
   }
   return rows;
 }
+// Pasted KOM lists plus lists other members share through their accounts (merged by name)
+let allKomMemo = null, allKomVer = '';
+function allKomLists() {
+  const ver = JSON.stringify([Object.keys(S.komLists || {}).map(k => [k, S.komLists[k].importedAt, S.komLists[k].rows.length]), S.remoteListsAt || 0]);
+  if (allKomMemo && ver === allKomVer) return allKomMemo;
+  const out = { ...(S.komLists || {}) };
+  for (const l of Object.values(S.remoteLists || {})) {
+    if (!l.rows || !l.rows.length || !l.name) continue;
+    const ex = Object.keys(out).find(k => k.toLowerCase() === l.name.toLowerCase());
+    if (ex) {
+      const m = new Map(out[ex].rows.map(r => [r.key + '|' + r.km, r]));
+      l.rows.forEach(r => m.set(r.key + '|' + r.km, r));
+      out[ex] = { rows: Array.from(m.values()), importedAt: Math.max(out[ex].importedAt || 0, l.at || 0) };
+    } else out[l.name] = { rows: l.rows, importedAt: l.at || 0, shared: true };
+  }
+  allKomMemo = out; allKomVer = ver;
+  return out;
+}
 let komIndex = null, komIndexVer = '';
 function getKomIndex() {
-  const ver = JSON.stringify(Object.keys(S.komLists || {}).map(k => [k, S.komLists[k].importedAt]));
+  const lists = allKomLists();
+  const ver = allKomVer;
   if (komIndex && ver === komIndexVer) return komIndex;
   komIndex = new Map(); komIndexVer = ver;
-  for (const [owner, l] of Object.entries(S.komLists || {})) for (const r of l.rows) {
+  for (const [owner, l] of Object.entries(lists)) for (const r of l.rows) {
     if (!komIndex.has(r.key)) komIndex.set(r.key, []);
     komIndex.get(r.key).push({ ...r, owner });
   }
@@ -835,8 +963,24 @@ function segType(seg) {
   if (Math.abs(g) < 2) return 'flat';
   return 'rolling';
 }
-function computeRows() {
-  const env = currentEnv(), pr = activeProfile(), st = S.settings;
+// Predictions are cached per segment and only recalculated when wind hour, rider or model settings change
+const predCache = new Map(); let predKey = '';
+function predictionsFor(seg, g, pr, env) {
+  const sk = seg.id + '|' + (seg.points || '').length + '|' + seg.avg_grade + '|' + seg.distance;
+  let p = predCache.get(sk);
+  if (!p) {
+    const tWind = predict(g, seg, pr, env, true), tCalm = predict(g, seg, pr, env, false);
+    let tail = 0;
+    if (env) { const L = g.groups.reduce((a, q) => a + q.len, 0); tail = g.groups.reduce((a, q) => a + q.len * Math.cos(rad(env.windTo - q.brg)), 0) / L * env.wms * 3.6; }
+    p = { tWind, tCalm, tail };
+    predCache.set(sk, p);
+  }
+  return p;
+}
+function computeRows(opts) {
+  const env = currentEnv(), pr = activeProfile(), st = { ...S.settings, ...(opts || {}) };
+  const key = JSON.stringify([env && [env.time, env.wms, env.windTo, env.rho], pr.riderKg, pr.bikeKg, pr.cda, pr.crr, pr.p60, pr.p300, pr.p1200, S.settings.eff, S.settings.calib]);
+  if (key !== predKey) { predCache.clear(); predKey = key; }
   const ignored = new Set(S.ignoredOwners.map(x => x.trim().toLowerCase()).filter(Boolean));
   const rows = [];
   for (const seg of Object.values(S.segments)) {
@@ -851,22 +995,16 @@ function computeRows() {
     const isIgnored = !!rt.hidden || (owner && ignored.has(owner.trim().toLowerCase()));
     if (isIgnored && !st.showIgnored) continue;
     const g = getGeom(seg);
-    const tWind = predict(g, seg, pr, env, true);
-    const tCalm = predict(g, seg, pr, env, false);
+    const { tWind, tCalm, tail } = predictionsFor(seg, g, pr, env);
     const gainPct = (tCalm - tWind) / tCalm * 100;
-    // average tail(+)/head(−) component at 10 m scaled by exposure, km/h
-    let tail = 0;
-    if (env) { const L = g.groups.reduce((a, p) => a + p.len, 0); tail = g.groups.reduce((a, p) => a + p.len * Math.cos(rad(env.windTo - p.brg)), 0) / L * env.wms * 3.6; }
     const komS = det ? parseTime(det[pr.target || 'kom']) : null;
     const mine = !!(det && det.prS && komS && det.prS <= komS);
     if (mine && st.hideMyKoms) continue;
     let pct = null, rank;
     if (komS) { pct = tWind / komS * 100; rank = pct <= st.goPct ? 2 : pct <= st.maybePct ? 1 : 0; }
-    else rank = gainPct >= st.windGoPct ? 2 : gainPct >= st.windMaybePct ? 1 : 0;
-    const traffic = liveTrafficRating(seg, env) || rt.traffic || '';
-    if (traffic === 'high' && st.trafficDowngrade) rank = Math.max(0, rank - 1);
+    else rank = gainPct >= 5 ? 2 : gainPct >= 1.5 ? 1 : 0;  // no KOM time yet: rank on wind help
     const away = S.home && seg.start ? hav([S.home.lat, S.home.lng], seg.start) / 1000 : null;
-    rows.push({ seg, g, det, rt, kl, owner, away, type, tWind, tCalm, gainPct, tail, komS, pct, mine, traffic, ignored: isIgnored, tag: RANK[rank], rank });
+    rows.push({ seg, g, det, rt, kl, owner, away, type, tWind, tCalm, gainPct, tail, komS, pct, mine, ignored: isIgnored, tag: RANK[rank], rank });
   }
   const sortBy = st.sortBy || 'best';
   rows.sort((a, b) => {
@@ -928,20 +1066,24 @@ function renderRiderSel() {
   $('#profSel').innerHTML = opts; $('#profSel').value = activeProfile().id;
 }
 const openSet = new Set();
-let lastRows = [];
+let lastRows = [], listJob = 0, listPending = [];
+function flushList() {
+  if (!listPending.length) return;
+  $('#list').insertAdjacentHTML('beforeend', listPending.join('')); listPending = []; listJob++;
+}
 function renderList() {
   const env = currentEnv(), rows = computeRows(); lastRows = rows;
   const list = $('#list');
+  listJob++; listPending = [];
   if (!Object.keys(S.segments).length) {
     list.innerHTML = `<div class="empty">No segments yet.<br>${S.auth.refreshToken ? 'Tap <b>Import starred</b> or <b>Import from my rides</b>, or paste segment links below the buttons.' : 'Connect Strava in the <b>Setup</b> tab first.'}</div>`;
     return;
   }
   if (!rows.length) { list.innerHTML = '<div class="empty">No segments match the current filter.</div>'; return; }
   const pr = activeProfile(), tgt = (pr.target || 'kom').toUpperCase();
-  list.innerHTML = rows.map(r => {
+  const cards = rows.map(r => {
     const s = r.seg, id = s.id, d = r.det;
     const typeLbl = { flat: 'Flat', climb: 'Climb', descent: 'Descent', rolling: 'Rolling' }[r.type];
-    const traffic = r.traffic ? `<span class="badge ${r.traffic}">${r.traffic} traffic</span>` : '';
     const mine = r.mine ? `<span class="badge mine">Your ${tgt}</span>` : '';
     const ign = r.ignored ? `<span class="badge">ignored</span>` : '';
     const holder = r.kl ? (r.kl.taken
@@ -961,16 +1103,13 @@ function renderList() {
       <div class="row1"><span class="pill ${r.tag}">${r.tag}</span><h3>${esc(s.name)}</h3></div>
       <div class="row2">${compassSVG(r.g.dirs, env)}
         <div class="facts">
-          <div class="meta">${((s.distance || 0) / 1000).toFixed(2)} km · ${(s.avg_grade || 0).toFixed(1)}% · ${typeLbl}${away}${traffic}${mine}${holder}${ign}</div>
+          <div class="meta">${((s.distance || 0) / 1000).toFixed(2)} km · ${(s.avg_grade || 0).toFixed(1)}% · ${typeLbl}${away}${mine}${holder}${ign}</div>
           <div class="pred">${pred}</div>
           <div class="windline">${windTxt}</div>
         </div>
       </div>
-      <details data-id="${id}"${openSet.has(String(id)) ? ' open' : ''}><summary>Rate &amp; details</summary>
+      <details data-id="${id}"${openSet.has(String(id)) ? ' open' : ''}><summary>Details</summary>
         <div class="dgrid">
-          <label>Traffic<select data-r="traffic">
-            ${['', 'low', 'medium', 'high'].map(v => `<option value="${v}"${(r.rt.traffic || '') === v ? ' selected' : ''}>${v || 'not rated'}</option>`).join('')}
-          </select></label>
           <label>KOM holder<input data-r="owner" value="${esc(r.rt.owner || '')}" placeholder="${r.kl ? esc('from list: ' + r.kl.owner) : 'name from Strava leaderboard'}"></label>
         </div>
         <label class="chk"><input type="checkbox" data-r="hidden"${r.rt.hidden ? ' checked' : ''}> Hide this segment</label>
@@ -982,23 +1121,37 @@ function renderList() {
         <div class="small">Direction: ${dirTxt} · Calm-air prediction ${fmtTime(r.tCalm)}<br>${detTxt}</div>
       </details>
     </article>`;
-  }).join('');
+  });
+  // Draw the top of the list straight away and the rest in small batches, so taps feel instant on a phone
+  const job = ++listJob, FIRST = 25, BATCH = 30;
+  list.innerHTML = cards.slice(0, FIRST).join('');
+  listPending = cards.slice(FIRST);
+  const step = () => {
+    if (job !== listJob || !listPending.length) return;
+    list.insertAdjacentHTML('beforeend', listPending.splice(0, BATCH).join(''));
+    if (listPending.length) requestAnimationFrame(step);
+  };
+  if (listPending.length) requestAnimationFrame(step);
   const c = rows.reduce((a, r) => (a[r.tag]++, a), { go: 0, maybe: 0, skip: 0 });
   if (!busy) setStatus(`${rows.length} segments · ${c.go} go · ${c.maybe} maybe · ${c.skip} skip`);
 }
 
 /* ---------------- Map ---------------- */
-let map = null, segLayer = null, rectLayer = null, windCtl = null; const polyById = new Map();
+let map = null, segLayer = null, selLayer = null, windCtl = null, drawnRows = [], segPopup = null;
 function ensureMap() {
   if (map) return true;
   if (!window.L) { $('#map').innerHTML = '<div class="empty">Map library did not load (offline?).</div>'; return false; }
-  map = L.map('map').setView([-21.12, 149.15], 12);
+  map = L.map('map', { preferCanvas: true }).setView([-21.12, 149.15], 12);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
-  segLayer = L.layerGroup().addTo(map); rectLayer = L.layerGroup().addTo(map);
+  segLayer = L.layerGroup().addTo(map); selLayer = L.layerGroup().addTo(map);
   const Ctl = L.Control.extend({ onAdd() { const d = L.DomUtil.create('div', 'leaflet-control windctl'); return d; } });
   windCtl = new Ctl({ position: 'topright' }); windCtl.addTo(map);
+  map.on('popupopen', e => {
+    const b = e.popup.getElement()?.querySelector('[data-showlist]');
+    if (b) b.onclick = () => showInList(b.dataset.showlist);
+  });
   map.on('click', async e => {
-    if (!pickMode) return;
+    if (!pickMode) { const hit = nearestSeg(e.containerPoint); if (hit) openSegPopup(hit, e.latlng); return; }
     pickMode = false; $('#mapHint').hidden = true;
     const { lat, lng } = e.latlng;
     setHome(lat, lng, null);
@@ -1009,28 +1162,81 @@ function ensureMap() {
 }
 function renderMap() {
   if (!map) return;
-  const env = currentEnv(), b = S.bounds;
+  const env = currentEnv();
   windCtl.getContainer().innerHTML = env ? `${compassSVG([], env, 54)}<div>${Math.round(env.speed)} km/h ${compassName(env.dir)}</div>` : 'No wind';
-  rectLayer.clearLayers();
-  L.rectangle([[b.s, b.w], [b.n, b.e]], { color: '#414142', weight: 1, dashArray: '4 4', fill: false, interactive: false }).addTo(rectLayer);
-  segLayer.clearLayers(); polyById.clear();
-  if (S.home) L.circleMarker([S.home.lat, S.home.lng], { radius: 7, color: '#414142', weight: 2, fillColor: '#E3E421', fillOpacity: 1 }).bindPopup('Start: ' + esc(S.home.name)).addTo(segLayer);
+  segLayer.clearLayers(); selLayer.clearLayers(); drawnRows = [];
+  if (S.home) L.circleMarker([S.home.lat, S.home.lng], { radius: 7, color: '#414142', weight: 2, fillColor: '#E3E421', fillOpacity: 1, bubblingMouseEvents: false }).bindPopup('Start: ' + esc(S.home.name)).addTo(segLayer);
   const col = { go: '#E3E421', maybe: '#ef9f32', skip: '#a2a2a5' };
   const rows = lastRows.slice().reverse(); // draw best last so it's on top
   for (const r of rows) {
     if (r.g.pts.length < 2) continue;
     const skip = r.tag === 'skip';
     L.polyline(r.g.pts, { color: '#414142', weight: skip ? 4 : 7, opacity: skip ? 0.25 : 0.85, interactive: false }).addTo(segLayer);
-    const pl = L.polyline(r.g.pts, { color: col[r.tag], weight: skip ? 2 : 4, opacity: skip ? 0.6 : 1 });
-    const pctTxt = r.komS ? `${fmtTime(r.tWind)} (${kmh(r.seg.distance, r.tWind)}) vs ${fmtTime(r.komS)} (${kmh(r.seg.distance, r.komS)}) · ${r.pct.toFixed(0)}%` : `Predicted ${fmtTime(r.tWind)} (${kmh(r.seg.distance, r.tWind)})`;
-    pl.bindPopup(`<b>${esc(r.seg.name)}</b><br>${r.tag.toUpperCase()} · ${pctTxt}<br>${((r.seg.distance || 0) / 1000).toFixed(2)} km · ${(r.seg.avg_grade || 0).toFixed(1)}%<br><a href="https://www.strava.com/segments/${r.seg.id}" target="_blank" rel="noopener">Open in Strava</a>`);
-    pl.addTo(segLayer); polyById.set(String(r.seg.id), pl);
+    L.polyline(r.g.pts, { color: col[r.tag], weight: skip ? 2 : 4, opacity: skip ? 0.6 : 1, interactive: false }).addTo(segLayer);
+    drawnRows.push(r);
     L.circleMarker(r.g.pts[0], { radius: skip ? 2 : 4, color: '#414142', weight: 1, fillColor: col[r.tag], fillOpacity: 1, interactive: false }).addTo(segLayer);
   }
 }
+// Find the segment closest to a tap, within a finger-width (24 px) of its line
+function nearestSeg(cp) {
+  const tol = 24;
+  let best = null, bestD = Infinity;
+  for (const r of drawnRows) {
+    const g = r.g;
+    if (!g.bb) { let a = 90, b = 180, c = -90, d = -180; for (const p of g.pts) { a = Math.min(a, p[0]); b = Math.min(b, p[1]); c = Math.max(c, p[0]); d = Math.max(d, p[1]); } g.bb = [a, b, c, d]; }
+    const tl = map.latLngToContainerPoint([g.bb[2], g.bb[1]]), br = map.latLngToContainerPoint([g.bb[0], g.bb[3]]);
+    if (cp.x < tl.x - tol || cp.x > br.x + tol || cp.y < tl.y - tol || cp.y > br.y + tol) continue;
+    let prev = map.latLngToContainerPoint(g.pts[0]);
+    for (let k = 1; k < g.pts.length; k++) {
+      const cur = map.latLngToContainerPoint(g.pts[k]);
+      const dx = cur.x - prev.x, dy = cur.y - prev.y, len2 = dx * dx + dy * dy;
+      const t = len2 ? Math.max(0, Math.min(1, ((cp.x - prev.x) * dx + (cp.y - prev.y) * dy) / len2)) : 0;
+      const d = Math.hypot(cp.x - (prev.x + t * dx), cp.y - (prev.y + t * dy));
+      if (d < bestD - 1 || (Math.abs(d - bestD) <= 1 && best && r.rank > best.rank)) { bestD = d; best = r; }
+      prev = cur;
+    }
+  }
+  return bestD <= tol ? best : null;
+}
+function segPopupHtml(r) {
+  const s = r.seg, tgt = (activeProfile().target || 'kom').toUpperCase();
+  const pred = r.komS
+    ? `Predicted <b>${fmtTime(r.tWind)}</b> (${kmh(s.distance, r.tWind)})<br>${tgt} ${fmtTime(r.komS)} (${kmh(s.distance, r.komS)}) · <b>${r.pct.toFixed(0)}%</b>`
+    : `Predicted <b>${fmtTime(r.tWind)}</b> (${kmh(s.distance, r.tWind)})<br><span style="color:#6b6b6e">No ${tgt} time yet</span>`;
+  return `<div class="segpop"><div class="nm"><span class="pill ${r.tag}">${r.tag}</span><b>${esc(s.name)}</b></div>
+    <div style="color:#6b6b6e">${((s.distance || 0) / 1000).toFixed(2)} km · ${(s.avg_grade || 0).toFixed(1)}%</div>
+    <div style="margin-top:4px">${pred}</div>
+    <div class="acts"><button class="btn lime" data-showlist="${s.id}">Show in list</button><a href="https://www.strava.com/segments/${s.id}" target="_blank" rel="noopener">Strava ↗</a></div></div>`;
+}
+function openSegPopup(r, latlng) {
+  const col = { go: '#E3E421', maybe: '#ef9f32', skip: '#a2a2a5' };
+  const pop = L.popup({ maxWidth: 280, autoPanPadding: [20, 20] }).setLatLng(latlng).setContent(segPopupHtml(r));
+  segPopup = pop;
+  pop.openOn(map);
+  selLayer.clearLayers();
+  L.polyline(r.g.pts, { color: '#414142', weight: 11, opacity: 0.95, interactive: false }).addTo(selLayer);
+  L.polyline(r.g.pts, { color: col[r.tag], weight: 6, interactive: false }).addTo(selLayer);
+  pop.on('remove', () => { if (segPopup === pop) { selLayer.clearLayers(); segPopup = null; } });
+}
+function showInList(id) {
+  if (map) map.closePopup();
+  showTab('ride');
+  setTimeout(() => {
+    flushList();
+    const el = document.querySelector(`#list article[data-id="${id}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center' });
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 2200);
+  }, 60);
+}
 function focusSeg(id) {
   showTab('map');
-  setTimeout(() => { const pl = polyById.get(String(id)); if (pl) { map.fitBounds(pl.getBounds(), { padding: [40, 40], maxZoom: 16 }); pl.openPopup(); } }, 60);
+  setTimeout(() => {
+    const r = drawnRows.find(x => String(x.seg.id) === String(id)); if (!r) return;
+    map.fitBounds(L.latLngBounds(r.g.pts), { padding: [40, 40], maxZoom: 16 });
+    openSegPopup(r, r.g.pts[Math.floor(r.g.pts.length / 2)]);
+  }, 80);
 }
 
 /* ---------------- Start location ---------------- */
@@ -1039,7 +1245,7 @@ function renderLoc() {
   $('#locName').textContent = S.home ? S.home.name : 'not set (tap to set)';
 }
 async function geoSearch(q) {
-  const b = S.bounds;
+  const b = DEFAULT_BOUNDS;
   const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=au' +
     `&viewbox=${b.w - 0.2},${b.n + 0.2},${b.e + 0.2},${b.s - 0.2}&q=` + encodeURIComponent(q);
   const r = await fetch(url, { headers: { 'Accept-Language': 'en-AU' } });
@@ -1055,7 +1261,8 @@ async function geoName(lat, lng) {
 }
 function setHome(lat, lng, name) {
   S.home = { lat: +lat, lng: +lng, name: name || `${(+lat).toFixed(4)}, ${(+lng).toFixed(4)}` };
-  save(); renderLoc(); renderList(); renderMap(); if (!$('#tab-route').hidden) renderRoute();
+  save(); renderLoc(); renderList(); renderMap();
+  fetchWeather(false).then(renderAll).catch(() => {});
 }
 $('#locSearch').onclick = async () => {
   const q = $('#locQuery').value.trim(); const out = $('#locResults');
@@ -1075,175 +1282,19 @@ $('#locSearch').onclick = async () => {
 $('#locQuery').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#locSearch').click(); } });
 $('#locPick').onclick = () => { pickMode = true; showTab('map'); setStatus(''); $('#mapHint').hidden = false; };
 $('#pickCancel').onclick = () => { pickMode = false; $('#mapHint').hidden = true; showTab('ride'); };
-$('#locClear').onclick = () => { S.home = null; save(); renderLoc(); renderList(); renderMap(); };
-
-/* ---------------- Road routing for legs ---------------- */
-const legKey = (a, b) => `${a[0].toFixed(4)},${a[1].toFixed(4)}>${b[0].toFixed(4)},${b[1].toFixed(4)}`;
-const legPending = new Set();
-function getLeg(a, b) {
-  const k = legKey(a, b), c = S.legCache[k];
-  if (c) return c;
-  if (!legPending.has(k)) {
-    legPending.add(k);
-    fetchLeg(a, b).then(res => {
-      if (res) {
-        S.legCache[k] = { ...res, at: Date.now() };
-        const keys = Object.keys(S.legCache);
-        if (keys.length > 400) keys.sort((x, y) => S.legCache[x].at - S.legCache[y].at).slice(0, keys.length - 400).forEach(x => delete S.legCache[x]);
-        save();
-      }
-      legPending.delete(k);
-      scheduleRouteRender();
-    });
-  }
-  return { d: hav(a, b), poly: null, approx: true, pending: true };
-}
-async function fetchLeg(a, b) {
-  if (hav(a, b) < 30) return { d: hav(a, b), poly: null, approx: false };
-  try {
-    const url = `https://routing.openstreetmap.de/routed-bike/route/v1/driving/${a[1]},${a[0]};${b[1]},${b[0]}?overview=full&geometries=polyline`;
-    const r = await fetch(url); if (!r.ok) return null;
-    const j = await r.json(); const rt = j.routes && j.routes[0];
-    if (!rt) return null;
-    return { d: rt.distance, poly: rt.geometry, approx: false };
-  } catch (e) { return null; }
-}
-let routeRenderTimer = null;
-function scheduleRouteRender() { clearTimeout(routeRenderTimer); routeRenderTimer = setTimeout(() => { if (!$('#tab-route').hidden) renderRoute(); }, 250); }
-
-/* ---------------- Route builder ---------------- */
-let routeMap = null, routeLayer = null;
-function ensureRouteMap() {
-  if (routeMap) return true;
-  if (!window.L) { $('#routeMap').innerHTML = '<div class="empty">Map library did not load (offline?).</div>'; return false; }
-  routeMap = L.map('routeMap').setView([-21.12, 149.15], 12);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(routeMap);
-  routeLayer = L.layerGroup().addTo(routeMap);
-  return true;
-}
-const segById = id => S.segments[id];
-function routePoints() {
-  // returns ordered list of {kind:'home'|'seg', ...}
-  return (S.route.stops || []).map(id => segById(id)).filter(Boolean);
-}
-function currentEnd() {
-  const segs = routePoints();
-  if (segs.length) { const g = getGeom(segs[segs.length - 1]); return g.pts.length ? g.pts[g.pts.length - 1] : segs[segs.length - 1].end; }
-  return S.home ? [S.home.lat, S.home.lng] : null;
-}
-function buildLegs() {
-  const segs = routePoints(), legs = [];
-  let at = S.home ? [S.home.lat, S.home.lng] : null;
-  for (const s of segs) {
-    const g = getGeom(s), st = g.pts[0] || s.start, en = g.pts[g.pts.length - 1] || s.end;
-    if (at && st) legs.push({ from: at, to: st, ...getLeg(at, st) });
-    else legs.push(null);
-    at = en;
-  }
-  let back = null;
-  if (S.route.finished && at && S.home) back = { from: at, to: [S.home.lat, S.home.lng], ...getLeg(at, [S.home.lat, S.home.lng]) };
-  return { segs, legs, back };
-}
-function renderRoute() {
-  const rowsById = new Map(computeRows().map(r => [String(r.seg.id), r]));
-  const { segs, legs, back } = buildLegs();
-  // ----- stops list -----
-  let html = '';
-  html += `<div class="stop"><div class="n home">S</div><div class="txt"><b>${esc(S.home ? S.home.name : 'No start location set')}</b>${S.home ? '' : '<div class="sub">Set one on the Ride tab (📍 Start) so legs can be worked out.</div>'}</div></div>`;
-  let legKm = 0, segKm = 0, segT = 0, approx = false;
-  segs.forEach((s, i) => {
-    const L1 = legs[i], r = rowsById.get(String(s.id));
-    if (L1) { legKm += L1.d / 1000; approx = approx || L1.approx; }
-    segKm += (s.distance || 0) / 1000; if (r) segT += r.tWind;
-    const legTxt = L1 ? `${(L1.d / 1000).toFixed(1)} km${L1.approx ? (L1.pending ? ' (routing…)' : ' approx') : ''} to get there` : '';
-    const pred = r ? `${fmtTime(r.tWind)} (${kmh(s.distance, r.tWind)})${r.komS ? ` vs KOM ${fmtTime(r.komS)} (${kmh(s.distance, r.komS)})` : ''}` : '';
-    html += `<div class="stop" data-i="${i}"><div class="n">${i + 1}</div>
-      <div class="txt"><b>${esc(s.name)}</b> ${r ? `<span class="pill ${r.tag}">${r.tag}</span>` : ''}
-        <div class="sub">${legTxt}${legTxt ? ' · ' : ''}${((s.distance || 0) / 1000).toFixed(2)} km segment · ${pred}</div></div>
-      <button data-mv="-1" ${i === 0 ? 'disabled' : ''}>↑</button><button data-mv="1" ${i === segs.length - 1 ? 'disabled' : ''}>↓</button><button data-rm="1">✕</button></div>`;
-  });
-  if (back) {
-    legKm += back.d / 1000; approx = approx || back.approx;
-    html += `<div class="stop"><div class="n home">S</div><div class="txt"><b>Back to start</b><div class="sub">${(back.d / 1000).toFixed(1)} km${back.approx ? (back.pending ? ' (routing…)' : ' approx') : ''}</div></div></div>`;
-  }
-  $('#routeStops').innerHTML = html;
-  $('#routeTotals').innerHTML = segs.length
-    ? `<div><b>${(legKm + segKm).toFixed(1)}</b> km total${approx ? ' (approx)' : ''}</div><div><b>${segs.length}</b> segment${segs.length === 1 ? '' : 's'} · ${segKm.toFixed(1)} km</div><div><b>${fmtTime(segT)}</b> on segments</div>`
-    : '<div class="small">No segments yet. Pick your first one below.</div>';
-  $('#routeFinish').disabled = !segs.length || S.route.finished || !S.home;
-  $('#routeUndo').disabled = !segs.length && !S.route.finished;
-  $('#routeClear').disabled = !segs.length && !S.route.finished;
-  // ----- candidates -----
-  const from = currentEnd(), used = new Set((S.route.stops || []).map(String));
-  if (S.route.finished) {
-    $('#candTitle').textContent = 'Route finished';
-    $('#candHint').textContent = 'Undo the finish to keep adding segments.';
-    $('#candList').innerHTML = '';
-  } else {
-    $('#candTitle').textContent = segs.length ? 'Pick your next segment' : 'Pick your first segment';
-    const cands = Array.from(rowsById.values()).filter(r => (r.tag === 'go' || r.tag === 'maybe') && !r.ignored && !used.has(String(r.seg.id)) && r.seg.start);
-    cands.forEach(r => r.from = from ? hav(from, r.seg.start) / 1000 : null);
-    cands.sort((a, b) => (a.from ?? 0) - (b.from ?? 0) || b.rank - a.rank);
-    $('#candHint').textContent = from ? `Nearest first from ${segs.length ? 'the end of ' + segs[segs.length - 1].name : 'your start'} (straight-line distance). Showing go and maybe segments.` : 'Set a start location on the Ride tab to sort these by distance.';
-    $('#candList').innerHTML = cands.length ? cands.slice(0, 25).map(r => `<div class="cand">
-      <span class="pill ${r.tag}">${r.tag}</span>
-      <div class="txt"><b>${esc(r.seg.name)}</b><div class="sub">${r.from != null ? r.from.toFixed(1) + ' km away · ' : ''}${((r.seg.distance || 0) / 1000).toFixed(2)} km · ${fmtTime(r.tWind)} (${kmh(r.seg.distance, r.tWind)})${r.komS ? ` vs KOM ${fmtTime(r.komS)} (${kmh(r.seg.distance, r.komS)}) · ${r.pct.toFixed(0)}%` : ''}</div></div>
-      <button class="btn" data-add="${r.seg.id}">Add</button></div>`).join('')
-      : '<div class="small">No go/maybe segments left for this time and wind.</div>';
-  }
-  // ----- map -----
-  if (!routeMap) return;
-  routeLayer.clearLayers();
-  const bnds = [];
-  const col = { go: '#E3E421', maybe: '#ef9f32', skip: '#a2a2a5' };
-  const drawLeg = Lg => {
-    if (!Lg) return;
-    const pts = Lg.poly ? decodePolyline(Lg.poly) : [Lg.from, Lg.to];
-    L.polyline(pts, { color: '#414142', weight: 3, opacity: 0.8, dashArray: Lg.approx ? '2 8' : '6 6' }).addTo(routeLayer);
-    pts.forEach(p => bnds.push(p));
-  };
-  legs.forEach(drawLeg); drawLeg(back);
-  segs.forEach((s, i) => {
-    const g = getGeom(s), r = rowsById.get(String(s.id)); if (g.pts.length < 2) return;
-    L.polyline(g.pts, { color: '#414142', weight: 8, opacity: 0.9 }).addTo(routeLayer);
-    L.polyline(g.pts, { color: col[r ? r.tag : 'go'], weight: 5 }).bindPopup(`<b>${i + 1}. ${esc(s.name)}</b>`).addTo(routeLayer);
-    L.marker(g.pts[0], { icon: L.divIcon({ className: '', html: `<div style="background:#414142;color:#E3E421;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font:700 12px Helvetica,Arial;border:2px solid #E3E421">${i + 1}</div>`, iconSize: [22, 22], iconAnchor: [11, 11] }) }).addTo(routeLayer);
-    g.pts.forEach(p => bnds.push(p));
-  });
-  if (S.home) {
-    L.marker([S.home.lat, S.home.lng], { icon: L.divIcon({ className: '', html: '<div style="background:#E3E421;color:#414142;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font:700 12px Helvetica,Arial;border:2px solid #414142">S</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).bindPopup(esc(S.home.name)).addTo(routeLayer);
-    bnds.push([S.home.lat, S.home.lng]);
-  }
-  if (bnds.length > 1) routeMap.fitBounds(bnds, { padding: [30, 30], maxZoom: 15 });
-  else if (bnds.length === 1) routeMap.setView(bnds[0], 14);
-}
-$('#candList').addEventListener('click', e => {
-  const b = e.target.closest('[data-add]'); if (!b) return;
-  S.route.stops.push(+b.dataset.add); S.route.finished = false; save(); renderRoute(); window.scrollTo(0, 0);
-});
-$('#routeStops').addEventListener('click', e => {
-  const row = e.target.closest('.stop[data-i]'); if (!row) return;
-  const i = +row.dataset.i, st = S.route.stops;
-  if (e.target.dataset.rm) st.splice(i, 1);
-  else if (e.target.dataset.mv) { const j = i + +e.target.dataset.mv; if (j < 0 || j >= st.length) return; [st[i], st[j]] = [st[j], st[i]]; }
-  else return;
-  save(); renderRoute();
-});
-$('#routeFinish').onclick = () => { S.route.finished = true; save(); renderRoute(); };
-$('#routeUndo').onclick = () => { if (S.route.finished) S.route.finished = false; else S.route.stops.pop(); save(); renderRoute(); };
-$('#routeClear').onclick = () => { if (!confirm('Clear the whole route?')) return; S.route = { stops: [], finished: false }; save(); renderRoute(); };
+$('#locClear').onclick = () => { S.home = null; save(); renderLoc(); renderList(); renderMap(); fetchWeather(false).then(renderAll).catch(() => {}); };
 
 /* ---------------- KOMs tab ---------------- */
 let komFilter = 'all';
 function komPeople() {
   const ppl = new Set();
   ppl.add(S.myName || 'Me');
-  Object.keys(S.komLists || {}).forEach(o => ppl.add(o));
+  Object.keys(allKomLists()).forEach(o => ppl.add(o));
   return Array.from(ppl);
 }
 function komRowsFor(who) {
   const isMe = who === (S.myName || 'Me');
-  const maxAge = (+S.settings.komMaxAgeDays || 7) * 86400e3;
+  const maxAge = (+S.settings.komMaxAgeDays || 14) * 86400e3;
   const byName = new Map();
   for (const s of Object.values(S.segments)) { const k = normName(s.name); if (!byName.has(k)) byName.set(k, []); byName.get(k).push(s); }
   const out = [], seen = new Set();
@@ -1256,7 +1307,7 @@ function komRowsFor(who) {
     if (Date.now() - d.fetchedAt > maxAge) return 'refresh';
     return 'held';
   };
-  for (const r of (S.komLists[who]?.rows || [])) {
+  for (const r of (allKomLists()[who]?.rows || [])) {
     const cands = byName.get(r.key) || [];
     const seg = cands.find(s => Math.abs((s.distance || 0) / 1000 - r.km) <= Math.max(0.02, r.km * 0.03)) || null;
     if (seg) seen.add(String(seg.id));
@@ -1286,7 +1337,7 @@ function renderKoms() {
   $('#komChips').innerHTML = Object.entries(labels).map(([k, v]) => `<button data-f="${k}" class="${komFilter === k ? 'on' : ''}">${v}</button>`).join('');
   const isMe = cur === (S.myName || 'Me');
   $('#komHint').textContent = isMe
-    ? `Your KOMs come from segments where your PR matches the KOM time${S.komLists[cur] ? ', plus your pasted KOM list' : ''}. ${S.komLists[cur] ? '' : 'For a complete list, paste your own KOM table in Settings using the name "' + (S.myName || 'Me') + '".'}`
+    ? `Your KOMs come from segments where your PR matches the KOM time${allKomLists()[cur] ? ', plus your pasted KOM list' : ''}. ${allKomLists()[cur] ? '' : 'For a complete list, paste your own KOM table in Settings using the name "' + (S.myName || 'Me') + '".'}`
     : `From ${cur}'s pasted KOM list. "To check" means the current KOM time is faster than their listed time, so someone may have taken it.`;
   const STL = { held: '✅ held', check: '⚠️ check', refresh: '🕓 refresh', untracked: '➖ not tracked' };
   const shown = rows.filter(r => komFilter === 'all' || r.status === komFilter);
@@ -1315,20 +1366,364 @@ $('#myName').addEventListener('change', e => { S.myName = e.target.value.trim();
 /* ---------------- Settings rendering ---------------- */
 function renderSettings() {
   $$('[data-set]').forEach(el => { const v = S.settings[el.dataset.set]; if (el.type === 'checkbox') el.checked = !!v; else el.value = v; });
-  $$('[data-bound]').forEach(el => el.value = S.bounds[el.dataset.bound]);
   const p = activeProfile();
   $$('[data-pf]').forEach(el => el.value = p[el.dataset.pf] ?? '');
   $('#ignored').value = S.ignoredOwners.join('\n');
   const u = usageState();
-  $('#usageLine').textContent = `Used this 15-min window: ${S.usage.c15}/${S.settings.limit15} · today (UTC day): ${S.usage.cDay}/${S.settings.limitDay}. Keep these a little under the limits shown on your Strava API settings page.`;
+  $('#usageLine').textContent = u.real
+    ? `Used this 15-min window: ${S.usage.c15}/${S.limits.l15} · today (UTC day): ${S.usage.cDay}/${S.limits.lD}. These are Strava's own figures.`
+    : `Used this 15-min window: ${S.usage.c15} · today (UTC day): ${S.usage.cDay}. Strava's real limits are picked up automatically after the next Strava request.`;
   $('#clientId').value = S.auth.clientId; $('#clientSecret').value = S.auth.clientSecret; $('#refreshToken').value = S.auth.refreshToken;
   $('#typeSel').value = S.settings.typeFilter;
   $('#sortSel').value = S.settings.sortBy || 'best';
   $('#myName').value = S.myName || '';
   komListSummary();
   renderBackupLine();
+  renderAccount();
 }
-function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderLoc(); renderList(); renderMap(); renderSettings(); if (!$('#tab-route').hidden) renderRoute(); if (!$('#tab-koms').hidden) renderKoms(); }
+function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderLoc(); renderList(); renderMap(); renderSettings(); renderAuthState(); if (!$('#tab-koms').hidden) renderKoms(); }
+
+/* ---------------- Accounts and sync (Supabase) ---------------- */
+const cloudOn = () => !!(SUPABASE_URL && SUPABASE_KEY);
+const PRIVACY = `Your account stores your email, your display name and what this page saves for you (segments, KOM times, settings and your own Strava app login) so it syncs across your devices. Your Strava details and KOM times are visible only to you. Your pasted KOM list and your segment list (links and names) are visible to the site admin and to members you choose to share with. Data is stored with Supabase in Sydney, Australia. You can delete your account and all its data at any time from Settings.`;
+function hashStr(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + '.' + s.length; }
+function setSyncBadge(txt, err) { const b = $('#syncBadge'); b.textContent = txt; b.classList.toggle('err', !!err); }
+
+// Groups of settings that sync as a whole; the newest change wins.
+const SYNC_GROUPS = ['riders', 'settings', 'ignoredOwners', 'komLists', 'ratings', 'myName', 'home', 'auth'];
+function groupVal(g) {
+  if (g === 'riders') return { profiles: S.profiles, activeProfile: S.activeProfile };
+  if (g === 'auth') { const a = S.auth; return { clientId: a.clientId, clientSecret: a.clientSecret, refreshToken: a.refreshToken, accessToken: a.accessToken, expiresAt: a.expiresAt, scope: a.scope || '', athleteName: a.athleteName || '' }; }
+  return S[g] ?? null;
+}
+function setGroup(g, v) {
+  if (v == null) return;
+  if (g === 'riders') { if (Array.isArray(v.profiles) && v.profiles.length) { S.profiles = v.profiles; S.activeProfile = v.activeProfile || v.profiles[0].id; } }
+  else if (g === 'settings') S.settings = { ...S.settings, ...v };
+  else if (g === 'auth') { Object.assign(S.auth, v); S.authProblem = false; }
+  else S[g] = v;
+}
+const ghash = g => hashStr(JSON.stringify(groupVal(g)));
+function syncMeta() { if (!S.sync) S.sync = { uid: null, version: 0, hash: {}, at: {}, docHash: '', pubHash: '' }; return S.sync; }
+function saveLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+
+// Strava caches merge item by item (newest / most detailed wins)
+function mergeCaches(doc) {
+  for (const [id, sg] of Object.entries(doc.segments || {})) {
+    const cur = S.segments[id];
+    if (!cur || (sg.hiRes && !cur.hiRes) || ((sg.fetchedAt || 0) > (cur.fetchedAt || 0) && (sg.hiRes || !cur.hiRes))) S.segments[id] = sg;
+  }
+  for (const [id, d] of Object.entries(doc.details || {})) {
+    const cur = S.details[id];
+    if (!cur || (d.fetchedAt || 0) > (cur.fetchedAt || 0)) S.details[id] = d;
+  }
+  S.doneActivities = Array.from(new Set([...(S.doneActivities || []), ...(doc.doneActivities || [])])).slice(-3000);
+}
+function applyRemote(doc, firstTime) {
+  const m = syncMeta();
+  mergeCaches(doc);
+  for (const g of SYNC_GROUPS) {
+    const r = doc.groups && doc.groups[g]; if (!r) continue;
+    const localChanged = ghash(g) !== m.hash[g];
+    if (g === 'auth') {
+      const v = r.val || {};
+      const take = !!v.refreshToken && (!S.auth.refreshToken || (v.expiresAt || 0) > (S.auth.expiresAt || 0) || (!localChanged && r.at > (m.at[g] || 0)));
+      if (take) { setGroup(g, v); m.hash[g] = ghash(g); m.at[g] = r.at; }
+      continue;
+    }
+    if (firstTime && (g === 'ignoredOwners' || g === 'komLists' || g === 'ratings')) {
+      // First sync on a device that already has data: combine both
+      if (g === 'ignoredOwners') S.ignoredOwners = Array.from(new Set([...(r.val || []), ...(S.ignoredOwners || [])]));
+      else if (g === 'ratings') S.ratings = { ...(r.val || {}), ...(S.ratings || {}) };
+      else { const out = { ...(r.val || {}) }; for (const [o, l] of Object.entries(S.komLists || {})) { if (!out[o]) { out[o] = l; continue; } const mm = new Map(out[o].rows.map(x => [x.key + '|' + x.km, x])); l.rows.forEach(x => mm.set(x.key + '|' + x.km, x)); out[o] = { rows: Array.from(mm.values()), importedAt: Math.max(out[o].importedAt || 0, l.importedAt || 0) }; } S.komLists = out; }
+      continue;  // left marked as changed so the combined version is uploaded
+    }
+    if (firstTime || (!localChanged && r.at > (m.at[g] || 0))) { setGroup(g, r.val); m.hash[g] = ghash(g); m.at[g] = r.at; }
+  }
+}
+function buildDoc() {
+  const m = syncMeta(), now = Date.now(), groups = {}, pend = {};
+  for (const g of SYNC_GROUPS) {
+    const h = ghash(g), at = h !== m.hash[g] ? now : (m.at[g] || now);
+    groups[g] = { at, val: groupVal(g) }; pend[g] = { h, at };
+  }
+  return { doc: { v: 1, groups, segments: S.segments, details: S.details, doneActivities: S.doneActivities || [] }, pend };
+}
+async function pullNow() {
+  if (!sb || !cloudUser) return null;
+  const { data, error } = await sb.from('user_data').select('data,version').eq('user_id', cloudUser.id).maybeSingle();
+  if (error) throw new Error(error.message);
+  const m = syncMeta();
+  const firstTime = m.uid !== cloudUser.id;
+  if (firstTime) { m.uid = cloudUser.id; m.version = 0; m.hash = {}; m.at = {}; m.docHash = ''; m.pubHash = ''; }
+  if (data) { applyRemote(data.data || {}, firstTime && Object.keys(S.segments).length > 0 ? true : firstTime); m.version = data.version; }
+  geomCache.clear(); saveLocal();
+  return data;
+}
+async function pushNow() {
+  const m = syncMeta();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { doc, pend } = buildDoc();
+    const dh = hashStr(JSON.stringify(doc));
+    if (dh === m.docHash && m.version) return;
+    let res;
+    if (!m.version) res = await sb.from('user_data').insert({ user_id: cloudUser.id, data: doc, version: 1 }).select('version');
+    else res = await sb.from('user_data').update({ data: doc, version: m.version + 1, updated_at: new Date().toISOString() }).eq('user_id', cloudUser.id).eq('version', m.version).select('version');
+    if (!res.error && res.data && res.data.length) {
+      m.version = res.data[0].version; m.docHash = dh;
+      for (const g of SYNC_GROUPS) { m.hash[g] = pend[g].h; m.at[g] = pend[g].at; }
+      saveLocal(); return;
+    }
+    if (res.error && !/duplicate|23505|conflict/i.test(res.error.message + ' ' + (res.error.code || ''))) throw new Error(res.error.message);
+    await pullNow();   // another device saved first: take its changes, then try again
+    renderAll();
+  }
+}
+function ownKomRows() {
+  const names = [S.myName, cloudUser && S.members && (S.members.find(x => x.id === cloudUser.id) || {}).display_name].filter(Boolean).map(x => x.toLowerCase());
+  const k = Object.keys(S.komLists || {}).find(o => names.includes(o.toLowerCase()));
+  return k ? S.komLists[k].rows : [];
+}
+async function pushPublic() {
+  const m = syncMeta();
+  const segs = Object.values(S.segments).filter(s => !(S.ratings[s.id] || {}).hidden).map(s => ({ id: s.id, name: s.name || '' }));
+  const pub = { kom_rows: ownKomRows(), segments: segs };
+  const ph = hashStr(JSON.stringify(pub));
+  if (ph === m.pubHash) return;
+  const { error } = await sb.from('public_lists').upsert({ user_id: cloudUser.id, ...pub, updated_at: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+  m.pubHash = ph; saveLocal();
+}
+async function loadShared() {
+  const [p, sh, pl] = await Promise.all([
+    sb.from('profiles').select('id,display_name,is_admin'),
+    sb.from('shares').select('owner,viewer'),
+    sb.from('public_lists').select('user_id,kom_rows,segments,updated_at')
+  ]);
+  if (p.error || sh.error || pl.error) throw new Error((p.error || sh.error || pl.error).message);
+  S.members = p.data || [];
+  S.myShares = (sh.data || []).filter(x => x.owner === cloudUser.id).map(x => x.viewer);
+  const names = new Map(S.members.map(x => [x.id, x.display_name]));
+  S.remoteLists = {};
+  for (const l of pl.data || []) {
+    if (l.user_id === cloudUser.id) continue;
+    S.remoteLists[l.user_id] = { name: names.get(l.user_id) || 'Member', rows: l.kom_rows || [], segments: l.segments || [], at: Date.parse(l.updated_at) || 0 };
+  }
+  S.remoteListsAt = Date.now();
+  if (isAdmin()) {
+    const inv = await sb.from('invites').select('code,note,max_uses,uses,revoked,created_at').order('created_at', { ascending: false });
+    S.invites = inv.error ? [] : (inv.data || []);
+  }
+  saveLocal();
+}
+const isAdmin = () => !!(cloudUser && (S.members || []).find(x => x.id === cloudUser.id && x.is_admin));
+async function syncNow(full) {
+  if (!sb || !cloudUser) return;
+  if (syncing) { syncAgain = true; return; }
+  syncing = true; setSyncBadge('Saving…');
+  try {
+    if (full) { await pullNow(); renderAll(); }
+    await pushNow();
+    await pushPublic();
+    if (full) { await loadShared(); renderAll(); }
+    setSyncBadge('Synced ✓');
+  } catch (e) { setSyncBadge('Offline', true); console.warn('sync', e); }
+  syncing = false;
+  if (syncAgain) { syncAgain = false; scheduleSync(); }
+}
+function scheduleSync() {
+  if (!cloudUser) return;
+  clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(false), 3000);
+}
+async function loadSupabase() {
+  if (window.__fakeSupabase) return window.__fakeSupabase();
+  if (!window.supabase) await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js';
+    s.onload = res; s.onerror = () => rej(new Error('Could not load the account service. Check your connection.'));
+    document.head.appendChild(s);
+  });
+  return window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+function showGate(on) {
+  $('#gate').hidden = !on;
+  document.querySelector('nav.tabs').hidden = on;
+  $$('main > section').forEach(s => { if (on) s.hidden = true; });
+  if (!on) showTab('ride');
+}
+async function startCloud() {
+  $('#privacyText').textContent = PRIVACY; $('#privacyText2').textContent = PRIVACY;
+  if (!cloudOn()) return false;
+  try { sb = await loadSupabase(); }
+  catch (e) { if (!syncMeta().uid) { showGate(true); $('#gateStatus').textContent = e.message; } else setSyncBadge('Offline', true); return !!syncMeta().uid; }
+  const { data } = await sb.auth.getSession();
+  if (!data || !data.session) { showGate(true); return true; }
+  await afterSignIn(data.session.user);
+  return true;
+}
+async function afterSignIn(user) {
+  cloudUser = { id: user.id, email: user.email };
+  showGate(false);
+  setSyncBadge('Syncing…');
+  await syncNow(true);
+  if (!hasLogin()) showTab('setup');
+}
+function gateMsg(t) { $('#gateStatus').textContent = t; }
+$('#gTabIn').onclick = () => { $('#gTabIn').classList.add('on'); $('#gTabJoin').classList.remove('on'); $('#gIn').hidden = false; $('#gJoin').hidden = true; gateMsg(''); };
+$('#gTabJoin').onclick = () => { $('#gTabJoin').classList.add('on'); $('#gTabIn').classList.remove('on'); $('#gIn').hidden = true; $('#gJoin').hidden = false; gateMsg(''); };
+$('#inGo').onclick = async () => {
+  const email = $('#inEmail').value.trim(), password = $('#inPass').value;
+  if (!email || !password) return gateMsg('Enter your email and password.');
+  gateMsg('Signing in…');
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) return gateMsg(/invalid/i.test(error.message) ? 'Email or password is wrong.' : /fetch|network/i.test(error.message) ? 'Can\'t reach the account service. Check your connection and try again.' : error.message);
+  gateMsg(''); await afterSignIn(data.user);
+};
+$('#jGo').onclick = async () => {
+  const code = $('#jCode').value.trim().toUpperCase(), name = $('#jName').value.trim(), email = $('#jEmail').value.trim(), password = $('#jPass').value;
+  if (!code) return gateMsg('Enter your invite code.');
+  if (!name) return gateMsg('Enter your name.');
+  if (!email) return gateMsg('Enter your email.');
+  if (password.length < 8) return gateMsg('Use a password of at least 8 characters.');
+  if (!$('#jAgree').checked) return gateMsg('Tick the box to agree to how your data is stored.');
+  gateMsg('Creating your account…');
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { invite_code: code, display_name: name } } });
+  if (error) {
+    if (/invite|database error/i.test(error.message)) return gateMsg('That invite code isn\'t valid or has already been used.');
+    if (/registered|exists/i.test(error.message)) return gateMsg('That email already has an account. Sign in instead.');
+    if (/fetch|network/i.test(error.message)) return gateMsg('Can\'t reach the account service. Check your connection and try again.');
+    return gateMsg(error.message);
+  }
+  if (!data.session) return gateMsg('Account created. Check your email to confirm it, then sign in.');
+  S.myName = S.myName || name;
+  gateMsg(''); await afterSignIn(data.user);
+};
+['#inPass', '#jPass'].forEach(s => $(s).addEventListener('keydown', e => { if (e.key === 'Enter') $(s === '#inPass' ? '#inGo' : '#jGo').click(); }));
+
+function renderAccount() {
+  const card = $('#acctCard');
+  card.hidden = !cloudUser;
+  if (!cloudUser) return;
+  const meRow = (S.members || []).find(x => x.id === cloudUser.id) || {};
+  $('#acctLine').textContent = `Signed in as ${meRow.display_name || ''} (${cloudUser.email})${isAdmin() ? ' · admin' : ''}.`;
+  if (document.activeElement !== $('#acctName')) $('#acctName').value = meRow.display_name || '';
+  const others = (S.members || []).filter(x => x.id !== cloudUser.id).sort((a, b) => a.display_name.localeCompare(b.display_name));
+  const shares = new Set(S.myShares || []);
+  $('#shareWith').innerHTML = others.length
+    ? others.map(x => `<label class="chk"><input type="checkbox" data-share="${x.id}"${shares.has(x.id) ? ' checked' : ''}> ${esc(x.display_name)}</label>`).join('')
+    : '<p class="small">No other members yet.</p>';
+  $('#sharedTitle').textContent = isAdmin() ? 'Members\' lists' : 'Shared with me';
+  const ign = new Set(S.ignoredOwners.map(x => x.toLowerCase()));
+  const lists = Object.entries(S.remoteLists || {}).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  $('#sharedLists').innerHTML = lists.length ? lists.map(([uid, l]) => {
+    const missing = (l.segments || []).filter(s => !S.segments[s.id]).length;
+    return `<div class="mrow"><div class="txt"><b>${esc(l.name)}</b><div class="sub">${l.rows.length} KOMs · ${(l.segments || []).length} segments · ${missing} missing from your page</div></div>
+      ${missing ? `<button class="btn" data-addmissing="${uid}">Add ${missing} missing</button>` : ''}
+      ${l.rows.length ? `<label class="chk" style="margin:0"><input type="checkbox" data-hideowner="${esc(l.name)}"${ign.has(l.name.toLowerCase()) ? ' checked' : ''}> Hide their KOMs</label>` : ''}</div>`;
+  }).join('') : '<p class="small">Nobody has shared their lists with you yet.</p>';
+  $('#adminBox').hidden = !isAdmin();
+  if (isAdmin()) {
+    $('#invList').innerHTML = (S.invites || []).map(i => `<div class="mrow"><div class="txt"><code class="inv">${esc(i.code)}</code> ${esc(i.note || '')}
+      <div class="sub">${i.revoked ? 'revoked' : `${i.uses}/${i.max_uses} used`}</div></div>
+      ${!i.revoked && i.uses < i.max_uses ? `<button class="btn ghost" data-copyinv="${esc(i.code)}">Copy</button><button class="btn ghost" data-revoke="${esc(i.code)}">Revoke</button>` : ''}</div>`).join('');
+  }
+}
+$('#acctName').addEventListener('change', async e => {
+  const v = e.target.value.trim().slice(0, 40); if (!v || !cloudUser) return;
+  const { error } = await sb.from('profiles').update({ display_name: v }).eq('id', cloudUser.id);
+  if (error) return alert('Could not rename: ' + error.message);
+  const meRow = (S.members || []).find(x => x.id === cloudUser.id); if (meRow) meRow.display_name = v;
+  saveLocal(); renderAccount();
+});
+$('#acctSync').onclick = () => syncNow(true);
+$('#acctOut').onclick = async () => {
+  if (!confirm('Sign out? Your data is removed from this device but stays safe in your account.')) return;
+  try { await syncNow(false); } catch (e) {}
+  await sb.auth.signOut();
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+  location.reload();
+};
+$('#acctDelete').onclick = async () => {
+  if (!confirm('Delete your account and everything stored in it? This can\'t be undone.')) return;
+  if (prompt('Type DELETE to confirm') !== 'DELETE') return;
+  const { error } = await sb.rpc('delete_my_account');
+  if (error) return alert('Could not delete: ' + error.message);
+  await sb.auth.signOut();
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+  alert('Your account has been deleted.');
+  location.reload();
+};
+$('#shareWith').addEventListener('change', async e => {
+  const cb = e.target.closest('[data-share]'); if (!cb) return;
+  const viewer = cb.dataset.share;
+  const res = cb.checked
+    ? await sb.from('shares').insert({ owner: cloudUser.id, viewer })
+    : await sb.from('shares').delete().eq('owner', cloudUser.id).eq('viewer', viewer);
+  if (res.error) { cb.checked = !cb.checked; return alert('Could not change sharing: ' + res.error.message); }
+  S.myShares = cb.checked ? [...(S.myShares || []), viewer] : (S.myShares || []).filter(x => x !== viewer);
+  saveLocal();
+});
+$('#sharedLists').addEventListener('click', e => {
+  const b = e.target.closest('[data-addmissing]'); if (!b) return;
+  const l = (S.remoteLists || {})[b.dataset.addmissing]; if (!l) return;
+  showTab('ride');
+  addIdList(l.segments.map(s => String(s.id)));
+});
+$('#sharedLists').addEventListener('change', e => {
+  const cb = e.target.closest('[data-hideowner]'); if (!cb) return;
+  const nm = cb.dataset.hideowner;
+  S.ignoredOwners = S.ignoredOwners.filter(x => x.toLowerCase() !== nm.toLowerCase());
+  if (cb.checked) S.ignoredOwners.push(nm);
+  save(); renderList(); renderMap(); renderSettings();
+});
+function newInviteCode() {
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', b = new Uint8Array(6); crypto.getRandomValues(b);
+  return 'KRD-' + Array.from(b, x => A[x % A.length]).join('');
+}
+$('#invMake').onclick = async () => {
+  const code = newInviteCode(), note = $('#invNote').value.trim(), max_uses = Math.max(1, Math.min(100, +$('#invUses').value || 1));
+  const { error } = await sb.from('invites').insert({ code, note, max_uses, created_by: cloudUser.id });
+  if (error) return alert('Could not create invite: ' + error.message);
+  $('#invNote').value = '';
+  S.invites = [{ code, note, max_uses, uses: 0, revoked: false }, ...(S.invites || [])];
+  renderAccount();
+  try { await navigator.clipboard.writeText(code); alert(`Invite code ${code} copied. Send it with the link to this page.`); } catch (e) { alert(`Invite code: ${code}`); }
+};
+$('#invList').addEventListener('click', async e => {
+  const c = e.target.closest('[data-copyinv]');
+  if (c) { try { await navigator.clipboard.writeText(c.dataset.copyinv); c.textContent = 'Copied'; } catch (err) { prompt('Invite code', c.dataset.copyinv); } return; }
+  const r = e.target.closest('[data-revoke]'); if (!r) return;
+  if (!confirm('Revoke invite ' + r.dataset.revoke + '?')) return;
+  const { error } = await sb.from('invites').update({ revoked: true }).eq('code', r.dataset.revoke);
+  if (error) return alert(error.message);
+  const i = (S.invites || []).find(x => x.code === r.dataset.revoke); if (i) i.revoked = true;
+  renderAccount();
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && cloudUser) syncNow(true); });
+setInterval(() => { if (cloudUser && !document.hidden) syncNow(true); }, 5 * 60e3);
+
+/* ---------------- Strava connection state / setup guide ---------------- */
+const hasLogin = () => !!(S.auth.clientId && S.auth.clientSecret && S.auth.refreshToken);
+const isConnected = () => hasLogin() && !S.authProblem;
+function renderAuthState() {
+  const ok = isConnected();
+  // Setup tab only shows while setup is needed (or while you're on it)
+  const setupBtn = document.querySelector('nav.tabs button[data-tab="setup"]');
+  if (setupBtn) setupBtn.hidden = ok && $('#tab-setup').hidden;
+  const ban = $('#authBanner');
+  ban.hidden = ok;
+  if (!ok) {
+    $('#authBannerTxt').textContent = S.authProblem ? 'Strava needs reconnecting. Your segments are safe.' : 'Connect Strava to import segments and get KOM times.';
+    $('#authFix').textContent = S.authProblem ? 'Reconnect' : 'Set up';
+  }
+  $('#g1').classList.toggle('done', !!S.auth.clientId);
+  $('#g2').classList.toggle('done', !!(S.auth.clientId && S.auth.clientSecret));
+  $('#g3').classList.toggle('done', ok);
+  $('#g4').classList.toggle('done', ok && Object.keys(S.segments).length > 0);
+  $$('.siteurl').forEach(el => el.textContent = /^https?:/.test(location.protocol) ? location.origin : 'https://krdgroup.com.au');
+  const cl = $('#connLine');
+  if (cl) cl.textContent = ok ? `Connected${S.auth.athleteName ? ' as ' + S.auth.athleteName : ''} (Strava app ${S.auth.clientId}).` : S.authProblem ? 'Strava rejected the saved login. Open the setup guide to reconnect.' : 'Not connected.';
+}
 
 /* ---------------- Tabs ---------------- */
 function showTab(name) {
@@ -1336,8 +1731,8 @@ function showTab(name) {
   $$('main > section').forEach(s => s.hidden = s.id !== 'tab-' + name);
   if (name === 'map' && ensureMap()) { setTimeout(() => { map.invalidateSize(); renderMap(); }, 30); }
   if (name === 'settings') renderSettings();
-  if (name === 'route') { ensureRouteMap(); setTimeout(() => { if (routeMap) routeMap.invalidateSize(); renderRoute(); }, 30); }
   if (name === 'koms') renderKoms();
+  renderAuthState();
   window.scrollTo(0, 0);
 }
 $$('nav.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
@@ -1346,6 +1741,7 @@ $$('nav.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 $('#btnStarred').onclick = importStarred;
 $('#btnRides').onclick = importRides;
 $('#btnAdd').onclick = addByIds;
+$('#btnShareIds').onclick = shareSegmentList;
 $('#btnKom').onclick = () => fetchKoms();
 $('#btnStop').onclick = () => { abortFlag = true; setStatus('Stopping…'); };
 $('#timeSel').onchange = e => { S.hourKey = e.target.value; save(); renderWind(); renderList(); renderMap(); };
@@ -1372,8 +1768,6 @@ $$('[data-set]').forEach(el => el.addEventListener('change', () => {
   S.settings[el.dataset.set] = el.type === 'checkbox' ? el.checked : (+el.value || 0);
   save(); renderList(); renderMap();
 }));
-$$('[data-bound]').forEach(el => el.addEventListener('change', () => { S.bounds[el.dataset.bound] = +el.value; save(); S.weather = null; fetchWeather(true).then(renderAll).catch(() => renderAll()); }));
-$('#boundsReset').onclick = () => { S.bounds = { ...DEFAULT_BOUNDS }; save(); renderSettings(); renderMap(); };
 $$('[data-pf]').forEach(el => el.addEventListener('change', () => {
   const p = activeProfile(); const k = el.dataset.pf;
   p[k] = (k === 'name' || k === 'target') ? el.value : (+el.value || 0);
@@ -1388,7 +1782,7 @@ $('#authSave').onclick = async () => {
   S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); S.auth.refreshToken = $('#refreshToken').value.trim();
   S.auth.accessToken = ''; S.auth.expiresAt = 0; save();
   const st = $('#authStatus'); st.textContent = 'Testing…';
-  try { const a = await api('/athlete'); if (!S.myName) { S.myName = `${a.firstname || ''} ${a.lastname || ''}`.trim(); save(); } st.textContent = `Connected as ${a.firstname || ''} ${a.lastname || ''}. You're good to scan.`; }
+  try { const a = await api('/athlete'); S.auth.athleteName = `${a.firstname || ''} ${a.lastname || ''}`.trim(); if (!S.myName) S.myName = S.auth.athleteName; S.authProblem = false; save(); renderAuthState(); st.textContent = `Connected as ${S.auth.athleteName}. Now step 4: bring in your segments.`; }
   catch (e) { st.textContent = e.message; }
 };
 const AUTH_SCOPE = 'read,read_all,activity:read_all';
@@ -1417,10 +1811,12 @@ $('#authExchange').onclick = async () => {
       throw new Error(/code/.test(why) ? 'That code has expired or was already used. Tap Authorise again and paste the new address straight away.' : 'Strava said: ' + (j.message || r.status) + (why ? ' (' + why + ')' : ''));
     }
     Object.assign(S.auth, { accessToken: j.access_token, expiresAt: j.expires_at, refreshToken: j.refresh_token, scope: j.scope || '' });
-    save(); $('#authCode').value = ''; renderSettings();
+    S.authProblem = false;
     const ath = j.athlete || {};
+    S.auth.athleteName = `${ath.firstname || ''} ${ath.lastname || ''}`.trim();
+    save(); $('#authCode').value = ''; renderSettings(); renderAuthState();
     if (!S.myName && (ath.firstname || ath.lastname)) { S.myName = `${ath.firstname || ''} ${ath.lastname || ''}`.trim(); save(); }
-    st.textContent = `Connected as ${ath.firstname || ''} ${ath.lastname || ''} (permissions: ${j.scope || 'unknown'}). Go to Ride and import your segments.`;
+    st.textContent = `Connected as ${S.auth.athleteName}. Now step 4: bring in your segments.`;
     renderList();
   } catch (e) { st.textContent = e.message; }
 };
@@ -1443,7 +1839,12 @@ $('#klSummary').addEventListener('click', e => {
   const o = a.dataset.klremove; if (!confirm('Remove ' + o + '\'s KOM list?')) return;
   delete S.komLists[o]; save(); renderAll();
 });
-$('#authClear').onclick = () => { if (!confirm('Forget Strava credentials on this device?')) return; S.auth = defaults().auth; save(); renderSettings(); $('#authStatus').textContent = 'Credentials removed.'; };
+$('#authClear').onclick = () => { if (!confirm('Forget the Strava login on this device? Your segments and lists stay.')) return; S.auth = defaults().auth; S.authProblem = false; save(); renderSettings(); renderAuthState(); $('#authStatus').textContent = 'Strava login removed.'; };
+$('#connSetup').onclick = () => showTab('setup');
+$('#authFix').onclick = () => showTab('setup');
+$('#gStarred').onclick = () => { showTab('ride'); importStarred(); };
+$('#gRides').onclick = () => { showTab('ride'); importRides(); };
+['#clientId', '#clientSecret'].forEach(s => $(s).addEventListener('change', () => { S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); save(); renderAuthState(); }));
 
 /* ---------------- Backup / share files ---------------- */
 async function deliverFile(obj, filename) {
@@ -1466,7 +1867,7 @@ function shareSettingsObj() {
 function fullBackupObj() {
   return { ...shareSettingsObj(), kind: 'full',
     segments: S.segments, details: S.details, doneActivities: S.doneActivities,
-    home: S.home, route: S.route, myName: S.myName, legCache: S.legCache,
+    home: S.home, myName: S.myName,
     auth: { clientId: S.auth.clientId, clientSecret: S.auth.clientSecret } };
 }
 function mergeBackup(j) {
@@ -1492,9 +1893,7 @@ function mergeBackup(j) {
     }
     S.doneActivities = Array.from(new Set([...(S.doneActivities || []), ...(j.doneActivities || [])])).slice(-3000);
     if (j.home && !S.home) S.home = j.home;
-    if (j.route?.stops?.length && !S.route?.stops?.length) S.route = j.route;
     if (j.myName && !S.myName) S.myName = j.myName;
-    S.legCache = { ...(j.legCache || {}), ...(S.legCache || {}) };
     if (j.auth?.clientId && !S.auth.clientId) { S.auth.clientId = j.auth.clientId; S.auth.clientSecret = j.auth.clientSecret || ''; }
     if (j.auth?.clientId && S.auth.clientId === j.auth.clientId && !S.auth.clientSecret) S.auth.clientSecret = j.auth.clientSecret || '';
   }
@@ -1503,14 +1902,13 @@ function mergeBackup(j) {
 function renderBackupLine() {
   const el = $('#lastBackup'); if (!el) return;
   const n = Object.keys(S.segments).length, k = Object.keys(S.details).length;
-  el.textContent = `On this device: ${n} segments, ${k} with KOM times, ${Object.keys(S.ratings).length} rated.` +
+  el.textContent = `On this device: ${n} segments, ${k} with KOM times.` +
     (S.lastBackup ? ` Last full backup ${new Date(S.lastBackup).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}.` : ' No full backup yet.');
 }
 $('#backupBtn').onclick = async () => {
   await deliverFile(fullBackupObj(), `segments-backup-${stamp()}.json`);
   S.lastBackup = Date.now(); save(); renderBackupLine();
 };
-$('#exportBtn').onclick = () => deliverFile(shareSettingsObj(), `segments-settings-${stamp()}.json`);
 $('#importBtn').onclick = () => $('#importFile').click();
 function readFileText(f) {
   if (f.text) return f.text();
@@ -1530,7 +1928,6 @@ $('#importFile').onchange = async e => {
       if (full) { if (Array.isArray(j.profiles) && j.profiles.length) { S.profiles = j.profiles; S.activeProfile = j.activeProfile || j.profiles[0].id; } }
       else for (const p of j.profiles || []) if (!S.profiles.some(x => x.id === p.id)) S.profiles.push(p);
       S.settings = { ...S.settings, ...(j.settings || {}) };
-      if (j.bounds) S.bounds = { ...j.bounds };
     }
     geomCache.clear(); save(); renderAll();
     const msg = full
@@ -1540,11 +1937,11 @@ $('#importFile').onchange = async e => {
   } catch (err) { alert('Import failed: ' + err.message); }
   e.target.value = '';
 };
-$('#clearCache').onclick = () => { if (!confirm('Clear cached segments and KOM times? (Ratings are kept.)')) return; S.segments = {}; S.details = {}; geomCache.clear(); save(); renderAll(); };
 $('#resetAll').onclick = () => { if (!confirm('Reset everything on this device, including credentials and ratings?')) return; S = defaults(); save(); geomCache.clear(); renderAll(); };
 
 /* ---------------- Start ---------------- */
 renderAll();
+startCloud().then(usingCloud => { if (!usingCloud && !hasLogin()) showTab('setup'); });
 fetchWeather(false).then(renderAll).catch(e => setStatus('Wind: ' + e.message, true));
 setInterval(() => { if (S.hourKey === 'now') { fetchWeather(false).then(() => { renderWind(); renderList(); renderMap(); }).catch(() => {}); } }, 10 * 60e3);
 </script>
