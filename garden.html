@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Garden Planner</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2256%2053%20508%20508%22%3E%3Crect%20x%3D%2256.62%22%20y%3D%2253.78%22%20width%3D%22507.117%22%20height%3D%22507.117%22%20fill%3D%22%23E3E421%22/%3E%3Cg%20fill%3D%22%23fff%22%3E%3Cpolygon%20points%3D%22238.084%20529.72%20155.219%20446.854%20237.891%20364.18%20194.796%20364.18%20118.271%20440.704%20118.271%20364.18%2087.796%20364.18%2087.796%20482.802%20118.101%20452.833%20194.989%20529.72%20238.084%20529.72%22/%3E%3Cpath%20d%3D%22M387.531%2C529.409l-44.055-56.629c22.844-1.497%2C40.962-19.557%2C40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464%2C0%2C13.538%2C5.059%2C13.538%2C11.276v25.028c0%2C6.217-6.074%2C11.274-13.538%2C11.274h-91.827v30.475h55.211l43.941%2C56.482h39.78Z%22/%3E%3Cpath%20d%3D%22M462.739%2C364.464h-64.437v30.929h64.437c21.444%2C0%2C38.891%2C17.448%2C38.891%2C38.891v25.34c0%2C21.444-17.448%2C38.891-38.891%2C38.891h-64.437v30.929h64.437c38.499%2C0%2C69.82-31.321%2C69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z%22/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{--krd-grey:#414142;--krd-lime:#E3E421;--ink:#232325;--ink-2:#4A4A4D;--ink-3:#66666A;--rule:#D9D9DB;--rule-2:#EBEBEC;--field:#A8A8AC;--ground:#F3F3F2;--white:#FFFFFF;--sel:#EEEEEC;--pass-bg:#E2F0E5;--pass:#1D5A2C;--fail-bg:#F6E0DD;--fail:#8A2A1E;--bar:#E07B00;--res:#F4F4F5;--res-2:#E2E2E4;--water:#2F6E9E;--sun:#C98A00}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--ground)}
+.app{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
+aside{background:var(--krd-grey);color:#fff;padding:24px 20px}
+aside .logo svg{width:180px;display:block}
+aside .tool{margin:10px 0 28px;font-size:13px;color:#cfcfd1;letter-spacing:.04em;text-transform:uppercase}
+aside nav button{display:block;width:100%;text-align:left;padding:10px 12px;color:#fff;background:none;border:0;border-left:3px solid transparent;font:inherit;cursor:pointer}
+aside nav button.on{border-left-color:var(--krd-lime);background:rgba(255,255,255,.06);color:var(--krd-lime)}
+aside .note{font-size:12px;color:#bdbdc0;margin-top:24px;line-height:1.5}
+.top{background:#fff;border-bottom:1px solid var(--rule);padding:14px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:20px;font-weight:500;margin:0 auto 0 0}
+.loc{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.loc b{color:var(--ink)}
+.zone{background:var(--sel);padding:4px 10px;font-size:13px}
+.btn{height:40px;padding:0 14px;border:1px solid var(--field);background:#fff;font:inherit;cursor:pointer;color:var(--ink)}
+.btn.pri{background:var(--krd-grey);color:#fff;border-color:var(--krd-grey)}
+.btn.sm{height:32px;padding:0 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+main{padding:20px 24px}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+.panel{background:#fff;border:1px solid var(--rule)}
+.sec{padding:18px 20px;border-bottom:1px solid var(--rule-2)}
+.sec:last-child{border-bottom:0}
+.sec h2{font-size:17px;font-weight:600;margin:0 0 4px}
+.sec h3.sub2{font-size:14px;font-weight:600;margin:20px 0 10px;color:var(--ink-2)}
+.lead{color:var(--ink-3);font-size:13px;margin:0 0 14px;line-height:1.45}
+.seg{display:inline-flex;border:1px solid var(--field);margin-bottom:14px;flex-wrap:wrap}
+.seg button{height:44px;padding:0 16px;border:0;background:#fff;font:inherit;cursor:pointer;border-right:1px solid var(--field);color:var(--ink)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--krd-grey);color:#fff}
+.seg .n{font-size:12px;opacity:.7;margin-left:6px}
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);padding:6px 10px;font:inherit;font-size:13px;background:#fff;cursor:pointer;color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--sel);border-color:var(--field)}
+.plants{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.pc{border:1px solid var(--rule);padding:12px;cursor:pointer;background:#fff;text-align:left;font:inherit;color:var(--ink)}
+.pc.sel{outline:2px solid var(--krd-grey);outline-offset:-1px}
+.pc .nm{font-weight:600}
+.pc .ty{font-size:12px;color:var(--ink-3);margin:2px 0 8px}
+.pc .meta{font-size:12px;color:var(--ink-2)}
+.tag{display:inline-block;font-size:11px;padding:2px 6px;margin-top:8px}
+.tag.ok{background:var(--pass-bg);color:var(--pass)}
+.tag.soon{background:#FFF2DC;color:#7A4A00}
+.tag.later{background:var(--res-2);color:var(--ink-2)}
+.tag.no{background:var(--fail-bg);color:var(--fail)}
+.empty{color:var(--ink-3);font-size:14px;padding:10px 0}
+.res{position:sticky;top:20px;display:flex;flex-direction:column;gap:20px}
+.wx{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--rule-2);border-left:1px solid var(--rule-2)}
+.wx div{border-right:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);padding:8px 2px;text-align:center;font-size:12px}
+.wx .d{font-weight:600}
+.wx .t{font-size:13px;margin:3px 0}
+.wx .r{color:#2F5E8A}
+.wx .hot{background:#FFF2DC}
+.wx .frost{background:#E3EDF7}
+.warnnote,.infonote{padding:10px 12px;font-size:13px;margin-top:10px;line-height:1.45}
+.warnnote{background:#FFF2DC;border-left:3px solid var(--bar)}
+.infonote{background:var(--res);border-left:3px solid var(--field)}
+.info h3{font-size:22px;font-weight:300;margin:0}
+.info .sub{color:var(--ink-3);font-size:13px;margin:2px 0 12px}
+table.kv{width:100%;border-collapse:collapse;font-size:14px}
+table.kv td{padding:7px 0;border-bottom:1px solid var(--rule-2);vertical-align:top}
+table.kv td:first-child{color:var(--ink-3);width:40%}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:2px;margin-top:14px}
+.months span{font-size:10px;text-align:center;padding:5px 0;background:var(--res-2);color:var(--ink-3)}
+.months span.s{background:var(--krd-lime);color:var(--ink)}
+.months span.c{outline:2px solid var(--krd-grey);outline-offset:-2px}
+.tip{font-size:13px;color:var(--ink-2);margin-top:12px;line-height:1.45}
+.newbed{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+input[type=text],input[type=date],input[type=search],select{height:40px;border:1px solid var(--field);padding:0 10px;font:inherit;background:#fff;color:var(--ink);border-radius:0}
+.beds{display:flex;flex-direction:column;gap:14px}
+.bed{border:1px solid var(--rule);background:#fff}
+.bed header{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid var(--rule);background:var(--res)}
+.bed header .t{flex:1;min-width:0}
+.bed header b{font-size:16px;display:block}
+.bed header small{font-size:12px;color:var(--ink-3)}
+.bed header .ed{flex:1;display:flex;gap:8px;flex-wrap:wrap}
+.bed header .ed input{height:36px}
+.bed header .ed input:first-child{flex:1;min-width:140px;font-weight:600}
+.bed header .ed input.size{width:140px}
+.ib{border:1px solid transparent;background:none;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-3);flex:0 0 auto}
+.ib:hover{border-color:var(--field);background:#fff}
+.ib svg{width:16px;height:16px}
+.cols,.pl{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) 32px;gap:4px 12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--rule-2)}
+.cols{padding:8px 14px;font-size:12px;color:var(--ink-3)}
+.pl .n{font-weight:500}
+.pl .dm{display:none;font-size:12px;color:var(--ink-3);margin-top:2px}
+.pl .dm button,.pl .p button{border:1px dashed transparent;background:none;font:inherit;font-size:14px;color:var(--ink-2);padding:4px 6px;margin-left:-6px;cursor:pointer}
+.pl .dm button:hover,.pl .p button:hover{border-color:var(--field)}
+.pl .dm input,.pl .p input{height:34px;font-size:14px;width:150px}
+.pl .h{font-size:14px;white-space:nowrap}
+.pl .h.due{color:var(--pass);font-weight:600}
+.pl .h.past{color:var(--ink-3)}
+.pl .h small{display:block;font-size:11px;color:var(--ink-3);font-weight:400}
+.pl.none{grid-template-columns:1fr;color:var(--ink-3);font-size:14px}
+.add{padding:12px 14px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;gap:8px;align-items:end;background:#FAFAFA}
+.add label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-3)}
+.add select,.add input{width:100%}
+.tobed{margin-top:16px;padding-top:14px;border-top:1px solid var(--rule-2)}
+.tobed .add{padding:0;background:none;grid-template-columns:minmax(0,1fr) 150px auto}
+.linkbtn{border:0;background:none;padding:6px 0 0;font:inherit;font-size:13px;color:var(--ink-3);text-decoration:underline;cursor:pointer}
+.okline{font-size:13px;color:var(--pass);margin:10px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--ink-2);padding:10px 12px;background:var(--res);margin-bottom:14px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.ic{display:inline-flex;align-items:center;gap:1px}
+.ic svg{width:16px;height:16px;display:block}
+.pc .meta{display:flex;align-items:center;gap:12px}
+.filters input[type=search]{height:34px;flex:1 1 180px;max-width:260px;font-size:14px}
+.disc{font-size:12px;color:var(--ink-3);margin-top:14px;line-height:1.5}
+.disc a{color:var(--ink-2)}
+dialog{border:1px solid var(--rule);padding:0;width:min(460px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(35,35,37,.4)}
+dialog .sec{padding:18px 20px}
+.results{display:flex;flex-direction:column;margin-top:10px}
+.results button{text-align:left;padding:10px 12px;border:0;border-bottom:1px solid var(--rule-2);background:#fff;font:inherit;cursor:pointer;color:var(--ink)}
+.results button:hover{background:var(--sel)}
+.results small{color:var(--ink-3)}
+.row{display:flex;gap:8px}
+.row input{flex:1;min-width:0}
+.status{font-size:13px;color:var(--ink-3);margin-top:8px;min-height:18px}
+@media(max-width:1150px){.grid{grid-template-columns:minmax(0,1fr)}.res{position:static}}
+@media(max-width:760px){.app{grid-template-columns:minmax(0,1fr)}aside{padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}aside .logo svg{width:120px}aside .tool{margin:0}aside .note{display:none}aside nav{display:flex;width:100%}aside nav button{border-left:0;border-bottom:3px solid transparent;text-align:center}aside nav button.on{border-bottom-color:var(--krd-lime)}main{padding:16px}.top{padding:12px 16px}.wx{grid-template-columns:repeat(4,1fr)}.seg{display:flex;width:100%}.seg button{flex:1;padding:0 8px}.cols{display:none}.pl{grid-template-columns:minmax(0,1fr) auto 32px}.pl .p{display:none}.pl .dm{display:block}.pl .dm button{font-size:12px;color:var(--ink-3);margin-left:0;padding:2px 4px}.add,.tobed .add{grid-template-columns:1fr auto}.add label:first-child{grid-column:1/-1}.filters input[type=search]{max-width:none;flex-basis:100%}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="var(--sun)"/><g stroke="var(--sun)" stroke-width="2" stroke-linecap="round"><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></g></symbol>
+<symbol id="i-part" viewBox="0 0 24 24"><circle cx="9" cy="9" r="4.5" fill="var(--sun)"/><g stroke="var(--sun)" stroke-width="2" stroke-linecap="round"><path d="M9 1v2.2M1 9h2.2M3.3 3.3l1.6 1.6M14.7 3.3l-1.6 1.6"/></g><path d="M7 20.5h11a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.6A3.3 3.3 0 0 0 7 20.5z" fill="#9A9AA0"/></symbol>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.5C9 7 5.5 10.8 5.5 15a6.5 6.5 0 0 0 13 0c0-4.2-3.5-8-6.5-12.5z" fill="var(--water)"/></symbol>
+<symbol id="i-dropo" viewBox="0 0 24 24"><path d="M12 2.5C9 7 5.5 10.8 5.5 15a6.5 6.5 0 0 0 13 0c0-4.2-3.5-8-6.5-12.5z" fill="none" stroke="#B9C9D6" stroke-width="1.6"/></symbol>
+<symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-tick" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+</svg>
+<div class="app">
+<aside>
+<div class="logo"><svg viewBox="50 47 980 520" xmlns="http://www.w3.org/2000/svg" aria-label="KRD Engineering + Management">
+<rect x="56.62" y="54.162" width="507.117" height="507.117" fill="#E3E421"/>
+<g fill="#fff">
+<polygon points="238.084 530.102 155.219 447.236 237.891 364.562 194.796 364.562 118.271 441.086 118.271 364.561 87.796 364.561 87.796 483.183 118.101 453.215 194.989 530.102 238.084 530.102"/>
+<path d="M387.531,529.791l-44.055-56.629c22.844-1.497,40.962-19.557,40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464,0,13.538,5.059,13.538,11.276v25.028c0,6.217-6.074,11.274-13.538,11.274h-91.827v30.475h55.211l43.941,56.482h39.78Z"/>
+<path d="M462.739,364.846h-64.437v30.929h64.437c21.444,0,38.891,17.448,38.891,38.891v25.34c0,21.444-17.448,38.891-38.891,38.891h-64.437v30.929h64.437c38.499,0,69.82-31.321,69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z"/>
+<path d="M598.349,395.613h36.139v4.251h-31.154v18.912h29.174v4.252h-29.174v20.671h31.52v4.251h-36.505v-52.338Z"/>
+<path d="M640.867,410.127h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z"/>
+<path d="M712.266,444.873c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.069,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM707.647,428.599c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027Z"/>
+<path d="M721.138,395.613h4.618v7.403h-4.618v-7.403ZM721.138,410.127h4.618v37.824h-4.618v-37.824Z"/>
+<path d="M734.553,410.127h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z"/>
+<path d="M776.704,430.285c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.963,13.561-16.493,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM801.187,426.4c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z"/>
+<path d="M814.75,430.285c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM839.233,426.4c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z"/>
+<path d="M850.085,410.127h4.251v8.87h.146c2.346-6.084,7.477-9.676,14.294-9.383v4.618c-8.356-.439-14.074,5.718-14.074,13.562v20.158h-4.618v-37.824Z"/>
+<path d="M873.249,395.613h4.618v7.403h-4.618v-7.403ZM873.249,410.127h4.618v37.824h-4.618v-37.824Z"/>
+<path d="M886.664,410.127h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z"/>
+<path d="M958.063,444.873c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM953.445,428.599c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027Z"/>
+<path d="M598.203,471.012h7.33l18.106,45.888,18.033-45.888h7.33v52.338h-4.984v-45.228h-.146l-17.886,45.228h-4.691l-17.959-45.228h-.147v45.228h-4.984v-52.338Z"/>
+<path d="M658.095,497.108c.439-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM682.725,502.679h-.146c-.587,1.1-2.639,1.466-3.885,1.686-7.843,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011Z"/>
+<path d="M696.507,485.526h4.618v6.524h.147c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.331,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z"/>
+<path d="M735.506,497.108c.44-8.87,6.67-12.681,15.32-12.681,6.67,0,13.928,2.052,13.928,12.168v20.085c0,1.759.879,2.785,2.712,2.785.513,0,1.1-.146,1.466-.293v3.885c-1.026.22-1.759.293-3.005.293-4.691,0-5.425-2.639-5.425-6.597h-.146c-3.225,4.911-6.524,7.697-13.781,7.697-6.964,0-12.682-3.445-12.682-11.069,0-10.629,10.336-10.996,20.305-12.168,3.812-.439,5.938-.953,5.938-5.131,0-6.231-4.472-7.771-9.896-7.771-5.718,0-9.969,2.639-10.116,8.796h-4.618ZM760.136,502.679h-.147c-.586,1.1-2.639,1.466-3.885,1.686-7.844,1.393-17.593,1.319-17.593,8.723,0,4.618,4.105,7.477,8.43,7.477,7.037,0,13.268-4.471,13.195-11.875v-6.011Z"/>
+<path d="M805.953,520.272c-.073,11.289-4.398,18.179-16.787,18.179-7.55,0-15.027-3.372-15.687-11.436h4.618c1.026,5.571,5.938,7.55,11.068,7.55,8.503,0,12.168-5.058,12.168-14.294v-5.131h-.146c-2.126,4.618-6.597,7.77-12.022,7.77-12.095,0-17.08-8.65-17.08-19.425,0-10.409,6.158-19.059,17.08-19.059,5.498,0,10.189,3.445,12.022,7.624h.146v-6.524h4.618v34.746ZM801.334,503.999c0-7.404-3.445-15.687-12.168-15.687-8.796,0-12.461,7.844-12.461,15.687,0,7.624,3.958,15.027,12.461,15.027,7.99,0,12.168-7.331,12.168-15.027Z"/>
+<path d="M817.464,505.685c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM841.947,501.799c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z"/>
+<path d="M852.798,485.526h4.252v6.377h.22c2.419-4.544,6.377-7.477,12.388-7.477,4.985,0,9.456,2.419,10.849,7.403,2.272-4.984,7.037-7.403,12.021-7.403,8.283,0,12.535,4.325,12.535,13.268v25.656h-4.618v-25.436c0-6.231-2.346-9.603-8.943-9.603-7.99,0-10.262,6.598-10.262,13.635v21.404h-4.618v-25.656c.073-5.131-2.052-9.383-7.917-9.383-7.99,0-11.216,6.011-11.289,13.928v21.111h-4.618v-37.824Z"/>
+<path d="M916.575,505.685c.073,6.744,3.592,14.88,12.461,14.88,6.744,0,10.409-3.958,11.875-9.676h4.618c-1.979,8.576-6.964,13.561-16.494,13.561-12.021,0-17.08-9.236-17.08-20.012,0-9.969,5.058-20.012,17.08-20.012,12.168,0,17.006,10.629,16.64,21.258h-29.102ZM941.059,501.799c-.22-6.964-4.545-13.488-12.022-13.488-7.55,0-11.729,6.598-12.461,13.488h24.483Z"/>
+<path d="M951.836,485.526h4.618v6.524h.146c1.686-4.545,6.744-7.624,12.095-7.624,10.629,0,13.854,5.571,13.854,14.587v24.337h-4.618v-23.604c0-6.524-2.126-11.436-9.603-11.436-7.33,0-11.729,5.571-11.875,12.975v22.064h-4.618v-37.824Z"/>
+<path d="M998.605,485.526h7.697v3.885h-7.697v25.51c0,3.005.44,4.765,3.738,4.984,1.32,0,2.639-.073,3.958-.22v3.958c-1.393,0-2.712.147-4.105.147-6.157,0-8.283-2.053-8.21-8.503v-25.876h-6.597v-3.885h6.597v-11.362h4.618v11.362Z"/>
+</g>
+<path fill="#E3E421" d="M1023.38,425.521v7.843h-14.587v14.587h-7.843v-14.587h-14.587v-7.843h14.587v-14.587h7.843v14.587h14.587Z"/>
+</svg></div>
+<div class="tool">Garden Planner</div>
+<nav id="nav"><button data-view="plants">What to plant</button><button data-view="beds">My garden beds</button></nav>
+<div class="note">Planting guide for Australian gardens, using your location and the 7-day forecast.</div>
+</aside>
+<div>
+<div class="top">
+<h1 id="title">What to plant</h1>
+<div class="loc" id="loc"></div>
+<button class="btn" id="btnLoc">Change location</button>
+<button class="btn" id="btnImport">Import</button>
+<button class="btn pri" id="btnSave">Save</button>
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+</div>
+<main id="main"></main>
+</div>
+</div>
+
+<dialog id="locDlg">
+<div class="sec">
+<h2>Your location</h2>
+<p class="lead">Used to work out your climate zone and the local forecast. It stays in this browser.</p>
+<button class="btn pri" id="btnGeo">Use my location</button>
+<h3 class="sub2">Or search for a town or suburb</h3>
+<div class="row"><input type="search" id="q" placeholder="e.g. Mackay"><button class="btn" id="btnSearch">Search</button></div>
+<div class="status" id="locStatus"></div>
+<div class="results" id="results"></div>
+<div style="margin-top:14px;text-align:right"><button class="btn" id="btnClose">Close</button></div>
+</div>
+</dialog>
+
+<script>
+"use strict";
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MI=["J","F","M","A","M","J","J","A","S","O","N","D"];
+const ZONES={trop:"Tropical",sub:"Subtropical",arid:"Arid",temp:"Temperate",cool:"Cool"};
+const TYPES={veg:"Vegetable",fruit:"Fruit",herb:"Herb"};
+const WATER={Low:"Low — water when the topsoil is dry",Med:"Medium — water 2–3 times a week",High:"High — keep soil moist, most days in heat"};
+const SUN={Full:"Full sun (6+ hours)",Part:"Part shade OK (4+ hours)"};
+const R=(a,b)=>{const o=[];for(let i=a;i<=b;i++)o.push(i);return o};
+/* Plant data: sowing/planting months per zone (1=Jan). null = not suited to that zone.
+   General guide compiled from common Australian planting calendars; check against local advice. */
+const P=[
+{id:"tomato",n:"Tomato",t:"fruit",m:"Seed or seedling",sun:"Full",w:"Med",sp:600,d:5,h:[70,100],z:{trop:[3,4,5,6,7,8],sub:[1,2,3,8,9,10,11],arid:[2,3,8,9],temp:[9,10,11,12],cool:[10,11,12]},tip:"Stake or cage plants. In the tropics grow through the dry season — wet-season humidity brings disease."},
+{id:"strawberry",n:"Strawberry",t:"fruit",m:"Runners or crowns",sun:"Full",w:"Med",sp:300,d:0,h:[90,120],z:{trop:[3,4,5,6],sub:[3,4,5],arid:[3,4,5],temp:[3,4,5,6,7,8],cool:[6,7,8,9]},tip:"Plant with the crown just at soil level. Mulch with straw to keep fruit off the soil."},
+{id:"watermelon",n:"Watermelon",t:"fruit",m:"Seed",sun:"Full",w:"High",sp:1000,d:20,h:[80,100],z:{trop:[6,7,8,9,10],sub:[8,9,10,11,12],arid:[8,9,10,11],temp:[10,11,12],cool:[11]},tip:"Needs warm soil and lots of room. Cut back watering as fruit ripens for sweeter melons."},
+{id:"rockmelon",n:"Rockmelon",t:"fruit",m:"Seed",sun:"Full",w:"Med",sp:800,d:20,h:[80,95],z:{trop:[6,7,8,9,10],sub:[8,9,10,11,12],arid:[8,9,10,11],temp:[10,11,12],cool:[11]},tip:"Ready when the stem slips off easily and the fruit smells sweet."},
+{id:"capegoose",n:"Cape gooseberry",t:"fruit",m:"Seed or seedling",sun:"Full",w:"Low",sp:1000,d:5,h:[100,140],z:{trop:[3,4,5,6,7],sub:[8,9,10,11],arid:[8,9],temp:[9,10,11],cool:[10,11]},tip:"Fruit is ripe when the papery husk turns brown and dry."},
+{id:"rosella",n:"Rosella",t:"fruit",m:"Seed",sun:"Full",w:"Med",sp:1000,d:10,h:[150,180],z:{trop:[10,11,12,1],sub:[10,11,12],arid:null,temp:null,cool:null},tip:"Short days trigger flowering, so sow early in the wet season. Calyces make jam and cordial."},
+{id:"capsicum",n:"Capsicum",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:500,d:5,h:[80,110],z:{trop:[2,3,4,5,6,7,8],sub:[8,9,10,11,12,1],arid:[8,9,10],temp:[9,10,11],cool:[10,11]},tip:"Slow to start from seed; seedlings save about six weeks."},
+{id:"chilli",n:"Chilli",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:500,d:5,h:[80,120],z:{trop:[2,3,4,5,6,7,8,9],sub:[8,9,10,11,12,1],arid:[8,9,10],temp:[9,10,11,12],cool:[10,11]},tip:"Often keeps cropping for more than one season in warm areas."},
+{id:"eggplant",n:"Eggplant",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:600,d:5,h:[80,110],z:{trop:[1,2,3,4,5,6,7,8,9],sub:[8,9,10,11,12,1,2],arid:[8,9,10],temp:[9,10,11,12],cool:[10,11]},tip:"Pick while the skin is still glossy."},
+{id:"zucchini",n:"Zucchini",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:900,d:20,h:[45,60],z:{trop:[3,4,5,6,7,8],sub:[8,9,10,11,12,1,2],arid:[2,3,8,9,10],temp:[9,10,11,12,1],cool:[10,11,12]},tip:"Water at the base to avoid powdery mildew. Pick small and often."},
+{id:"cucumber",n:"Cucumber",t:"veg",m:"Seed",sun:"Full",w:"High",sp:400,d:20,h:[50,70],z:{trop:[3,4,5,6,7,8],sub:[8,9,10,11,12,1,2],arid:[2,8,9,10],temp:[9,10,11,12,1],cool:[10,11,12]},tip:"Grow up a trellis to save space and keep fruit clean."},
+{id:"pumpkin",n:"Pumpkin",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:1500,d:25,h:[90,120],z:{trop:[3,4,5,6,7,8],sub:[8,9,10,11,12,1],arid:[8,9,10],temp:[9,10,11,12],cool:[10,11]},tip:"Harvest when the vine dies back and the stem is dry and corky."},
+{id:"corn",n:"Sweet corn",t:"veg",m:"Seed",sun:"Full",w:"High",sp:300,d:40,h:[70,90],z:{trop:[3,4,5,6,7,8],sub:[8,9,10,11,12,1,2],arid:[2,8,9,10],temp:[10,11,12],cool:[11,12]},tip:"Plant in a block of at least four rows, not a single line, so it pollinates."},
+{id:"bean",n:"Bean (bush or climbing)",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:150,d:30,h:[55,75],z:{trop:[3,4,5,6,7,8],sub:[2,3,4,8,9,10,11],arid:[2,3,8,9],temp:[10,11,12,1],cool:[11,12]},tip:"Sow every few weeks for a steady supply. Don't soak the seed."},
+{id:"snakebean",n:"Snake bean",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:200,d:30,h:[60,80],z:{trop:[9,10,11,12,1,2],sub:[10,11,12,1],arid:[10,11],temp:[11,12],cool:null},tip:"Loves heat and humidity. Needs a tall trellis."},
+{id:"okra",n:"Okra",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:500,d:20,h:[55,70],z:{trop:[9,10,11,12,1,2,3],sub:[9,10,11,12,1],arid:[9,10,11],temp:[11,12],cool:null},tip:"Pick pods at 5–8 cm long, every couple of days."},
+{id:"sweetpotato",n:"Sweet potato",t:"veg",m:"Slips (cuttings)",sun:"Full",w:"Med",sp:400,d:0,h:[110,150],z:{trop:[9,10,11,12,1,2,3,4],sub:[9,10,11,12,1],arid:[9,10,11],temp:[10,11,12],cool:null},tip:"Plant slips with most of the stem buried. Vines spread a long way."},
+{id:"kangkong",n:"Kang kong",t:"veg",m:"Seed or cuttings",sun:"Full",w:"High",sp:300,d:10,h:[40,60],z:{trop:[9,10,11,12,1,2,3],sub:[9,10,11,12,1,2],arid:[10,11],temp:null,cool:null},tip:"Water-loving leafy green. Keep it contained in a pot or wet bed."},
+{id:"peanut",n:"Peanut",t:"veg",m:"Seed (raw, shelled)",sun:"Full",w:"Med",sp:300,d:50,h:[120,150],z:{trop:[10,11,12,1],sub:[10,11,12],arid:[10,11],temp:[11],cool:null},tip:"Needs loose, sandy soil — the pods form underground."},
+{id:"lettuce",n:"Lettuce",t:"veg",m:"Seed or seedling",sun:"Part",w:"High",sp:250,d:3,h:[45,70],z:{trop:[4,5,6,7,8],sub:[2,3,4,5,6,7,8,9],arid:[2,3,4,5,8,9],temp:[1,2,3,4,5,8,9,10,11,12],cool:[9,10,11,12,1,2,3]},tip:"Bolts in hot weather; give afternoon shade in warm months."},
+{id:"asiangreens",n:"Asian greens (bok choy)",t:"veg",m:"Seed or seedling",sun:"Part",w:"High",sp:250,d:5,h:[40,60],z:{trop:[3,4,5,6,7,8],sub:[2,3,4,5,6,7,8,9],arid:[3,4,5,6,8,9],temp:[2,3,4,8,9,10],cool:[9,10,11,12,1,2]},tip:"Fast crop. Harvest whole or pick outer leaves."},
+{id:"silverbeet",n:"Silverbeet",t:"veg",m:"Seed or seedling",sun:"Part",w:"Med",sp:300,d:15,h:[55,70],z:{trop:[3,4,5,6,7],sub:[2,3,4,5,6,7,8,9,10],arid:[2,3,4,5,8,9],temp:[2,3,4,8,9,10,11],cool:[9,10,11,12,1]},tip:"Pick outer leaves and it keeps producing for months."},
+{id:"spinach",n:"English spinach",t:"veg",m:"Seed",sun:"Part",w:"Med",sp:200,d:15,h:[40,60],z:{trop:[5,6],sub:[3,4,5,6,7],arid:[3,4,5,6],temp:[2,3,4,5,8,9],cool:[2,3,8,9,10]},tip:"A cool-season crop — runs to seed quickly in heat."},
+{id:"kale",n:"Kale",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:450,d:10,h:[60,80],z:{trop:[4,5,6],sub:[2,3,4,5,6],arid:[3,4,5],temp:[2,3,4,5,8,9],cool:[10,11,12,1,2]},tip:"Net against cabbage moth caterpillars."},
+{id:"broccoli",n:"Broccoli",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:500,d:10,h:[70,100],z:{trop:[4,5,6],sub:[2,3,4,5,6],arid:[2,3,4],temp:[1,2,3,4,5],cool:[11,12,1,2]},tip:"Cut the main head before the flowers open; side shoots follow."},
+{id:"cabbage",n:"Cabbage",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:500,d:10,h:[80,120],z:{trop:[4,5,6,7],sub:[2,3,4,5,6,7],arid:[2,3,4,5],temp:[1,2,3,4,5,9,10],cool:[10,11,12,1,2]},tip:"Feed well with compost; net against caterpillars."},
+{id:"cauliflower",n:"Cauliflower",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:600,d:10,h:[90,140],z:{trop:[4,5],sub:[2,3,4,5],arid:[2,3,4],temp:[1,2,3,4],cool:[11,12,1]},tip:"Fold leaves over the curd to keep it white."},
+{id:"carrot",n:"Carrot",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:50,d:6,h:[70,100],z:{trop:[3,4,5,6,7,8],sub:[1,2,3,4,5,6,7,8,9,10],arid:[2,3,4,5,8,9],temp:[1,2,3,8,9,10,11,12],cool:[9,10,11,12,1]},tip:"Sow direct in loose, stone-free soil. Keep moist until seedlings show."},
+{id:"beetroot",n:"Beetroot",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:100,d:15,h:[60,80],z:{trop:[3,4,5,6,7,8],sub:[2,3,4,5,6,7,8,9,10],arid:[2,3,4,5,8,9],temp:[1,2,3,8,9,10,11,12],cool:[9,10,11,12,1,2]},tip:"Each seed is a cluster — thin to one plant per spot."},
+{id:"radish",n:"Radish",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:50,d:10,h:[25,40],z:{trop:[3,4,5,6,7,8],sub:R(2,11),arid:R(2,9),temp:R(1,12),cool:[1,2,3,4,8,9,10,11,12]},tip:"Fastest crop in the garden. Sow a short row every two weeks."},
+{id:"springonion",n:"Spring onion",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:50,d:5,h:[50,70],z:{trop:R(3,9),sub:R(1,12),arid:R(2,10),temp:R(1,12),cool:[1,2,3,4,8,9,10,11,12]},tip:"Easy in pots. Cut the tops and they regrow."},
+{id:"onion",n:"Onion (bulb)",t:"veg",m:"Seed or seedling",sun:"Full",w:"Low",sp:100,d:5,h:[150,200],z:{trop:[4,5],sub:[3,4,5],arid:[4,5,6],temp:[4,5,6,7],cool:[6,7,8,9]},tip:"Choose a short-day variety in the north, long-day in the south."},
+{id:"garlic",n:"Garlic",t:"veg",m:"Cloves",sun:"Full",w:"Low",sp:120,d:40,h:[180,240],z:{trop:null,sub:[3,4],arid:[3,4],temp:[3,4,5],cool:[3,4,5]},tip:"Needs a cool winter to form bulbs. Harvest when the leaves yellow."},
+{id:"leek",n:"Leek",t:"veg",m:"Seed or seedling",sun:"Full",w:"Med",sp:150,d:5,h:[120,150],z:{trop:[3,4,5],sub:[2,3,4,5,8,9],arid:[3,4,5],temp:[2,3,4,5,8,9,10],cool:[9,10,11,12,1]},tip:"Plant deep or mound soil around stems for long white shanks."},
+{id:"pea",n:"Peas and snow peas",t:"veg",m:"Seed",sun:"Full",w:"Med",sp:75,d:30,h:[60,80],z:{trop:[4,5,6],sub:[3,4,5,6,7],arid:[3,4,5,6],temp:[3,4,5,6,7,8],cool:[7,8,9,10]},tip:"Give them a trellis. Don't water heavily until they're up."},
+{id:"broadbean",n:"Broad bean",t:"veg",m:"Seed",sun:"Full",w:"Low",sp:200,d:50,h:[120,150],z:{trop:null,sub:[3,4,5],arid:[3,4,5],temp:[3,4,5,6],cool:[3,4,5,6]},tip:"Pinch out the tips once pods set to deter aphids."},
+{id:"potato",n:"Potato",t:"veg",m:"Seed potatoes",sun:"Full",w:"Med",sp:300,d:100,h:[90,120],z:{trop:[4,5,6],sub:[1,2,3,7,8,9],arid:[2,3,8],temp:[1,8,9,10,11,12],cool:[9,10,11,12]},tip:"Use certified seed potatoes. Mound soil over the stems as they grow."},
+{id:"celery",n:"Celery",t:"veg",m:"Seedling",sun:"Part",w:"High",sp:300,d:0,h:[100,130],z:{trop:[4,5,6],sub:[2,3,4,8,9,10],arid:[3,4,8],temp:[8,9,10,11,12],cool:[10,11,12]},tip:"Very thirsty. Rich soil and steady water stop it going stringy."},
+{id:"basil",n:"Basil",t:"herb",m:"Seed or seedling",sun:"Full",w:"Med",sp:300,d:5,h:[40,60],z:{trop:[8,9,10,11,12,1,2,3,4],sub:[8,9,10,11,12,1,2],arid:[2,9,10,11],temp:[10,11,12,1],cool:[11,12]},tip:"Pinch out flower heads to keep leaves coming. Frost kills it."},
+{id:"coriander",n:"Coriander",t:"herb",m:"Seed",sun:"Part",w:"Med",sp:200,d:10,h:[40,60],z:{trop:[4,5,6,7],sub:[3,4,5,6,7,8],arid:[3,4,5,6,7,8],temp:[2,3,4,5,8,9,10],cool:[2,3,9,10,11]},tip:"Bolts fast in heat. Sow little and often."},
+{id:"parsley",n:"Parsley",t:"herb",m:"Seed or seedling",sun:"Part",w:"Med",sp:250,d:5,h:[70,90],z:{trop:[3,4,5,6,7,8],sub:[2,3,4,5,6,7,8,9],arid:[2,3,4,8,9],temp:[1,2,3,8,9,10,11,12],cool:[9,10,11,12,1,2]},tip:"Slow to germinate — soak seed overnight first."},
+{id:"dill",n:"Dill",t:"herb",m:"Seed",sun:"Full",w:"Med",sp:300,d:10,h:[50,70],z:{trop:[4,5,6,7],sub:[3,4,5,6,7,8,9],arid:[3,4,5,8,9],temp:[3,4,8,9,10,11],cool:[9,10,11,12]},tip:"Sow direct — it doesn't like being transplanted."},
+{id:"chives",n:"Chives",t:"herb",m:"Seed or seedling",sun:"Full",w:"Med",sp:200,d:5,h:[70,90],z:{trop:[3,4,5,6,7,8],sub:R(2,10),arid:[3,4,8,9],temp:[2,3,4,8,9,10,11],cool:[9,10,11,12]},tip:"Cut a third at a time and it regrows."},
+{id:"rocket",n:"Rocket",t:"herb",m:"Seed",sun:"Part",w:"Med",sp:150,d:5,h:[30,45],z:{trop:[4,5,6,7],sub:R(2,9),arid:R(3,9),temp:[2,3,4,5,8,9,10,11],cool:[1,2,3,9,10,11,12]},tip:"Gets hot and peppery in warm weather."},
+{id:"ginger",n:"Ginger",t:"herb",m:"Rhizome pieces",sun:"Part",w:"High",sp:250,d:50,h:[240,300],z:{trop:[8,9,10,11],sub:[9,10,11],arid:null,temp:null,cool:null},tip:"Plant fresh rhizome pieces with a bud. Harvest when leaves die back."}
+];
+const PM=Object.fromEntries(P.map(p=>[p.id,p]));
+const KEY="krd-garden-planner";
+let S={version:1,loc:null,view:"plants",tab:"now",filter:"all",sel:null,beds:[]};
+let W=null,Wstate="idle",Q="",editBed=null,editDate=null;
+const ico=id=>'<svg><use href="#i-'+id+'"/></svg>';
+const sunIc=p=>'<span class="ic" title="'+SUN[p.sun]+'">'+ico(p.sun==="Full"?"sun":"part")+"</span>";
+const waterIc=w=>{const n={Low:1,Med:2,High:3}[w];return'<span class="ic" title="Water: '+WATER[w].split(" —")[0]+'">'+[1,2,3].map(i=>ico(i<=n?"drop":"dropo")).join("")+"</span>"};
+const LEGEND='<div class="legend"><span>'+sunIc({sun:"Full"})+'Full sun (6+ hrs)</span><span>'+sunIc({sun:"Part"})+'Part shade OK (4+ hrs)</span><span>'+waterIc("Low")+'Low water</span><span>'+waterIc("Med")+'Medium</span><span>'+waterIc("High")+'High</span></div>';
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const pd=s=>new Date(s+"T00:00:00");
+const fmt=d=>d.getDate()+" "+MON[d.getMonth()];
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const curMonth=()=>new Date().getMonth()+1;
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function clean(o){
+ const n={version:1,loc:null,view:"plants",tab:"now",filter:"all",sel:null,beds:[]};
+ if(!o||typeof o!=="object")return n;
+ if(o.loc&&typeof o.loc.lat==="number"&&typeof o.loc.lon==="number")n.loc={name:String(o.loc.name||"My location"),lat:o.loc.lat,lon:o.loc.lon,zone:ZONES[o.loc.zone]?o.loc.zone:null,zw:o.loc.zw||null};
+ if(["plants","beds"].includes(o.view))n.view=o.view;
+ if(["now","soon","never"].includes(o.tab))n.tab=o.tab;
+ if(["all","veg","fruit","herb"].includes(o.filter))n.filter=o.filter;
+ if(PM[o.sel])n.sel=o.sel;
+ if(Array.isArray(o.beds))n.beds=o.beds.map(b=>({id:b.id||uid(),name:String(b.name||"Bed"),size:String(b.size||""),plantings:Array.isArray(b.plantings)?b.plantings.filter(p=>PM[p.plant]&&/^\d{4}-\d{2}-\d{2}$/.test(p.date)).map(p=>({id:p.id||uid(),plant:p.plant,date:p.date})):[]}));
+ return n;
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r)S=clean(JSON.parse(r))}catch(e){}}
+
+/* ---------- Plant status ---------- */
+function status(p,zone,m){
+ const ms=p.z[zone];
+ if(!ms)return{g:"never"};
+ if(ms.includes(m))return{g:"now"};
+ for(let k=1;k<=11;k++){const mm=(m-1+k)%12+1;if(ms.includes(mm))return{g:"soon",k,from:mm}}
+ return{g:"never"};
+}
+function groups(){
+ const z=S.loc&&S.loc.zone, m=curMonth(), g={now:[],soon:[],later:[],never:[]};
+ if(!z)return g;
+ const q=Q.trim().toLowerCase();
+ P.forEach(p=>{if(S.filter!=="all"&&p.t!==S.filter)return;if(q&&!p.n.toLowerCase().includes(q))return;const s=status(p,z,m);
+  if(s.g==="soon")(s.k<=2?g.soon:g.later).push([p,s]);else g[s.g].push([p,s])});
+ g.soon.sort((a,b)=>a[1].k-b[1].k||a[0].n.localeCompare(b[0].n));
+ g.later.sort((a,b)=>a[1].k-b[1].k||a[0].n.localeCompare(b[0].n));
+ g.now.sort((a,b)=>a[0].n.localeCompare(b[0].n));g.never.sort((a,b)=>a[0].n.localeCompare(b[0].n));
+ return g;
+}
+
+/* ---------- Render ---------- */
+function render(){
+ document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.view===S.view));
+ $("title").textContent=S.view==="plants"?"What to plant — "+["January","February","March","April","May","June","July","August","September","October","November","December"][curMonth()-1]:"My garden beds";
+ const L=S.loc;
+ $("loc").innerHTML=L?"📍 <b>"+esc(L.name)+"</b>"+(L.zone?' <span class="zone">'+ZONES[L.zone]+" zone</span>":' <span class="zone">Working out zone…</span>'):"No location set";
+ S.view==="plants"?renderPlants():renderBeds();
+}
+function card(p,s){
+ const tag=s.g==="soon"?'<span class="tag '+(s.k<=2?"soon":"later")+'" title="Next sowing window opens in '+MON[s.from-1]+'">'+MON[s.from-1]+"</span>":"";
+ return '<button class="pc'+(S.sel===p.id?" sel":"")+'" data-plant="'+p.id+'"><div class="nm">'+esc(p.n)+'</div><div class="ty">'+TYPES[p.t]+" · "+esc(p.m)+'</div><div class="meta">'+sunIc(p)+waterIc(p.w)+"</div>"+tag+"</button>";
+}
+function renderPlants(){
+ const main=$("main");
+ if(!S.loc){main.innerHTML='<div class="panel"><div class="sec"><h2>Set your location</h2><p class="lead">The planner needs your location to work out your climate zone and local weather.</p><button class="btn pri" data-act="openloc">Set location</button></div></div>'+disc();return}
+ if(!S.loc.zone){main.innerHTML='<div class="panel"><div class="sec"><h2>Working out your climate zone…</h2><p class="lead">Checking the last 12 months of weather for '+esc(S.loc.name)+".</p></div></div>"+disc();return}
+ const g=groups();
+ const cnt={now:g.now.length,soon:g.soon.length+g.later.length,never:g.never.length};
+ let list="";
+ if(S.tab==="now")list=g.now.length?'<div class="plants">'+g.now.map(x=>card(...x)).join("")+"</div>":'<p class="empty">'+(Q.trim()?"No matches in this group.":"Nothing in this group for "+MON[curMonth()-1]+".")+"</p>";
+ else if(S.tab==="soon"){
+  list=(g.soon.length?'<div class="plants">'+g.soon.map(x=>card(...x)).join("")+"</div>":'<p class="empty">'+(Q.trim()?"No matches opening in the next two months.":"No sowing windows open in the next two months.")+"</p>");
+  if(g.later.length)list+='<h3 class="sub2">Later in the year</h3><div class="plants">'+g.later.map(x=>card(...x)).join("")+"</div>";
+ } else list=g.never.length?'<p class="lead">These don\'t suit the '+ZONES[S.loc.zone].toLowerCase()+' climate.</p><div class="plants">'+g.never.map(x=>card(...x)).join("")+"</div>":'<p class="empty">'+(Q.trim()?"No matches in this group.":"Everything in this list can be grown in your zone.")+"</p>";
+ const seg=[["now","Plant now"],["soon","Plant soon"],["never","Never plant"]].map(([k,l])=>'<button data-tab="'+k+'" aria-pressed="'+(S.tab===k)+'">'+l+'<span class="n">'+cnt[k]+"</span></button>").join("");
+ const fil=[["all","All"],["veg","Vegetables"],["fruit","Fruit"],["herb","Herbs"]].map(([k,l])=>'<button class="chip" data-filter="'+k+'" aria-pressed="'+(S.filter===k)+'">'+l+"</button>").join("");
+ const srch='<input type="search" id="plantQ" placeholder="Search plants" aria-label="Search plants" value="'+esc(Q)+'">';
+ main.innerHTML='<div class="grid"><div class="panel"><div class="sec"><h2>Plants for your zone</h2><p class="lead">Based on the '+ZONES[S.loc.zone].toLowerCase()+" sowing calendar for "+MON[curMonth()-1]+'. Click a plant for details.</p><div class="seg">'+seg+'</div><div class="filters">'+srch+fil+"</div>"+LEGEND+list+'</div></div><div class="res"><div class="panel" id="wxPanel">'+wxHTML()+'</div><div class="panel info" id="infoPanel">'+infoHTML()+"</div></div></div>"+disc();
+}
+function infoHTML(){
+ const p=PM[S.sel];
+ if(!p)return'<div class="sec"><h2>Plant details</h2><p class="lead">Click a plant to see its sun, water and spacing needs and when to sow it in your zone.</p></div>';
+ const z=S.loc.zone, ms=p.z[z]||[], m=curMonth(), s=status(p,z,m);
+ const when=s.g==="now"?"In season — sow now":s.g==="soon"?"Next window opens in "+MON[s.from-1]:"Not suited to the "+ZONES[z].toLowerCase()+" zone";
+ const months=MI.map((l,i)=>'<span class="'+(ms.includes(i+1)?"s":"")+(i+1===m?" c":"")+'" title="'+MON[i]+'">'+l+"</span>").join("");
+ return '<div class="sec"><h3>'+esc(p.n)+'</h3><div class="sub">'+TYPES[p.t]+" · "+esc(p.m)+'</div><table class="kv"><tr><td>When</td><td>'+when+"</td></tr><tr><td>Sun</td><td>"+SUN[p.sun]+"</td></tr><tr><td>Water</td><td>"+WATER[p.w]+"</td></tr><tr><td>Spacing</td><td>"+p.sp+" mm between plants</td></tr><tr><td>Sow depth</td><td>"+(p.d?p.d+" mm":"At soil level / see tip")+"</td></tr><tr><td>Time to harvest</td><td>"+p.h[0]+"–"+p.h[1]+' days from planting</td></tr></table><div class="months">'+months+'</div><p class="lead" style="margin-top:8px">Lime = sowing months for your zone. Outline = this month.</p><p class="tip">'+esc(p.tip)+"</p>"+addToBedHTML(p)+"</div>";
+}
+let lastAdd=null,lastBed=null,newBedMode=false,tbDate=null;
+function addToBedHTML(p){
+ const done=lastAdd&&lastAdd.plant===p.id?'<p class="okline">Added to '+esc(lastAdd.bed)+" — "+lastAdd.h+".</p>":"";
+ if(!S.beds.length&&!newBedMode)return'<div class="tobed"><p class="lead" style="margin:0 0 8px">No garden beds yet.</p><button class="btn pri" data-act="newbed">Add bed</button></div>';
+ const date='<label>Date planted<input type="date" id="tb-date" value="'+(tbDate||todayISO())+'"></label>';
+ if(newBedMode)return'<div class="tobed"><div class="add"><label>New bed name<input type="text" id="tb-new" placeholder="e.g. Back fence"></label>'+date+'<button class="btn pri" data-tobed="'+p.id+'">Add to new bed</button></div><button class="linkbtn" data-act="cancelnew">Cancel</button>'+done+"</div>";
+ const opts=S.beds.map(b=>'<option value="'+b.id+'"'+(b.id===lastBed?" selected":"")+">"+esc(b.name)+"</option>").join("")+'<option value="__new">+ New bed…</option>';
+ return'<div class="tobed"><div class="add"><label>Bed<select id="tb-bed">'+opts+"</select></label>"+date+'<button class="btn pri" data-tobed="'+p.id+'">Add to bed</button></div>'+done+"</div>";
+}
+function disc(){return'<p class="disc">General guide only — sowing times vary with local conditions, so check with your local nursery. Climate zone and forecast from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>. Made by <a href="https://krdgroup.com.au" target="_blank" rel="noopener">KRD Engineering &amp; Management</a>.</p>'}
+
+/* ---------- Weather ---------- */
+const dn=s=>["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][pd(s).getDay()];
+function runs(idx){const out=[];idx.forEach(i=>{const l=out[out.length-1];if(l&&l[l.length-1]===i-1)l.push(i);else out.push([i])});return out}
+function advice(days){
+ const n=[], lab=r=>dn(days[r[0]].date)+(r.length>1?"–"+dn(days[r[r.length-1]].date):"");
+ const hot=runs(days.map((d,i)=>d.max>=35?i:-1).filter(i=>i>=0));
+ hot.forEach(r=>n.push(["warn","<b>Heat "+lab(r)+" ("+Math.round(Math.max(...r.map(i=>days[i].max)))+" °C).</b> Hold off transplanting seedlings. Water early in the morning and shade young plants."]));
+ const fr=runs(days.map((d,i)=>d.min<=2?i:-1).filter(i=>i>=0));
+ fr.forEach(r=>n.push(["warn","<b>Frost risk "+lab(r)+" (low of "+Math.round(Math.min(...r.map(i=>days[i].min)))+" °C).</b> Cover tender plants overnight and don't plant out frost-tender seedlings."]));
+ days.forEach(d=>{if(d.rain>=50)n.push(["warn","<b>Heavy rain "+dn(d.date)+" ("+Math.round(d.rain)+" mm).</b> Check drainage and hold off sowing fine seed until it passes."])});
+ const wet=runs(days.map((d,i)=>d.rain>=10?i:-1).filter(i=>i>=0));
+ wet.forEach(r=>n.push(["info","<b>"+Math.round(r.reduce((a,i)=>a+days[i].rain,0))+" mm rain "+lab(r)+".</b> Skip watering those days. Good time to sow seed straight after."]));
+ const wind=runs(days.map((d,i)=>d.wind>=45?i:-1).filter(i=>i>=0));
+ wind.forEach(r=>n.push(["warn","<b>Strong wind "+lab(r)+" (up to "+Math.round(Math.max(...r.map(i=>days[i].wind)))+" km/h).</b> Stake tall plants like tomatoes and corn."]));
+ const tr=days.reduce((a,d)=>a+d.rain,0), am=days.reduce((a,d)=>a+d.max,0)/days.length;
+ if(tr<5&&am>=28)n.push(["info","<b>Dry and warm week ("+tr.toFixed(0)+" mm rain, average high "+am.toFixed(0)+" °C).</b> Water deeply every 2–3 days and mulch to hold moisture."]);
+ if(!n.length)n.push(["info","<b>No weather concerns this week.</b> Good conditions for planting."]);
+ return n;
+}
+function wxHTML(){
+ const head='<div class="sec"><h2>Weather this week</h2><p class="lead">7-day forecast for '+esc(S.loc.name)+" (Open-Meteo).</p>";
+ if(Wstate==="loading"||Wstate==="idle")return head+'<p class="empty">Loading forecast…</p></div>';
+ if(Wstate==="error"||!W)return head+'<div class="warnnote">Couldn\'t load the forecast right now. <button class="btn sm" data-act="retrywx">Try again</button></div></div>';
+ const cells=W.map(d=>'<div class="'+(d.max>=35?"hot":d.min<=2?"frost":"")+'"><div class="d">'+dn(d.date)+'</div><div class="t">'+Math.round(d.max)+"° / "+Math.round(d.min)+'°</div><div class="r">'+Math.round(d.rain)+" mm</div></div>").join("");
+ return head+'<div class="wx">'+cells+"</div>"+advice(W).map(([k,t])=>'<div class="'+(k==="warn"?"warnnote":"infonote")+'">'+t+"</div>").join("")+"</div>";
+}
+async function loadWeather(){
+ if(!S.loc)return;
+ Wstate="loading";W=null;const p=$("wxPanel");if(p)p.innerHTML=wxHTML();
+ try{
+  const u="https://api.open-meteo.com/v1/forecast?latitude="+S.loc.lat+"&longitude="+S.loc.lon+"&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=auto&forecast_days=7";
+  const r=await fetch(u);if(!r.ok)throw 0;const j=await r.json(),d=j.daily;
+  W=d.time.map((t,i)=>({date:t,max:+d.temperature_2m_max[i]||0,min:+d.temperature_2m_min[i]||0,rain:+d.precipitation_sum[i]||0,wind:+d.wind_speed_10m_max[i]||0}));
+  Wstate="ok";
+ }catch(e){Wstate="error"}
+ const q=$("wxPanel");if(q)q.innerHTML=wxHTML();
+}
+
+/* ---------- Climate zone ---------- */
+function zoneFrom(coldMin,rain){
+ if(rain<400)return"arid";
+ if(coldMin<5)return"cool";
+ if(coldMin<9)return"temp";
+ if(coldMin<11)return"sub";
+ return"trop";
+}
+function zoneFallback(lat){return lat>=-19.5?"trop":lat>=-28?"sub":lat>=-40?"temp":"cool"}
+async function findZone(){
+ const L=S.loc;if(!L)return;
+ const end=addDays(new Date(),-7),start=addDays(end,-364);
+ const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+ try{
+  const u="https://archive-api.open-meteo.com/v1/archive?latitude="+L.lat+"&longitude="+L.lon+"&start_date="+iso(start)+"&end_date="+iso(end)+"&daily=temperature_2m_min,precipitation_sum&timezone=auto";
+  const r=await fetch(u);if(!r.ok)throw 0;const d=(await r.json()).daily;
+  const sum=Array(12).fill(0),c=Array(12).fill(0);let rain=0;
+  d.time.forEach((t,i)=>{const m=+t.slice(5,7)-1,v=d.temperature_2m_min[i];if(v!=null){sum[m]+=v;c[m]++}rain+=+d.precipitation_sum[i]||0});
+  const means=sum.map((s,i)=>c[i]?s/c[i]:null).filter(v=>v!=null);
+  const cold=Math.min(...means);
+  L.zone=zoneFrom(cold,rain);
+  L.zw="Worked out from the last 12 months of weather: coldest month average low "+cold.toFixed(1)+" °C, rainfall "+Math.round(rain).toLocaleString()+" mm.";
+ }catch(e){L.zone=zoneFallback(L.lat);L.zw="Estimated from latitude (climate data couldn't be loaded)."}
+ save();render();
+}
+async function setLoc(name,lat,lon){
+ S.loc={name,lat:+lat.toFixed(4),lon:+lon.toFixed(4),zone:null,zw:null};
+ save();if($("locDlg").open)$("locDlg").close();S.view="plants";render();
+ loadWeather();await findZone();
+}
+
+/* ---------- Location dialog ---------- */
+function openLoc(){$("locStatus").textContent=S.loc&&S.loc.zw?S.loc.zw:"";$("results").innerHTML="";const d=$("locDlg");if(d.showModal)d.showModal();else d.setAttribute("open","")}
+function useGeo(){
+ const st=$("locStatus");
+ if(!navigator.geolocation){st.textContent="Location isn't available in this browser — search for your town instead.";return}
+ st.textContent="Getting your location…";
+ navigator.geolocation.getCurrentPosition(async pos=>{
+  const lat=pos.coords.latitude,lon=pos.coords.longitude;let name="My location";
+  try{const r=await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+lat+"&longitude="+lon+"&localityLanguage=en");const j=await r.json();
+   const town=j.locality||j.city,sc=(j.principalSubdivisionCode||"").replace("AU-","");if(town)name=town+(sc?" "+sc:"")}catch(e){}
+  setLoc(name,lat,lon);
+ },()=>{st.textContent="Location was blocked or unavailable — search for your town instead."},{timeout:15000,maximumAge:600000});
+}
+async function search(){
+ const q=$("q").value.trim(),st=$("locStatus"),res=$("results");
+ if(q.length<2){st.textContent="Type at least two letters.";return}
+ st.textContent="Searching…";res.innerHTML="";
+ try{
+  const r=await fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(q)+"&count=8&language=en&countryCode=AU");
+  const j=await r.json(),list=j.results||[];
+  st.textContent=list.length?"Pick your location:":"No places found in Australia for that name.";
+  res.innerHTML=list.map((p,i)=>'<button data-i="'+i+'">'+esc(p.name)+" <small>"+esc([p.admin1,p.postcodes&&p.postcodes[0]].filter(Boolean).join(" "))+"</small></button>").join("");
+  res.querySelectorAll("button").forEach(b=>b.onclick=()=>{const p=list[+b.dataset.i];const ab={"Queensland":"QLD","New South Wales":"NSW","Victoria":"VIC","Tasmania":"TAS","South Australia":"SA","Western Australia":"WA","Northern Territory":"NT","Australian Capital Territory":"ACT"}[p.admin1]||"";setLoc(p.name+(ab?" "+ab:""),p.latitude,p.longitude)});
+ }catch(e){st.textContent="Search isn't working right now — try again shortly."}
+}
+
+/* ---------- Beds ---------- */
+function harvest(pl){
+ const p=PM[pl.plant],d=pd(pl.date),a=addDays(d,p.h[0]),e=addDays(d,p.h[1]),b=addDays(d,p.h[1]+21),t=pd(todayISO());
+ const days=Math.round((a-t)/864e5);
+ if(t<a)return["","From "+fmt(a),"in "+days+" day"+(days===1?"":"s")];
+ if(t<=b)return["due","Ready now",(t<=e?"to about ":"should be done by ")+fmt(t<=e?e:b)];
+ return["past","Finished?","harvest window ended "+fmt(b)];
+}
+function renderBeds(){
+ const opts=P.slice().sort((a,b)=>a.n.localeCompare(b.n)).map(p=>'<option value="'+p.id+'">'+esc(p.n)+"</option>").join("");
+ const beds=S.beds.map(b=>{
+  const n=b.plantings.length;
+  const head=editBed===b.id
+   ?'<div class="ed"><input type="text" id="eb-n" value="'+esc(b.name)+'" aria-label="Bed name"><input type="text" class="size" id="eb-s" value="'+esc(b.size)+'" placeholder="Size, e.g. 4 × 3 m" aria-label="Bed size"></div><button class="ib" title="Done" data-bdone="'+b.id+'">'+ico("tick")+"</button>"
+   :'<div class="t"><b>'+esc(b.name)+"</b><small>"+[b.size,n+" planting"+(n===1?"":"s")].filter(Boolean).map(esc).join(" · ")+'</small></div><button class="ib" title="Rename or resize" data-bedit="'+b.id+'">'+ico("pen")+"</button>";
+  const rows=b.plantings.slice().sort((x,y)=>x.date.localeCompare(y.date)).map(pl=>{
+   const h=harvest(pl),key=b.id+"|"+pl.id;
+   const dcell=editDate===key?'<input type="date" value="'+pl.date+'" data-pdate="'+key+'" aria-label="Date planted">':'<button data-pedit="'+key+'" title="Change date">'+fmt(pd(pl.date))+"</button>";
+   const narrow=window.matchMedia&&window.matchMedia("(max-width:760px)").matches;
+   return'<div class="pl"><div><div class="n">'+esc(PM[pl.plant].n)+'</div><div class="dm">'+(narrow?"Planted "+dcell:"")+'</div></div><div class="p">'+(narrow?"":dcell)+'</div><div class="h '+h[0]+'">'+h[1]+"<small>"+h[2]+'</small></div><button class="ib" title="Remove planting" data-prem="'+key+'">'+ico("x")+"</button></div>";
+  }).join("");
+  return'<div class="bed"><header>'+head+'<button class="ib" title="Delete bed" data-bdel="'+b.id+'">'+ico("x")+"</button></header>"+(n?'<div class="cols"><span>Plant</span><span>Planted</span><span>Harvest</span><span></span></div>'+rows:'<div class="pl none">Nothing planted yet.</div>')+'<div class="add"><label>Plant<select id="ap-'+b.id+'">'+opts+'</select></label><label>Date planted<input type="date" id="ad-'+b.id+'" value="'+todayISO()+'"></label><button class="btn pri" data-padd="'+b.id+'">Add</button></div></div>';
+ }).join("");
+ $("main").innerHTML='<div class="panel"><div class="sec"><h2>My garden beds</h2><p class="lead">What\'s in each bed and when it\'s due. Tap a planted date to change it. Saved in this browser — use Save to keep a copy or move it to another device.</p><div class="newbed"><input type="text" id="nbName" placeholder="Bed name, e.g. Back fence"><input type="text" id="nbSize" placeholder="Size, e.g. 2.4 × 1.2 m"><button class="btn pri" id="btnAddBed">Add bed</button></div>'+(beds?'<div class="beds">'+beds+"</div>":'<p class="empty">No beds yet — add your first one above.</p>')+"</div></div>"+disc();
+ if(editBed){const i=$("eb-n");if(i)i.focus()}
+ if(editDate){const i=document.querySelector("[data-pdate]");if(i){i.focus();try{i.showPicker&&i.showPicker()}catch(e){}}}
+}
+function closeBedEdit(){const b=findB(editBed);if(b){b.name=$("eb-n").value.trim()||"Bed";b.size=$("eb-s").value.trim();save()}editBed=null}
+function findB(id){return S.beds.find(b=>b.id===id)}
+
+/* ---------- Events ---------- */
+document.addEventListener("click",e=>{
+ const t=e.target.closest("button");if(!t)return;
+ if(t.dataset.view){if(editBed)closeBedEdit();editDate=null;S.view=t.dataset.view;save();render();if(S.view==="plants"&&S.loc&&Wstate!=="ok")loadWeather();return}
+ if(t.dataset.tab){S.tab=t.dataset.tab;save();render();return}
+ if(t.dataset.filter){S.filter=t.dataset.filter;save();render();return}
+ if(t.dataset.plant){lastAdd=null;newBedMode=false;S.sel=t.dataset.plant;save();document.querySelectorAll(".pc").forEach(c=>c.classList.toggle("sel",c.dataset.plant===S.sel));$("infoPanel").innerHTML=infoHTML();return}
+ if(t.dataset.act==="openloc"){openLoc();return}
+ if(t.dataset.act==="retrywx"){loadWeather();return}
+ if(t.dataset.act==="newbed"){newBedMode=true;tbDate=null;$("infoPanel").innerHTML=infoHTML();$("tb-new").focus();return}
+ if(t.dataset.act==="cancelnew"){newBedMode=false;$("infoPanel").innerHTML=infoHTML();return}
+ if(t.dataset.tobed){const dt=$("tb-date").value;if(!dt)return;let b;
+  if(newBedMode){const nm=$("tb-new").value.trim();if(!nm){$("tb-new").focus();return}b={id:uid(),name:nm,size:"",plantings:[]};S.beds.push(b);newBedMode=false}
+  else b=findB($("tb-bed").value);
+  if(!b)return;const pl={id:uid(),plant:t.dataset.tobed,date:dt};b.plantings.push(pl);lastBed=b.id;tbDate=null;save();const h=harvest(pl);lastAdd={plant:pl.plant,bed:b.name,h:h[1].charAt(0).toLowerCase()+h[1].slice(1)};$("infoPanel").innerHTML=infoHTML();return}
+ if(t.id==="btnAddBed"){const n=$("nbName").value.trim()||"Bed "+(S.beds.length+1);S.beds.push({id:uid(),name:n,size:$("nbSize").value.trim(),plantings:[]});save();render();return}
+ if(t.dataset.bdel){const b=findB(t.dataset.bdel);if(b&&confirm('Delete "'+b.name+'" and everything logged in it?')){S.beds=S.beds.filter(x=>x!==b);save();render()}return}
+ if(t.dataset.padd){const b=findB(t.dataset.padd),pl=$("ap-"+b.id).value,dt=$("ad-"+b.id).value;if(!dt)return;b.plantings.push({id:uid(),plant:pl,date:dt});save();render();return}
+ if(t.dataset.bedit){if(editBed)closeBedEdit();editBed=t.dataset.bedit;render();return}
+ if(t.dataset.bdone){closeBedEdit();render();return}
+ if(t.dataset.pedit){editDate=t.dataset.pedit;render();return}
+ if(t.dataset.prem){const[bid,pid]=t.dataset.prem.split("|"),b=findB(bid);b.plantings=b.plantings.filter(p=>p.id!==pid);save();render();return}
+});
+document.addEventListener("change",e=>{
+ const t=e.target;
+ if(t.dataset.pdate){if(t.value){const[bid,pid]=t.dataset.pdate.split("|");findB(bid).plantings.find(p=>p.id===pid).date=t.value;save()}editDate=null;render();return}
+});
+document.addEventListener("input",e=>{if(e.target.id!=="plantQ")return;Q=e.target.value;const pos=e.target.selectionStart;render();const i=$("plantQ");if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(_){}}});
+document.addEventListener("keydown",e=>{
+ if(e.key==="Enter"&&(e.target.id==="eb-n"||e.target.id==="eb-s")){e.preventDefault();closeBedEdit();render()}
+ if(e.key==="Escape"&&(editBed||editDate)){editBed=null;editDate=null;render()}
+});
+document.addEventListener("focusout",e=>{if(e.target.dataset&&e.target.dataset.pdate)setTimeout(()=>{if(editDate&&!document.activeElement.dataset.pdate){editDate=null;render()}},150)});
+document.addEventListener("change",e=>{if(e.target.id==="tb-bed"&&e.target.value==="__new"){tbDate=$("tb-date").value;newBedMode=true;$("infoPanel").innerHTML=infoHTML();$("tb-new").focus()}});
+$("btnLoc").onclick=openLoc;
+$("btnGeo").onclick=useGeo;
+$("btnSearch").onclick=search;
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();search()}});
+$("btnClose").onclick=()=>$("locDlg").close?$("locDlg").close():$("locDlg").removeAttribute("open");
+$("btnSave").onclick=()=>{
+ const data={type:"krd-garden-planner",version:1,saved:new Date().toISOString(),calc:S};
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download="garden-planner-"+todayISO()+".json";document.body.appendChild(a);a.click();a.remove();
+};
+$("btnImport").onclick=()=>$("fileIn").click();
+$("fileIn").onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{const j=JSON.parse(await f.text());if(j.type!=="krd-garden-planner")throw 0;S=clean(j.calc);save();render();if(S.loc){loadWeather();if(!S.loc.zone)findZone()}}
+ catch(err){alert("That file isn't a Garden Planner save file.")}
+ e.target.value="";
+};
+
+/* ---------- Start ---------- */
+load();render();
+if(S.loc){loadWeather();if(!S.loc.zone)findZone()}
+else{openLoc();useGeo()}
+</script>
+</body>
+</html>
