@@ -547,6 +547,110 @@ const EXP = (() => {
   }
   return { render, W, H };
 })();
+/* ===== Excel export in the club's original workbook layout ===== */
+const XLS = (() => {
+  const RED = 'FFFF3B3B';
+  const RULES = "Points are awarded based on the rider’s overall position as well as their position in their individual category. Overall points are awarded from 1st to 40th, and category points are awarded from 1st to 20th (points can be seen attached). One point is also awarded for a DNF (started the race but did not finish) and DNS (registered but did not start).\n\nIn a standard XCO race where there are grades, the graded points are given based on finishing position within each grade. The overall points are given finishers in A grade first, then B grade, then C grade. For example, if A grade has 3 riders, B grade has 4 and C grade has 3, and all riders finish, A grade will be awarded 1st–3rd, B grade 4th–7th, and C grade 8th–10th overall. This system is in place to encourage competitive riders to move towards A grade, making racing fairer.\n\nIn racing formats where riders do not race in grades (e.g. XCE), overall points are awarded first based on finishing order, regardless of registered grade. Graded points are then awarded based on finishing position relative to each rider’s grade. For example, if an A grader finishes 1st, a B grader 2nd, and another A grader 3rd, overall points would be 45, 42, and 40 respectively. For A grade points, the 1st A grader receives 25 points, and the next A grader (3rd overall) receives 22 points (2nd in grade).\n\nU9s, U11s and U13s also race for a junior overall as well as their individual categories. The points structure is the same as the seniors; the older grade finishers are awarded first.\n\nAt the end of the year, the top 10 riders from the club will be awarded race plates for the following year.\nThe calendar is split into separate series, each sponsored by a company from Mackay. Each series will award prizes for the men’s, women’s and junior overalls, as well as each category.";
+  const ord = n => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+  const colL = n => { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+  const used = new Set();
+  const tName = t => { let b = ('T_' + t).replace(/[^A-Za-z0-9_]/g, '_').slice(0, 200), n = b, i = 2; while (used.has(n)) n = b + '_' + i++; used.add(n); return n; };
+
+  // One table block: heading bar, then an Excel table with formulas for series totals and Pts.
+  function block(ws, row, se, scored, st, title, dh) {
+    const series = (se.series || []).filter(s => st.rounds.some(r => r.seriesId === s.id));
+    const cols = []; // {label, kind, id, seriesId}
+    series.forEach(s => { st.rounds.filter(r => r.seriesId === s.id).forEach(r => cols.push({ label: r.name, kind: 'round', id: r.id, seriesId: s.id })); cols.push({ label: s.name.toUpperCase(), kind: 'series', id: s.id }); });
+    const last = 3 + cols.length;
+    // heading bar
+    for (let c = 1; c <= last; c++) { const cell = ws.getCell(row, c); cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: RED } }; cell.border = { top: { style: 'medium' } }; }
+    const h = ws.getCell(row, 1); h.value = title; h.font = { bold: true, name: 'Calibri', size: 11 }; h.alignment = { horizontal: 'left' };
+    const hr = row + 1, first = hr + 1;
+    const headers = ['Pos.', 'Name', 'Pts.', ...cols.map(c => c.label)];
+    const rows = st.rows.map((rw, i) => {
+      const r = first + i;
+      const vals = [ord(rw.place), rw.name, null];
+      cols.forEach((c, ci) => {
+        if (c.kind === 'round') {
+          const cell = rw.cells[c.id];
+          if (!cell || cell.status === 'MISS') { vals.push(null); return; }
+          const isDh = (cell.notes || []).some(n => /downhill/i.test(n));
+          vals.push(isDh && cell.pts > dh ? { formula: `${cell.pts - dh}+${dh}`, result: cell.pts } : cell.pts);
+        } else {
+          const refs = cols.map((x, xi) => x.kind === 'round' && x.seriesId === c.id && !(rw.cells[x.id] || {}).dropped ? colL(4 + xi) + r : null).filter(Boolean);
+          vals.push(refs.length ? { formula: refs.join('+'), result: rw.series[c.id] || 0 } : 0);
+        }
+      });
+      const sref = cols.map((x, xi) => x.kind === 'series' ? colL(4 + xi) + r : null).filter(Boolean);
+      vals[2] = sref.length ? { formula: sref.join('+'), result: rw.total } : rw.total;
+      return vals;
+    });
+    if (!rows.length) rows.push(['', '', 0, ...cols.map(() => null)]);
+    ws.addTable({ name: tName(title), ref: `A${hr}`, headerRow: true, style: { theme: 'TableStyleMedium18', showRowStripes: true }, columns: headers.map(n => ({ name: n })), rows });
+    // header styling like the original: red fill, centred round/series headings
+    for (let c = 1; c <= last; c++) { const cell = ws.getCell(hr, c); cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: RED } }; cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF000000' } }; cell.alignment = { horizontal: c <= 3 ? 'left' : 'center' }; }
+    const end = first + rows.length - 1;
+    for (let r = first; r <= end; r++) {
+      ws.getCell(r, 3).alignment = { horizontal: 'right' }; ws.getCell(r, 3).border = { right: { style: 'medium' } };
+      cols.forEach((c, ci) => { const cell = ws.getCell(r, 4 + ci); cell.alignment = { horizontal: 'center' }; if (c.kind === 'series') cell.border = { left: { style: 'mediumDashed' }, right: ci < cols.length - 1 ? { style: 'mediumDashed' } : undefined }; });
+    }
+    for (let c = 1; c <= last; c++) { const cell = ws.getCell(end, c); cell.border = { ...(cell.border || {}), bottom: { style: 'medium' } }; }
+    return { next: end + 3, last };
+  }
+  function widths(ws, maxCol, se) {
+    ws.getColumn(1).width = 7.2; ws.getColumn(2).width = 23; ws.getColumn(3).width = 6.8;
+    for (let c = 4; c <= maxCol; c++) ws.getColumn(c).width = 10.8;
+  }
+  function seriesWidths(ws, se, st) {
+    // widen series total columns to fit their names
+    let c = 4;
+    (se.series || []).filter(s => st.rounds.some(r => r.seriesId === s.id)).forEach(s => { c += st.rounds.filter(r => r.seriesId === s.id).length; ws.getColumn(c).width = Math.max(ws.getColumn(c).width || 0, Math.min(34, s.name.length * 1.15 + 4)); c++; });
+  }
+  async function build(ExcelJS, se, scored) {
+    used.clear();
+    const wb = new ExcelJS.Workbook(); wb.creator = 'MAD MTB Points'; wb.created = new Date();
+    const title = se.name || `MAD MTB ${se.year} Club Championship`;
+    // Overall
+    const ov = wb.addWorksheet('Overall');
+    ov.getCell('A2').value = title; ov.getCell('A2').font = { bold: true, size: 28, name: 'Calibri' }; ov.getRow(2).height = 42.75;
+    let row = 4, maxCol = 3;
+    for (const t of se.overalls || []) {
+      const st = ENG.standings(se, scored, 'overall', t.id);
+      const nm = t.name === 'Club Champs' ? 'Club Champs (Overall Points)' : /junior/i.test(t.name) ? 'Junior Overall Points' : t.name;
+      const b = block(ov, row, se, scored, st, nm, se.points.downhill); row = b.next; maxCol = Math.max(maxCol, b.last); seriesWidths(ov, se, st);
+    }
+    widths(ov, maxCol, se); (se.overalls || []).forEach(t => seriesWidths(ov, se, ENG.standings(se, scored, 'overall', t.id)));
+    ov.mergeCells(2, 1, 2, Math.max(maxCol, 3)); ov.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
+    // Grades
+    const gr = wb.addWorksheet('GRADES');
+    gr.getCell('A3').value = title; gr.getCell('A3').font = { bold: true, size: 28, name: 'Calibri' }; gr.getRow(3).height = 42.75;
+    row = 6; maxCol = 3; const sts = [];
+    for (const g of se.grades || []) {
+      const st = ENG.standings(se, scored, 'graded', g.id); sts.push(st);
+      const b = block(gr, row, se, scored, st, g.name, se.points.downhill); row = b.next; maxCol = Math.max(maxCol, b.last);
+    }
+    widths(gr, maxCol, se); sts.forEach(st => seriesWidths(gr, se, st));
+    gr.mergeCells(3, 1, 3, Math.max(maxCol, 3)); gr.getCell('A3').alignment = { horizontal: 'center', vertical: 'middle' };
+    // Points
+    const pt = wb.addWorksheet('Points');
+    pt.getCell('B1').value = `Points system ${se.year}`; pt.getCell('B1').font = { bold: true, size: 14 };
+    pt.getCell('A2').value = RULES; pt.getCell('A2').alignment = { wrapText: true, vertical: 'top' };
+    ['Grades', 'Points', 'Gaps'].forEach((h, i) => { pt.getCell(2, 2 + i).value = i === 0 ? 'Overall' : h; pt.getCell(2, 5 + i).value = i === 0 ? 'Graded' : h; });
+    [2, 3, 4, 5, 6, 7].forEach(c => { const cell = pt.getCell(2, c); cell.font = { bold: true }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: RED } }; });
+    const scale = (arr, c0) => arr.forEach((p, i) => {
+      const r = 3 + i; pt.getCell(r, c0).value = ord(i + 1); pt.getCell(r, c0 + 1).value = p;
+      if (i < arr.length - 1) pt.getCell(r, c0 + 2).value = { formula: `${colL(c0 + 1)}${r}-${colL(c0 + 1)}${r + 1}`, result: p - arr[i + 1] };
+    });
+    scale(se.points.overall || [], 2); scale(se.points.graded || [], 5);
+    const nOv = (se.points.overall || []).length;
+    const extra = [['DNF', se.points.dnf], ['DNS', se.points.dns], ['Fastest downhill', se.points.downhill]];
+    extra.forEach(([k, v], i) => { pt.getCell(nOv + 5 + i, 2).value = k; pt.getCell(nOv + 5 + i, 3).value = v; });
+    pt.getColumn(1).width = 81.8; [2, 5].forEach(c => pt.getColumn(c).width = 9); [3, 6].forEach(c => pt.getColumn(c).width = 6); [4, 7].forEach(c => pt.getColumn(c).width = 5);
+    pt.mergeCells(2, 1, 60, 1);
+    return wb;
+  }
+  return { build };
+})();
 /* ===== Website storage (Supabase) — used when the page isn't inside claude.ai ===== */
 const SB_URL = (window.__SB_TEST && window.__SB_TEST.url) || 'https://ypcnmpnelzoxwxitwdym.supabase.co';
 const SB_KEY = (window.__SB_TEST && window.__SB_TEST.key) || 'sb_publishable_GjZtxpzDLoZdcZdDCKqneg_T7TsN-xJ';
@@ -778,7 +882,7 @@ function viewStandings() {
   return `<div class="stack">
     <div><h2>${esc(se.name || S.year + ' Championship')}</h2><p class="lede">${doneN} of ${allN} rounds scored. Ties are split on most 1sts, then 2nds, and so on.${dropTxt}</p></div>
     <div class="chips" role="group" aria-label="Table">${chips}</div>
-    <div class="row">${serSel}<span class="spacer"></span><button data-act="exportImgs" ${S.exporting ? 'disabled' : ''}>${S.exporting ? 'Making images…' : 'Export images'}</button></div>
+    <div class="row">${serSel}<span class="spacer"></span><button data-act="exportXlsx" ${S.xlsxing ? 'disabled' : ''}>${S.xlsxing ? 'Making Excel…' : 'Export Excel'}</button><button data-act="exportImgs" ${S.exporting ? 'disabled' : ''}>${S.exporting ? 'Making images…' : 'Export images'}</button></div>
     ${exportPanel()}
     ${tables}</div>`;
 }
@@ -835,6 +939,23 @@ const today = () => { const d = new Date(); return `${d.getFullYear()}.${String(
 function loadLib(src, globalName) {
   if (window[globalName]) return Promise.resolve(window[globalName]);
   return new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = src; sc.onload = () => res(window[globalName]); sc.onerror = () => rej(new Error('Could not load the zip tool')); document.head.appendChild(sc); });
+}
+async function exportExcel() {
+  const se = season(); S.xlsxing = true; render();
+  try {
+    if (S.dl === undefined) S.dl = window.claude ? await claude.use('downloads').catch(() => null) : null;
+    if (!S.dl) { S.xlsxing = false; render(); return toast('Saving files isn\'t available in this view.'); }
+    const ExcelJS = await loadLib('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js', 'ExcelJS');
+    const wb = await XLS.build(ExcelJS, se, ENG.scoreAll(se, racesFor(S.year)));
+    const buf = await wb.xlsx.writeBuffer();
+    S.xlsxing = false; render();
+    await S.dl.save({ filename: `MAD MTB ${S.year} Points Championship ${today()}.xlsx`, data: new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }) });
+    toast('Excel saved');
+  } catch (e) {
+    S.xlsxing = false; render();
+    if (e && e.code === 'declined') return; if (e && e.code === 'rate_limited') return toast('Finish the open save first.');
+    toast('Excel export failed: ' + ((e && (e.message || e.code)) || e));
+  }
 }
 async function saveAllImg() {
   S.zipping = true; render();
@@ -1289,6 +1410,7 @@ document.addEventListener('click', async e => {
     case 'unlock': return unlockEditing();
     case 'lock': if ((S.view === 'rounds' && S.dirty) || (S.view === 'setup' && S.setupDirty)) return toast('Save or discard your changes first.'); return lockEditing();
     case 'exportImgs': return exportImages();
+    case 'exportXlsx': return exportExcel();
     case 'closeExp': S.exp = null; return render();
     case 'saveImg': return saveImg(Number(el.dataset.i));
     case 'saveAllImg': return saveAllImg();
