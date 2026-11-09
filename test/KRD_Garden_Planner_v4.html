@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Garden Planner v3</title>
+<title>Garden Planner v4</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%2256%2053%20508%20508%22%3E%3Crect%20x%3D%2256.62%22%20y%3D%2253.78%22%20width%3D%22507.117%22%20height%3D%22507.117%22%20fill%3D%22%23E3E421%22/%3E%3Cg%20fill%3D%22%23fff%22%3E%3Cpolygon%20points%3D%22238.084%20529.72%20155.219%20446.854%20237.891%20364.18%20194.796%20364.18%20118.271%20440.704%20118.271%20364.18%2087.796%20364.18%2087.796%20482.802%20118.101%20452.833%20194.989%20529.72%20238.084%20529.72%22/%3E%3Cpath%20d%3D%22M387.531%2C529.409l-44.055-56.629c22.844-1.497%2C40.962-19.557%2C40.962-41.602v-25.028c0-23.021-19.745-41.751-44.013-41.751h-91.827v30.475h91.827c7.464%2C0%2C13.538%2C5.059%2C13.538%2C11.276v25.028c0%2C6.217-6.074%2C11.274-13.538%2C11.274h-91.827v30.475h55.211l43.941%2C56.482h39.78Z%22/%3E%3Cpath%20d%3D%22M462.739%2C364.464h-64.437v30.929h64.437c21.444%2C0%2C38.891%2C17.448%2C38.891%2C38.891v25.34c0%2C21.444-17.448%2C38.891-38.891%2C38.891h-64.437v30.929h64.437c38.499%2C0%2C69.82-31.321%2C69.82-69.82v-25.34c0-38.499-31.321-69.82-69.82-69.82Z%22/%3E%3C/g%3E%3C/svg%3E">
 <style>
 :root{--krd-grey:#414142;--krd-lime:#E3E421;--ink:#232325;--ink-2:#4A4A4D;--ink-3:#66666A;--rule:#D9D9DB;--rule-2:#EBEBEC;--field:#A8A8AC;--ground:#F3F3F2;--white:#FFFFFF;--sel:#EEEEEC;--pass-bg:#E2F0E5;--pass:#1D5A2C;--fail-bg:#F6E0DD;--fail:#8A2A1E;--bar:#E07B00;--res:#F4F4F5;--res-2:#E2E2E4;--water:#2F6E9E;--sun:#C98A00}
@@ -106,6 +106,7 @@ input[type=text],input[type=date],input[type=search],select{height:40px;border:1
 .add select,.add input{width:100%}
 .tobed{margin-top:16px;padding-top:14px;border-top:1px solid var(--rule-2)}
 .tobed .add{padding:0;background:none;grid-template-columns:minmax(0,1fr) 150px auto}
+.linkbtn{border:0;background:none;padding:6px 0 0;font:inherit;font-size:13px;color:var(--ink-3);text-decoration:underline;cursor:pointer}
 .okline{font-size:13px;color:var(--pass);margin:10px 0 0}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--ink-2);padding:10px 12px;background:var(--res);margin-bottom:14px}
 .legend span{display:inline-flex;align-items:center;gap:5px}
@@ -348,12 +349,14 @@ function infoHTML(){
  const months=MI.map((l,i)=>'<span class="'+(ms.includes(i+1)?"s":"")+(i+1===m?" c":"")+'" title="'+MON[i]+'">'+l+"</span>").join("");
  return '<div class="sec"><h3>'+esc(p.n)+'</h3><div class="sub">'+TYPES[p.t]+" · "+esc(p.m)+'</div><table class="kv"><tr><td>When</td><td>'+when+"</td></tr><tr><td>Sun</td><td>"+SUN[p.sun]+"</td></tr><tr><td>Water</td><td>"+WATER[p.w]+"</td></tr><tr><td>Spacing</td><td>"+p.sp+" mm between plants</td></tr><tr><td>Sow depth</td><td>"+(p.d?p.d+" mm":"At soil level / see tip")+"</td></tr><tr><td>Time to harvest</td><td>"+p.h[0]+"–"+p.h[1]+' days from planting</td></tr></table><div class="months">'+months+'</div><p class="lead" style="margin-top:8px">Lime = sowing months for your zone. Outline = this month.</p><p class="tip">'+esc(p.tip)+"</p>"+addToBedHTML(p)+"</div>";
 }
-let lastAdd=null,lastBed=null;
+let lastAdd=null,lastBed=null,newBedMode=false,tbDate=null;
 function addToBedHTML(p){
- if(!S.beds.length)return'<div class="tobed"><p class="lead" style="margin:0 0 8px">No garden beds yet.</p><button class="btn pri" data-act="gobeds">Add bed</button></div>';
- const opts=S.beds.map(b=>'<option value="'+b.id+'"'+(b.id===lastBed?" selected":"")+'>'+esc(b.name)+"</option>").join("");
  const done=lastAdd&&lastAdd.plant===p.id?'<p class="okline">Added to '+esc(lastAdd.bed)+" — "+lastAdd.h+".</p>":"";
- return'<div class="tobed"><div class="add"><label>Bed<select id="tb-bed">'+opts+'</select></label><label>Date planted<input type="date" id="tb-date" value="'+todayISO()+'"></label><button class="btn pri" data-tobed="'+p.id+'">Add to bed</button></div>'+done+"</div>";
+ if(!S.beds.length&&!newBedMode)return'<div class="tobed"><p class="lead" style="margin:0 0 8px">No garden beds yet.</p><button class="btn pri" data-act="newbed">Add bed</button></div>';
+ const date='<label>Date planted<input type="date" id="tb-date" value="'+(tbDate||todayISO())+'"></label>';
+ if(newBedMode)return'<div class="tobed"><div class="add"><label>New bed name<input type="text" id="tb-new" placeholder="e.g. Back fence"></label>'+date+'<button class="btn pri" data-tobed="'+p.id+'">Add to new bed</button></div><button class="linkbtn" data-act="cancelnew">Cancel</button>'+done+"</div>";
+ const opts=S.beds.map(b=>'<option value="'+b.id+'"'+(b.id===lastBed?" selected":"")+">"+esc(b.name)+"</option>").join("")+'<option value="__new">+ New bed…</option>';
+ return'<div class="tobed"><div class="add"><label>Bed<select id="tb-bed">'+opts+"</select></label>"+date+'<button class="btn pri" data-tobed="'+p.id+'">Add to bed</button></div>'+done+"</div>";
 }
 function disc(){return'<p class="disc">General guide only — sowing times vary with local conditions, so check with your local nursery. Climate zone and forecast from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>. Made by <a href="https://krdgroup.com.au" target="_blank" rel="noopener">KRD Engineering &amp; Management</a>.</p>'}
 
@@ -488,11 +491,15 @@ document.addEventListener("click",e=>{
  if(t.dataset.view){if(editBed)closeBedEdit();editDate=null;S.view=t.dataset.view;save();render();if(S.view==="plants"&&S.loc&&Wstate!=="ok")loadWeather();return}
  if(t.dataset.tab){S.tab=t.dataset.tab;save();render();return}
  if(t.dataset.filter){S.filter=t.dataset.filter;save();render();return}
- if(t.dataset.plant){lastAdd=null;S.sel=t.dataset.plant;save();document.querySelectorAll(".pc").forEach(c=>c.classList.toggle("sel",c.dataset.plant===S.sel));$("infoPanel").innerHTML=infoHTML();return}
+ if(t.dataset.plant){lastAdd=null;newBedMode=false;S.sel=t.dataset.plant;save();document.querySelectorAll(".pc").forEach(c=>c.classList.toggle("sel",c.dataset.plant===S.sel));$("infoPanel").innerHTML=infoHTML();return}
  if(t.dataset.act==="openloc"){openLoc();return}
  if(t.dataset.act==="retrywx"){loadWeather();return}
- if(t.dataset.act==="gobeds"){S.view="beds";save();render();const i=$("nbName");if(i)i.focus();return}
- if(t.dataset.tobed){const b=findB($("tb-bed").value),dt=$("tb-date").value;if(!b||!dt)return;const pl={id:uid(),plant:t.dataset.tobed,date:dt};b.plantings.push(pl);lastBed=b.id;save();const h=harvest(pl);lastAdd={plant:pl.plant,bed:b.name,h:h[1].charAt(0).toLowerCase()+h[1].slice(1)};$("infoPanel").innerHTML=infoHTML();return}
+ if(t.dataset.act==="newbed"){newBedMode=true;tbDate=null;$("infoPanel").innerHTML=infoHTML();$("tb-new").focus();return}
+ if(t.dataset.act==="cancelnew"){newBedMode=false;$("infoPanel").innerHTML=infoHTML();return}
+ if(t.dataset.tobed){const dt=$("tb-date").value;if(!dt)return;let b;
+  if(newBedMode){const nm=$("tb-new").value.trim();if(!nm){$("tb-new").focus();return}b={id:uid(),name:nm,size:"",plantings:[]};S.beds.push(b);newBedMode=false}
+  else b=findB($("tb-bed").value);
+  if(!b)return;const pl={id:uid(),plant:t.dataset.tobed,date:dt};b.plantings.push(pl);lastBed=b.id;tbDate=null;save();const h=harvest(pl);lastAdd={plant:pl.plant,bed:b.name,h:h[1].charAt(0).toLowerCase()+h[1].slice(1)};$("infoPanel").innerHTML=infoHTML();return}
  if(t.id==="btnAddBed"){const n=$("nbName").value.trim()||"Bed "+(S.beds.length+1);S.beds.push({id:uid(),name:n,size:$("nbSize").value.trim(),plantings:[]});save();render();return}
  if(t.dataset.bdel){const b=findB(t.dataset.bdel);if(b&&confirm('Delete "'+b.name+'" and everything logged in it?')){S.beds=S.beds.filter(x=>x!==b);save();render()}return}
  if(t.dataset.padd){const b=findB(t.dataset.padd),pl=$("ap-"+b.id).value,dt=$("ad-"+b.id).value;if(!dt)return;b.plantings.push({id:uid(),plant:pl,date:dt});save();render();return}
@@ -511,6 +518,7 @@ document.addEventListener("keydown",e=>{
  if(e.key==="Escape"&&(editBed||editDate)){editBed=null;editDate=null;render()}
 });
 document.addEventListener("focusout",e=>{if(e.target.dataset&&e.target.dataset.pdate)setTimeout(()=>{if(editDate&&!document.activeElement.dataset.pdate){editDate=null;render()}},150)});
+document.addEventListener("change",e=>{if(e.target.id==="tb-bed"&&e.target.value==="__new"){tbDate=$("tb-date").value;newBedMode=true;$("infoPanel").innerHTML=infoHTML();$("tb-new").focus()}});
 $("btnLoc").onclick=openLoc;
 $("btnGeo").onclick=useGeo;
 $("btnSearch").onclick=search;
