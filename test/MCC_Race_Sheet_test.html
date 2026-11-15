@@ -864,7 +864,7 @@ function importHistory(rows) {
 
 /* ============ PDF ============ */
 const SHEETS = {
-  handicap: [['start', 'Handicaps (groups with start times)'], ['brief', 'Briefing'], ['finish', 'Results sheet (names, blank finish positions)']],
+  handicap: [['start', 'Handicaps (groups and gaps)'], ['brief', 'Briefing'], ['finish', 'Results sheet (names, blank finish positions)']],
   scratch: [['entries', 'Entry list by grade'], ['brief', 'Briefing'], ['results', 'Blank results sheet (one per grade)']],
   tt: [['start', 'Start sheet'], ['brief', 'Briefing'], ['timing', 'Blank timing sheet']],
 };
@@ -891,8 +891,7 @@ function buildReport(r, ks) {
     if (k === 'brief') pages.push(rhead(r, 'Rider briefing') + briefList(r));
     if (r.type === 'handicap' && k === 'start') {
       const G = hcGroups(r).slice().sort((a, b) => (a.start == null) - (b.start == null) || a.start - b.start || a.i - b.i);
-      const base = TIMER[r.id] || plannedBase(r);
-      let h = rhead(r, 'Handicaps') + '<div class="xlgrid">' + G.map(x => '<div class="grp"><h2>Group ' + x.i + ' <span class="gs">start +' + mmss(x.start) + (base ? ' (' + clockFull(base, x.start) + ')' : '') + '</span></h2><div class="gd">' + f2(x.ex) + ' km/h · race time ' + mmss(x.t) + '</div><table class="xl"><thead><tr><th>Name</th><th class="n">Average Speed</th></tr></thead><tbody>' +
+      let h = rhead(r, 'Handicaps') + '<div class="xlgrid">' + G.map(x => '<div class="grp"><h2>Group ' + x.i + ' <span class="gs">start +' + mmss(x.start) + '</span></h2><div class="gd">' + f2(x.ex) + ' km/h · race time ' + mmss(x.t) + '</div><table class="xl"><thead><tr><th>Name</th><th class="n">Average Speed</th></tr></thead><tbody>' +
         x.m.map(id => '<tr><td>' + esc(riderById(id).name) + '</td><td class="n">' + f2(avgOf(id)) + '</td></tr>').join('') +
         '</tbody><tfoot><tr><td>' + x.m.length + '</td><td class="n">' + f2(x.ca) + '</td></tr></tfoot></table></div>').join('') + '</div>';
       const un = entrantIds(r).filter(id => !(r.hc.g && r.hc.g[id] >= 0));
