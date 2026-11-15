@@ -64,6 +64,10 @@ button.btn:disabled{opacity:.5;cursor:default}
 .segpop .acts{display:flex;gap:10px;align-items:center;margin-top:8px}
 .segpop .btn{padding:8px 12px;font-size:13px}
 .segpop a{color:var(--grey)}
+.segpop .popn{margin-top:6px;color:#6b6b6e;font-size:12px}
+.locctl a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:#fff}
+.locctl a.busy svg{animation:locpulse 1s infinite}
+@keyframes locpulse{50%{opacity:.3}}
 .row1{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .pill{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 7px;border-radius:3px;white-space:nowrap}
 .pill.go{background:var(--lime);color:var(--grey)}
@@ -218,9 +222,7 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
     </select></label>
   </div>
   <div class="actions">
-    <button class="btn" id="btnStarred">Import starred</button>
-    <button class="btn" id="btnRides">Import from my rides</button>
-    <button class="btn lime" id="btnKom">Get KOM times</button>
+    <button class="btn lime" id="btnRefresh">Refresh data</button>
     <button class="btn ghost" id="btnStop" hidden>Stop</button>
     <label class="sortbox">Sort<select id="sortSel">
       <option value="best">Best KOM chance</option><option value="near">Nearest to start</option><option value="wind">Most wind help</option>
@@ -411,11 +413,7 @@ code.inv{font-size:14px;background:#eee;padding:2px 6px;border-radius:3px}
     </div></div>
     <div class="gstep" id="g4"><div class="gn">4</div><div class="gb">
       <b>Bring in your segments</b>
-      <div class="small">Pick one or both. Then tap <b>Get KOM times</b> on the Ride tab.</div>
-      <div class="actions" style="margin-top:8px">
-        <button class="btn" id="gStarred">Import starred</button>
-        <button class="btn" id="gRides">Import from my rides</button>
-      </div>
+      <div class="small">Tap <b>Refresh data</b> on the Ride tab. The first time it reads your starred segments and your last 50 rides, then gets KOM times. After that it only reads new rides.</div>
     </div></div>
     <div id="authStatus" class="small"></div>
   </div>
@@ -478,6 +476,9 @@ function defaults() {
     settingsVer: 2,
     limits: null,  // real Strava limits from response headers
     doneActivities: [],
+    lastRideAt: null,  // start time (epoch s) of the newest ride read; later refreshes only read rides after it
+    dailyDay: '',      // Brisbane date of the last completed daily KOM recheck
+    elev: {},          // id -> {k, z:[m], zin} elevation profile + run-in point (this device only, from Open-Meteo)
     komLists: {},  // owner -> {rows:[{name,key,km,timeS,date,type}], importedAt}
     home: null,    // {name, lat, lng}
     authProblem: false,  // true when Strava rejects the saved login
@@ -582,8 +583,44 @@ function dominantDirs(pieces) {
   return [{ brg: m1, share: best }, { brg: meanBrg(rest.filter(p => angDiff(p.brg, c2) <= 45)), share: best2 }];
 }
 const geomCache = new Map();
+const STEP_M = 10;          // resample spacing for grade and heading along a segment
+const RUNIN_M = 100;        // lead-in before the start line
+const LAT_ACC = 3.5;        // sideways grip for corner speed, m/s² (about 0.35 g)
+const BRAKE_DEC = 2.5;      // braking into a corner, m/s²
+const CORNER_MIN_DEG = 30;  // gentler bends are ridden flat out
+const EXIT_SURGE = 1.3;     // power out of a corner, × the effort's average (a short jump back up to speed)
+const TANGENT_MAX = 15;     // m of road either side of a sharp polyline vertex that the turn can use
+const signedTurn = (a, b) => ((b - a + 540) % 360) - 180;
+// Point d metres from p on heading brg
+function destPoint(p, brg, d) {
+  const R = 6371000, la = rad(p[0]), lo = rad(p[1]), b = rad(brg), dr = d / R;
+  const la2 = Math.asin(Math.sin(la) * Math.cos(dr) + Math.cos(la) * Math.sin(dr) * Math.cos(b));
+  const lo2 = lo + Math.atan2(Math.sin(b) * Math.sin(dr) * Math.cos(la), Math.cos(dr) - Math.sin(la) * Math.sin(la2));
+  return [deg(la2), deg(lo2)];
+}
+// n+1 evenly spaced points along a polyline
+function resampleN(pts, n) {
+  const cum = [0]; for (let k = 1; k < pts.length; k++) cum.push(cum[k - 1] + hav(pts[k - 1], pts[k]));
+  const L = cum[cum.length - 1], out = []; let j = 1;
+  for (let i = 0; i <= n; i++) {
+    const s = L * i / n;
+    while (j < pts.length - 1 && cum[j] < s) j++;
+    const seg = cum[j] - cum[j - 1], f = seg > 0 ? (s - cum[j - 1]) / seg : 0;
+    out.push([pts[j - 1][0] + f * (pts[j][0] - pts[j - 1][0]), pts[j - 1][1] + f * (pts[j][1] - pts[j - 1][1])]);
+  }
+  return out;
+}
+const elevKey = seg => (seg.points || '').length + ':' + (seg.distance || 0);
+// Elevation profile: Open-Meteo samples, smoothed, then tilted so the total rise matches Strava's average grade
+function elevAt(ev, seg) {
+  const z = ev.z.slice();
+  for (let i = 1; i < z.length - 1; i++) z[i] = (ev.z[i - 1] + ev.z[i] + ev.z[i + 1]) / 3;
+  const n = z.length - 1, rise = (seg.avg_grade || 0) / 100 * (seg.distance || 0), fix = rise - (z[n] - z[0]);
+  return f => { const x = clamp(f, 0, 1) * n, i = Math.min(Math.floor(x), n - 1), t = x - i; return z[i] + t * (z[i + 1] - z[i]) + f * fix; };
+}
 function getGeom(seg) {
-  const key = seg.id + ':' + (seg.points || '').length;
+  const ev = S.elev && S.elev[seg.id] && S.elev[seg.id].k === elevKey(seg) ? S.elev[seg.id] : null;
+  const key = seg.id + ':' + (seg.points || '').length + ':' + (ev ? 'e' : '-') + ':' + seg.avg_grade + ':' + seg.distance;
   if (geomCache.has(key)) return geomCache.get(key);
   let pts = [];
   try { pts = seg.points ? decodePolyline(seg.points) : []; } catch (e) { pts = []; }
@@ -596,11 +633,59 @@ function getGeom(seg) {
   const scale = L > 0 && seg.distance ? seg.distance / L : 1;
   pieces.forEach(p => p.len *= scale);
   if (!pieces.length) pieces.push({ brg: 0, len: seg.distance || 1 });
-  // Group by 5° heading so the physics runs fast on a phone
+  const dist = seg.distance || pieces.reduce((a, p) => a + p.len, 0);
+
+  // Steps every ~10 m carry their own heading and grade
+  const avgG = seg.avg_grade || 0, zf = ev ? elevAt(ev, seg) : null;
+  const steps = [];
+  if (pts.length >= 2 && L > 0) {
+    const n = Math.max(1, Math.round(L / STEP_M)), rp = resampleN(pts, n), len = dist / n;
+    for (let i = 0; i < n; i++) {
+      const grade = zf ? clamp((zf((i + 1) / n) - zf(i / n)) / len * 100, -25, 25) : avgG;
+      steps.push({ brg: bearing(rp[i], rp[i + 1]), len, grade });
+    }
+  } else steps.push({ brg: pieces[0].brg, len: dist, grade: avgG });
+  const stepLen = dist / steps.length;
+
+  // Group by 5° heading and 0.5% grade so the physics runs fast on a phone
   const gmap = new Map();
-  for (const p of pieces) { const b = Math.round(p.brg / 5) * 5 % 360; gmap.set(b, (gmap.get(b) || 0) + p.len); }
-  const groups = Array.from(gmap, ([brg, len]) => ({ brg, len }));
-  const g = { pts, pieces, groups, dirs: dominantDirs(pieces) };
+  for (const s of steps) {
+    const b = Math.round(s.brg / 5) * 5 % 360, gr = Math.round(s.grade * 2) / 2, k = b + '|' + gr;
+    let q = gmap.get(k); if (!q) { q = { brg: b, grade: gr, len: 0 }; gmap.set(k, q); }
+    q.len += s.len; s.q = q;
+  }
+  const groups = Array.from(gmap.values());
+  groups.forEach((q, i) => q.i = i);
+  steps.forEach(s => { s.gi = s.q.i; delete s.q; });
+
+  // Corners from the polyline's own vertices. A run of bends the same way close together is one corner.
+  const corners = [];
+  let pos = 0;
+  const turnAt = j => signedTurn(pieces[j].brg, pieces[j + 1].brg);
+  for (let j = 0; j < pieces.length - 1;) {
+    pos += pieces[j].len;
+    const t0 = turnAt(j);
+    if (Math.abs(t0) < 3) { j++; continue; }
+    let k = j, th = t0, inner = 0;
+    while (k + 1 < pieces.length - 1 && pieces[k + 1].len < 40 && Math.sign(turnAt(k + 1)) === Math.sign(t0) && Math.abs(turnAt(k + 1)) >= 3) { inner += pieces[k + 1].len; k++; th += turnAt(k); }
+    const ang = Math.min(Math.abs(th), 180);
+    if (ang >= CORNER_MIN_DEG) {
+      const lt = Math.min(TANGENT_MAX, pieces[j].len / 2, pieces[k + 1].len / 2);
+      const R = k === j ? lt / Math.tan(rad(ang) / 2) : (inner + lt) / rad(ang);
+      const arc = Math.max(R * rad(ang), 1);
+      const at = Math.min(steps.length - 1, Math.floor(pos / stepLen));
+      corners.push({ i: at, exit: Math.min(steps.length - 1, Math.floor((pos + inner + arc / 2) / stepLen) + 1), deg: ang, R, arc });
+    }
+    for (let x = j + 1; x <= k; x++) pos += pieces[x].len;
+    j = k + 1;
+  }
+
+  // Lead-in: the 100 m before the start, assumed to carry on the segment's opening heading
+  let acc = 0, bx = 0, by = 0;
+  for (const s of steps) { bx += s.len * Math.sin(rad(s.brg)); by += s.len * Math.cos(rad(s.brg)); acc += s.len; if (acc >= 30) break; }
+  const brgIn = norm360(deg(Math.atan2(bx, by)));
+  const gradeIn = ev && ev.zin != null ? clamp((ev.z[0] - ev.zin) / RUNIN_M * 100, -15, 15) : steps[0].grade;
+  const g = { pts, pieces, groups, steps, corners, runIn: { brg: brgIn, grade: gradeIn }, hasElev: !!ev, dirs: dominantDirs(pieces) };
   geomCache.set(key, g);
   return g;
 }
@@ -615,31 +700,92 @@ function powerAt(t, pr, calib) {
   else { const k = lt <= P[1][0] ? 0 : 1; const f = (lt - P[k][0]) / (P[k + 1][0] - P[k][0]); w = P[k][1] + f * (P[k + 1][1] - P[k][1]); }
   return Math.max(w, 1) * calib / 100;
 }
-// Steady-state speed for power P. wt = tailwind component (m/s, +ve helps).
+// Riding resistance (N) at speed v. wt = tailwind component (m/s, +ve helps).
+function resist(v, c) { return c.m * G * (c.crr * Math.cos(c.th) + Math.sin(c.th)) + 0.5 * c.rho * c.cda * (v - c.wt) * Math.abs(v - c.wt); }
+// Steady-state speed for power P.
 function solveV(P, c) {
-  const grav = c.m * G * (c.crr * Math.cos(c.th) + Math.sin(c.th));
-  const f = v => P * c.eff - (grav * v + 0.5 * c.rho * c.cda * (v - c.wt) * Math.abs(v - c.wt) * v);
+  const f = v => P * c.eff - resist(v, c) * v;
   let lo = 0.5, hi = 25; // 1.8–90 km/h
   if (f(hi) > 0) return hi;
   if (f(lo) < 0) return lo;
   for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (f(mid) > 0) lo = mid; else hi = mid; }
   return (lo + hi) / 2;
 }
-function simTime(g, seg, pr, env, P, withWind) {
-  const th = Math.atan((seg.avg_grade || 0) / 100);
-  const m = (+pr.riderKg || 75) + (+pr.bikeKg || 9);
-  let t = 0;
-  for (const p of g.groups) {
-    const wt = withWind && env ? env.wms * Math.cos(rad(env.windTo - p.brg)) : 0;
-    const v = solveV(P, { m, th, crr: +pr.crr || 0.0045, rho: env ? env.rho : 1.18, cda: +pr.cda || 0.32, wt, eff: S.settings.eff });
-    t += p.len / v;
+// Time lost (+) or gained (−) settling from speed v0 to steady speed vT, compared with riding at vT the whole way
+function transitionLoss(v0, vT, P, c) {
+  if (Math.abs(v0 - vT) < 0.05 * vT) return 0;
+  const up = v0 < vT, dt = 0.2;
+  let v = v0, t = 0, d = 0;
+  for (let k = 0; k < 600; k++) {
+    const a = clamp((P * c.eff / Math.max(v, 1) - resist(v, c)) / c.m, -6, 2.5);
+    const v2 = Math.max(0.5, v + a * dt);
+    d += (v + v2) / 2 * dt; t += dt; v = v2;
+    if (up ? v >= vT * 0.99 : v <= vT * 1.01) break;
   }
-  return t;
+  return t - d / vT;
+}
+function riderCond(pr, env, withWind, brg, grade) {
+  return { m: (+pr.riderKg || 75) + (+pr.bikeKg || 9), th: Math.atan(grade / 100), crr: +pr.crr || 0.0045, rho: env ? env.rho : 1.18, cda: +pr.cda || 0.32,
+    wt: withWind && env ? env.wms * Math.cos(rad(env.windTo - brg)) : 0, eff: S.settings.eff };
+}
+// Steady speed on every heading/grade group, plus corner and lead-in effects
+function simTime(g, seg, pr, env, P, withWind) {
+  const sp = g.groups.map(q => { const c = riderCond(pr, env, withWind, q.brg, q.grade); return { c, v: solveV(P, c) }; });
+  let t = 0;
+  g.groups.forEach((q, i) => t += q.len / sp[i].v);
+  for (const k of g.corners) {
+    const v = sp[g.steps[k.i].gi].v, vc = Math.max(3, Math.sqrt(LAT_ACC * k.R));
+    if (v <= vc) continue;
+    const out = sp[g.steps[k.exit].gi];
+    t += (v - vc) ** 2 / (2 * BRAKE_DEC * v) + (k.arc / vc - k.arc / v) + Math.max(0, transitionLoss(vc, out.v, P * EXIT_SURGE, out.c));
+  }
+  const first = sp[g.steps[0].gi], vin = solveV(P, riderCond(pr, env, withWind, g.runIn.brg, g.runIn.grade));
+  t += transitionLoss(vin, first.v, P, first.c);
+  return Math.max(t, 1);
 }
 function predict(g, seg, pr, env, withWind) {
   let t = Math.max(15, (seg.distance || 500) / 10);
   for (let i = 0; i < 6; i++) { const P = powerAt(t, pr, S.settings.calib); t = simTime(g, seg, pr, env, P, withWind); }
   return t;
+}
+
+/* ---------------- Elevation (Open-Meteo, free, not counted against Strava) ---------------- */
+let elevRunning = false;
+function elevQueue() {
+  return Object.values(S.segments).filter(s => {
+    const e = S.elev[s.id];
+    return s.points && (!e || (e.k !== elevKey(s) && !(e.fail && Date.now() - e.fail < 86400e3)));
+  }).map(s => s.id);
+}
+async function fetchElev(seg) {
+  const g = getGeom(seg); if (g.pts.length < 2) return;
+  const n = clamp(Math.ceil((seg.distance || 0) / 25), 2, 98), pts = resampleN(g.pts, n);
+  pts.push(destPoint(g.pts[0], norm360(g.runIn.brg + 180), RUNIN_M));
+  const url = 'https://api.open-meteo.com/v1/elevation?latitude=' + pts.map(p => p[0].toFixed(5)).join(',') + '&longitude=' + pts.map(p => p[1].toFixed(5)).join(',');
+  const r = await fetch(url);
+  if (r.status === 429) throw new Error('rate');
+  if (!r.ok) { S.elev[seg.id] = { k: elevKey(seg), fail: Date.now() }; return; }
+  const z = (await r.json()).elevation;
+  if (!Array.isArray(z) || z.length !== pts.length || z.some(x => !isFinite(x))) { S.elev[seg.id] = { k: elevKey(seg), fail: Date.now() }; return; }
+  const zin = z.pop();
+  S.elev[seg.id] = { k: elevKey(seg), z: z.map(x => Math.round(x * 10) / 10), zin: Math.round(zin * 10) / 10 };
+}
+// Fills in elevation profiles in the background; rankings update as they arrive
+async function ensureElevation() {
+  if (elevRunning) return;
+  const ids = elevQueue(); if (!ids.length) return;
+  elevRunning = true;
+  let done = 0, lastDraw = Date.now();
+  try {
+    await runPool(ids, async id => {
+      const seg = S.segments[id]; if (!seg) return;
+      try { await fetchElev(seg); } catch (e) { if (e.message === 'rate') throw e; }
+      done++;
+      if (Date.now() - lastDraw > 3000) { lastDraw = Date.now(); const st = $('#status'), txt = st.textContent, cls = st.className; saveLocal(); renderList(); renderMap(); if (!busy && txt) { st.textContent = txt; st.className = cls; } }
+    }, 3, true);
+  } catch (e) { /* Open-Meteo busy: try again next time */ }
+  elevRunning = false;
+  if (done) { const st = $('#status'), txt = st.textContent, cls = st.className; saveLocal(); renderList(); renderMap(); if (!busy && txt) { st.textContent = txt; st.className = cls; } }
 }
 
 /* ---------------- Weather (Open-Meteo) ---------------- */
@@ -741,7 +887,7 @@ async function api(path, retry = true) {
 
 /* ---------------- Scanning ---------------- */
 let busy = false, abortFlag = false;
-function setBusy(b) { busy = b; ['#btnStarred', '#btnRides', '#btnKom', '#btnAdd'].forEach(s => $(s).disabled = b); $('#btnStop').hidden = !b; if (!b) setProgress(null); }
+function setBusy(b) { busy = b; ['#btnRefresh', '#btnAdd'].forEach(s => $(s).disabled = b); $('#btnStop').hidden = !b; if (!b) setProgress(null); }
 
 // Add or update a segment from any Strava segment object (starred, effort, or detail)
 function upsertSeg(sg) {
@@ -765,70 +911,116 @@ function storeDetail(id, d) {
   };
 }
 
-async function importStarred() {
-  if (busy) return; setBusy(true); abortFlag = false;
-  let page = 1, added = 0, total = 0;
-  try {
-    while (!abortFlag) {
-      setStatus(`Reading starred segments (page ${page})…`);
-      const arr = await api(`/segments/starred?page=${page}&per_page=100`);
-      if (!Array.isArray(arr) || !arr.length) break;
-      for (const sg of arr) {
-        if (sg.activity_type && sg.activity_type !== 'Ride') continue;
-        total++; if (upsertSeg(sg)) added++;
-      }
-      save();
-      if (arr.length < 100) break;
-      page++;
-    }
-    setStatus(`Starred: ${total} ride segments, ${added} new. Next: tap Get KOM times.`);
-  } catch (e) { setStatus(e.message, !(e instanceof RateError)); }
-  setBusy(false); renderAll();
-}
+const FIRST_RIDES = 50;   // first refresh reads this many recent rides; later refreshes read only new ones
+const isOutdoorRide = a => { const t = a.sport_type || a.type || ''; return /Ride/.test(t) && t !== 'VirtualRide' && !a.trainer; };
+const brisbaneDay = ms => brisbaneHourKey(ms).slice(0, 10);
 
-async function importRides() {
-  if (busy) return; setBusy(true); abortFlag = false;
-  const days = 90, max = 60;
-  const after = Math.floor((Date.now() - days * 86400e3) / 1000);
-  const done = new Set(S.doneActivities || []);
-  let added = 0, skipped = 0, read = 0, todo = [];
-  try {
-    let page = 1, acts = [];
-    while (!abortFlag) {
-      setStatus(`Listing your rides (page ${page})…`);
-      const arr = await api(`/athlete/activities?after=${after}&page=${page}&per_page=100`);
-      if (!Array.isArray(arr) || !arr.length) break;
-      acts.push(...arr);
-      if (arr.length < 100) break;
-      page++;
-    }
-    todo = acts
-      .filter(a => { const t = a.sport_type || a.type || ''; return /Ride/.test(t) && t !== 'VirtualRide' && !a.trainer && !done.has(a.id); })
-      .sort((x, y) => new Date(y.start_date) - new Date(x.start_date))
-      .slice(0, max);
-    if (!todo.length) { setStatus(`No new rides to read in the last ${days} days.`); }
-    for (const a of todo) {
-      if (abortFlag) break;
-      setStatus(`Reading ride ${read + 1}/${todo.length}: ${a.name || ''}`); setProgress(read / todo.length);
+// A ride's segment effort updates your best time and KOM straight away, with no extra Strava call
+function applyEffort(ef) {
+  const sg = ef.segment; if (!sg) return false;
+  const isNew = upsertSeg(sg);
+  const d = S.details[sg.id], el = ef.elapsed_time;
+  if (!d || d.notFound || !(el > 0)) return isNew;
+  if (!d.prS || el < d.prS) d.prS = el;
+  const komS = parseTime(d.kom), ovS = parseTime(d.overall);
+  if (komS && el < komS) d.kom = fmtTime(el);
+  if (ef.kom_rank === 1 || (ovS && el < ovS)) d.overall = fmtTime(el);
+  return isNew;
+}
+async function readStarred() {
+  let page = 1, added = 0;
+  while (!abortFlag) {
+    const arr = await api(`/segments/starred?page=${page}&per_page=100`);
+    if (!Array.isArray(arr) || !arr.length) break;
+    for (const sg of arr) { if (sg.activity_type && sg.activity_type !== 'Ride') continue; if (upsertSeg(sg)) added++; }
+    if (arr.length < 100) break;
+    page++;
+  }
+  return added;
+}
+// First time: your last 50 rides. After that: only rides since the newest one already read (oldest first, so a stop or limit carries on next time).
+async function readNewRides() {
+  const done = new Set(S.doneActivities || []), first = !S.lastRideAt;
+  setStatus('Checking for new rides…');
+  const arr = await api(first ? '/athlete/activities?per_page=100' : `/athlete/activities?after=${S.lastRideAt}&per_page=100`);
+  const acts = (Array.isArray(arr) ? arr : []).sort((x, y) => new Date(x.start_date) - new Date(y.start_date));
+  let rides = acts.filter(isOutdoorRide);
+  rides = first ? rides.slice(-FIRST_RIDES) : rides.slice(0, FIRST_RIDES);
+  const todo = rides.filter(a => !done.has(a.id)).length, startS = a => Math.floor(new Date(a.start_date).getTime() / 1000);
+  let read = 0, added = 0;
+  for (const a of rides) {
+    if (abortFlag) break;
+    if (!done.has(a.id)) {
+      setStatus(`Reading ride ${read + 1}/${todo}: ${a.name || ''}`); setProgress(read / todo);
       const d = await api(`/activities/${a.id}?include_all_efforts=true`);
-      for (const ef of d.segment_efforts || []) {
-        const sg = ef.segment; if (!sg) continue;
-        if (upsertSeg(sg)) added++;
-      }
+      for (const ef of d.segment_efforts || []) if (applyEffort(ef)) added++;
       done.add(a.id); read++;
       S.doneActivities = Array.from(done).slice(-3000);
-      save();
       if (read % 5 === 0) renderList();
-      await sleep(150);
     }
-    if (todo.length) setStatus(`Read ${read} ride${read === 1 ? '' : 's'}: ${added} new segments` + (skipped ? `, ${skipped} efforts outside the area skipped` : '') + (read < todo.length ? `. ${todo.length - read} rides left.` : '.') + ' Next: tap Get KOM times.');
-  } catch (e) {
-    const msg = /401|Authorization/.test(e.message) && !/activity:read/.test(S.auth.scope || '')
-      ? 'Strava refused access to your rides. Re-authorise in the Setup tab (it now asks for ride permission), then try again.'
-      : e.message;
-    setStatus(`${msg} (${read}/${todo.length} rides read)`, !(e instanceof RateError));
+    S.lastRideAt = Math.max(S.lastRideAt || 0, startS(a));
+    saveSoon();
   }
-  setBusy(false); renderAll();
+  // Every listed activity is now handled (runs etc. too), so the next check starts after the newest of them
+  if (!abortFlag && rides.length < FIRST_RIDES && acts.length && acts.length < 100) S.lastRideAt = Math.max(S.lastRideAt || 0, startS(acts[acts.length - 1]));
+  if (first && !S.lastRideAt) S.lastRideAt = Math.floor(Date.now() / 1000) - 86400;   // no rides yet
+  return { read, added };
+}
+// Fetch segment details (KOM times, your PR). Counts go in cnt so they survive a limit or Stop part-way.
+async function fetchDetails(ids, cnt, label) {
+  let lastRender = Date.now();
+  await runPool(ids, async id => {
+    let d;
+    try { d = await api('/segments/' + id); }
+    catch (e) {
+      if (e.status !== 404) throw e;
+      // Deleted or private: note it, don't retry until the normal refresh age, carry on with the rest
+      S.details[id] = { ...(S.details[id] || {}), notFound: true, fetchedAt: Date.now() };
+      cnt.missing++; cnt.done++; saveSoon(); return;
+    }
+    storeDetail(id, d);
+    cnt.done++;
+    setStatus(`${label} ${cnt.done}/${ids.length}…`); setProgress(cnt.done / ids.length);
+    saveSoon();
+    if (Date.now() - lastRender > 2000) { lastRender = Date.now(); renderList(); }
+  }, 4);
+}
+// One button: starred segments, new rides, KOM times for new segments, then once a day a recheck of
+// KOMs you hold (catches a KOM taken by someone not on this page) and of KOM times past the refresh age.
+async function refreshData() {
+  if (busy) return; setBusy(true); abortFlag = false;
+  const cnt = { done: 0, missing: 0 }; let rides = { read: 0, added: 0 }, starred = 0, ids = [], daily = false, msg = '', isErr = false;
+  try {
+    setStatus('Reading starred segments…');
+    starred = await readStarred();
+    rides = await readNewRides();
+    save(); renderList();
+    const maxAge = (+S.settings.komMaxAgeDays || 14) * 86400e3, today = brisbaneDay(Date.now());
+    const fresh = komRefreshQueue(Infinity);   // segments with no KOM time yet
+    daily = S.dailyDay !== today;
+    if (daily) {
+      const seen = new Set(fresh.map(String)), held = Array.from(myDetectedKoms()).filter(id => S.segments[id] && !seen.has(String(id)));
+      held.forEach(id => seen.add(String(id)));
+      ids = [...fresh, ...held, ...komRefreshQueue(maxAge).filter(id => !seen.has(String(id)))];
+    } else ids = fresh;
+    if (ids.length && !abortFlag) await fetchDetails(ids, cnt, 'Getting KOM times');
+    if (daily && !abortFlag && cnt.done >= ids.length) S.dailyDay = today;
+    const news = starred + rides.added;
+    msg = abortFlag ? 'Stopped. Tap Refresh data to carry on.'
+      : `Up to date. ${rides.read} new ride${rides.read === 1 ? '' : 's'} read, ${news} new segment${news === 1 ? '' : 's'}` +
+        (ids.length ? `, ${cnt.done - cnt.missing} KOM time${cnt.done - cnt.missing === 1 ? '' : 's'} checked` : '') + '.' +
+        (cnt.missing ? ` ${cnt.missing} not found on Strava (deleted or private).` : '');
+  } catch (e) {
+    const left = ids.length ? ` ${ids.length - cnt.done} KOM times still to get.` : '';
+    if (e instanceof RateError) msg = `${e.message}${left} Tap Refresh data then to carry on; it picks up where it stopped.`;
+    else {
+      isErr = true;
+      msg = /401|Authorization/.test(e.message) && !/activity:read/.test(S.auth.scope || '')
+        ? 'Strava refused access to your rides. Re-authorise in the Setup tab (it now asks for ride permission), then try again.'
+        : e.message + left;
+    }
+  }
+  save(); setBusy(false); renderAll(); setStatus(msg, isErr);
 }
 
 // Pull segment IDs out of pasted text. If it contains Strava links, use only those
@@ -879,10 +1071,10 @@ async function shareSegmentList() {
 }
 
 // Run a worker over ids with a few requests in flight at once. Stops on abort or first error.
-async function runPool(ids, worker, conc = 4) {
+async function runPool(ids, worker, conc = 4, ignoreStop = false) {
   let i = 0, err = null;
   const lane = async () => {
-    while (!abortFlag && !err && i < ids.length) {
+    while ((ignoreStop || !abortFlag) && !err && i < ids.length) {
       const id = ids[i++];
       try { await worker(id); } catch (e) { err = err || e; }
     }
@@ -907,31 +1099,15 @@ function komRefreshQueue(maxAge) {
   out.sort((a, b) => a.grp - b.grp || a.age - b.age);
   return out.map(x => x.id);
 }
-async function fetchKoms(onlyIds) {
-  if (busy) return; setBusy(true); abortFlag = false;
-  const maxAge = (+S.settings.komMaxAgeDays || 14) * 86400e3;
-  const ids = onlyIds ? onlyIds.slice() : komRefreshQueue(maxAge);
-  if (!ids.length) { setStatus('All segments already have up-to-date KOM times.'); setBusy(false); return; }
-  let done = 0, missing = 0, lastRender = Date.now(), msg = '', isErr = false;
-  setStatus(`Getting KOM times for ${ids.length} segment${ids.length === 1 ? '' : 's'}${onlyIds ? '' : ' (go and maybe first)'}…`);
+async function fetchKoms(ids) {
+  if (busy || !ids || !ids.length) return; setBusy(true); abortFlag = false;
+  const cnt = { done: 0, missing: 0 }; let msg = '', isErr = false;
+  setStatus(`Getting KOM times for ${ids.length} segment${ids.length === 1 ? '' : 's'}…`);
   try {
-    await runPool(ids, async id => {
-      let d;
-      try { d = await api('/segments/' + id); }
-      catch (e) {
-        if (e.status !== 404) throw e;
-        // Deleted or private: note it, don't retry until the normal refresh age, carry on with the rest
-        S.details[id] = { ...(S.details[id] || {}), notFound: true, fetchedAt: Date.now() };
-        missing++; done++; saveSoon(); return;
-      }
-      storeDetail(id, d);
-      done++;
-      setStatus(`Getting KOM times ${done}/${ids.length}…`); setProgress(done / ids.length);
-      saveSoon();
-      if (Date.now() - lastRender > 2000) { lastRender = Date.now(); renderList(); }
-    }, 4);
-    msg = `Got KOM times for ${done - missing} segment${done - missing === 1 ? '' : 's'}.` + (missing ? ` ${missing} not found on Strava (deleted or private).` : '') + (done < ids.length ? ` ${ids.length - done} left.` : '');
-  } catch (e) { msg = `${e.message} (${done}/${ids.length} done)`; isErr = !(e instanceof RateError); }
+    await fetchDetails(ids.slice(), cnt, 'Getting KOM times');
+    const ok = cnt.done - cnt.missing;
+    msg = `Got KOM times for ${ok} segment${ok === 1 ? '' : 's'}.` + (cnt.missing ? ` ${cnt.missing} not found on Strava (deleted or private).` : '') + (cnt.done < ids.length ? ` ${ids.length - cnt.done} left.` : '');
+  } catch (e) { msg = `${e.message} (${cnt.done}/${ids.length} done)`; isErr = !(e instanceof RateError); }
   save(); setBusy(false); renderAll(); setStatus(msg, isErr);
 }
 
@@ -1016,7 +1192,7 @@ function segType(seg) {
 // Predictions are cached per segment and only recalculated when wind hour, rider or model settings change
 const predCache = new Map(); let predKey = '';
 function predictionsFor(seg, g, pr, env) {
-  const sk = seg.id + '|' + (seg.points || '').length + '|' + seg.avg_grade + '|' + seg.distance;
+  const sk = seg.id + '|' + (seg.points || '').length + '|' + seg.avg_grade + '|' + seg.distance + '|' + (g.hasElev ? 'e' : '-');
   let p = predCache.get(sk);
   if (!p) {
     const tWind = predict(g, seg, pr, env, true), tCalm = predict(g, seg, pr, env, false);
@@ -1126,7 +1302,7 @@ function renderList() {
   const list = $('#list');
   listJob++; listPending = [];
   if (!Object.keys(S.segments).length) {
-    list.innerHTML = `<div class="empty">No segments yet.<br>${S.auth.refreshToken ? 'Tap <b>Import starred</b> or <b>Import from my rides</b>, or paste segment links below the buttons.' : 'Connect Strava in the <b>Setup</b> tab first.'}</div>`;
+    list.innerHTML = `<div class="empty">No segments yet.<br>${S.auth.refreshToken ? 'Tap <b>Refresh data</b>, or paste segment links below it.' : 'Connect Strava in the <b>Setup</b> tab first.'}</div>`;
     return;
   }
   if (!rows.length) { list.innerHTML = '<div class="empty">No segments match the current filter.</div>'; return; }
@@ -1189,7 +1365,23 @@ function renderList() {
 }
 
 /* ---------------- Map ---------------- */
-let map = null, segLayer = null, selLayer = null, windCtl = null, drawnRows = [], segPopup = null;
+let map = null, segLayer = null, selLayer = null, locLayer = null, windCtl = null, drawnRows = [], segPopup = null, lastTap = null;
+// Find my location: one-off fix, centred on the map with its accuracy circle
+function findMe() {
+  if (!navigator.geolocation) { setStatus('This browser can\'t share your location.', true); return; }
+  const btn = document.querySelector('.locctl a'); if (btn) btn.classList.add('busy');
+  navigator.geolocation.getCurrentPosition(p => {
+    if (btn) btn.classList.remove('busy');
+    const ll = [p.coords.latitude, p.coords.longitude], acc = p.coords.accuracy || 0;
+    locLayer.clearLayers();
+    if (acc > 15) L.circle(ll, { radius: acc, color: '#2a7de1', weight: 1, fillOpacity: 0.12, interactive: false }).addTo(locLayer);
+    L.circleMarker(ll, { radius: 7, color: '#fff', weight: 2, fillColor: '#2a7de1', fillOpacity: 1, interactive: false }).addTo(locLayer);
+    map.setView(ll, Math.max(map.getZoom(), 15));
+  }, err => {
+    if (btn) btn.classList.remove('busy');
+    alert(err.code === 1 ? 'Location is blocked for this site. Allow it in your browser settings, then try again.' : 'Couldn\'t get your location (' + err.message + ').');
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+}
 function ensureMap() {
   if (map) return true;
   if (!window.L) { $('#map').innerHTML = '<div class="empty">Map library did not load (offline?).</div>'; return false; }
@@ -1198,12 +1390,32 @@ function ensureMap() {
   segLayer = L.layerGroup().addTo(map); selLayer = L.layerGroup().addTo(map);
   const Ctl = L.Control.extend({ onAdd() { const d = L.DomUtil.create('div', 'leaflet-control windctl'); return d; } });
   windCtl = new Ctl({ position: 'topright' }); windCtl.addTo(map);
+  locLayer = L.layerGroup().addTo(map);
+  const LocCtl = L.Control.extend({ onAdd() {
+    const d = L.DomUtil.create('div', 'leaflet-bar locctl');
+    d.innerHTML = '<a href="#" role="button" title="Find my location" aria-label="Find my location"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="#414142"/><circle cx="12" cy="12" r="8" fill="none" stroke="#414142" stroke-width="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="#414142" stroke-width="2"/></svg></a>';
+    L.DomEvent.disableClickPropagation(d);
+    d.firstChild.onclick = e => { e.preventDefault(); findMe(); };
+    return d;
+  } });
+  new LocCtl({ position: 'topleft' }).addTo(map);
   map.on('popupopen', e => {
     const b = e.popup.getElement()?.querySelector('[data-showlist]');
     if (b) b.onclick = () => showInList(b.dataset.showlist);
   });
   map.on('click', async e => {
-    if (!pickMode) { const hit = nearestSeg(e.containerPoint); if (hit) openSegPopup(hit, e.latlng); return; }
+    if (!pickMode) {
+      // Overlapping segments: each tap on the same spot shows the next one
+      let hits = segsAt(e.containerPoint);
+      if (!hits.length) { lastTap = null; return; }
+      const ids = hits.map(r => String(r.seg.id)).sort().join(',');
+      const again = lastTap && lastTap.ids === ids && Math.hypot(e.containerPoint.x - lastTap.x, e.containerPoint.y - lastTap.y) <= 30;
+      if (again) hits = lastTap.hits;   // keep the same order while cycling
+      const idx = again ? (lastTap.idx + 1) % hits.length : 0;
+      lastTap = { ids, hits, idx, x: e.containerPoint.x, y: e.containerPoint.y };
+      openSegPopup(hits[idx], e.latlng, idx, hits.length);
+      return;
+    }
     pickMode = false; $('#mapHint').hidden = true;
     const { lat, lng } = e.latlng;
     setHome(lat, lng, null);
@@ -1216,7 +1428,7 @@ function renderMap() {
   if (!map) return;
   const env = currentEnv();
   windCtl.getContainer().innerHTML = env ? `${compassSVG([], env, 54)}<div>${Math.round(env.speed)} km/h ${compassName(env.dir)}</div>` : 'No wind';
-  segLayer.clearLayers(); selLayer.clearLayers(); drawnRows = [];
+  segLayer.clearLayers(); selLayer.clearLayers(); drawnRows = []; lastTap = null;
   if (S.home) L.circleMarker([S.home.lat, S.home.lng], { radius: 7, color: '#414142', weight: 2, fillColor: '#E3E421', fillOpacity: 1, bubblingMouseEvents: false }).bindPopup('Start: ' + esc(S.home.name)).addTo(segLayer);
   const col = { go: '#E3E421', maybe: '#ef9f32', skip: '#a2a2a5' };
   const rows = lastRows.slice().reverse(); // draw best last so it's on top
@@ -1229,28 +1441,28 @@ function renderMap() {
     L.circleMarker(r.g.pts[0], { radius: skip ? 2 : 4, color: '#414142', weight: 1, fillColor: col[r.tag], fillOpacity: 1, interactive: false }).addTo(segLayer);
   }
 }
-// Find the segment closest to a tap, within a finger-width (24 px) of its line
-function nearestSeg(cp) {
-  const tol = 24;
-  let best = null, bestD = Infinity;
+// All segments within a finger-width (24 px) of a tap, closest first (best rank wins a tie)
+function segsAt(cp) {
+  const tol = 24, out = [];
   for (const r of drawnRows) {
     const g = r.g;
     if (!g.bb) { let a = 90, b = 180, c = -90, d = -180; for (const p of g.pts) { a = Math.min(a, p[0]); b = Math.min(b, p[1]); c = Math.max(c, p[0]); d = Math.max(d, p[1]); } g.bb = [a, b, c, d]; }
     const tl = map.latLngToContainerPoint([g.bb[2], g.bb[1]]), br = map.latLngToContainerPoint([g.bb[0], g.bb[3]]);
     if (cp.x < tl.x - tol || cp.x > br.x + tol || cp.y < tl.y - tol || cp.y > br.y + tol) continue;
-    let prev = map.latLngToContainerPoint(g.pts[0]);
+    let prev = map.latLngToContainerPoint(g.pts[0]), best = Infinity;
     for (let k = 1; k < g.pts.length; k++) {
       const cur = map.latLngToContainerPoint(g.pts[k]);
       const dx = cur.x - prev.x, dy = cur.y - prev.y, len2 = dx * dx + dy * dy;
       const t = len2 ? Math.max(0, Math.min(1, ((cp.x - prev.x) * dx + (cp.y - prev.y) * dy) / len2)) : 0;
-      const d = Math.hypot(cp.x - (prev.x + t * dx), cp.y - (prev.y + t * dy));
-      if (d < bestD - 1 || (Math.abs(d - bestD) <= 1 && best && r.rank > best.rank)) { bestD = d; best = r; }
+      best = Math.min(best, Math.hypot(cp.x - (prev.x + t * dx), cp.y - (prev.y + t * dy)));
       prev = cur;
     }
+    if (best <= tol) out.push({ r, d: best });
   }
-  return bestD <= tol ? best : null;
+  out.sort((a, b) => (Math.abs(a.d - b.d) <= 1 ? b.r.rank - a.r.rank : a.d - b.d) || String(a.r.seg.id).localeCompare(String(b.r.seg.id)));
+  return out.map(x => x.r);
 }
-function segPopupHtml(r) {
+function segPopupHtml(r, idx, n) {
   const s = r.seg, tgt = (activeProfile().target || 'kom').toUpperCase();
   const pred = r.komS
     ? `Predicted <b>${fmtTime(r.tWind)}</b> (${kmh(s.distance, r.tWind)})<br>${tgt} ${fmtTime(r.komS)} (${kmh(s.distance, r.komS)}) · <b>${r.pct.toFixed(0)}%</b>`
@@ -1258,11 +1470,12 @@ function segPopupHtml(r) {
   return `<div class="segpop"><div class="nm"><span class="pill ${r.tag}">${r.tag}</span><b>${esc(s.name)}</b></div>
     <div style="color:#6b6b6e">${((s.distance || 0) / 1000).toFixed(2)} km · ${(s.avg_grade || 0).toFixed(1)}%</div>
     <div style="margin-top:4px">${pred}</div>
+    ${n > 1 ? `<div class="popn">${idx + 1} of ${n} here · tap the line again for the next</div>` : ''}
     <div class="acts"><button class="btn lime" data-showlist="${s.id}">Show in list</button><a href="https://www.strava.com/segments/${s.id}" target="_blank" rel="noopener">Strava ↗</a></div></div>`;
 }
-function openSegPopup(r, latlng) {
+function openSegPopup(r, latlng, idx = 0, n = 1) {
   const col = { go: '#E3E421', maybe: '#ef9f32', skip: '#a2a2a5' };
-  const pop = L.popup({ maxWidth: 280, autoPanPadding: [20, 20] }).setLatLng(latlng).setContent(segPopupHtml(r));
+  const pop = L.popup({ maxWidth: 280, autoPanPadding: [20, 20] }).setLatLng(latlng).setContent(segPopupHtml(r, idx, n));
   segPopup = pop;
   pop.openOn(map);
   selLayer.clearLayers();
@@ -1434,7 +1647,7 @@ function renderSettings() {
   renderBackupLine();
   renderAccount();
 }
-function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderLoc(); renderList(); renderMap(); renderSettings(); renderAuthState(); if (!$('#tab-koms').hidden) renderKoms(); }
+function renderAll() { renderWind(); renderTimeSel(); renderRiderSel(); renderLoc(); renderList(); renderMap(); renderSettings(); renderAuthState(); if (!$('#tab-koms').hidden) renderKoms(); setTimeout(ensureElevation, 500); }
 
 /* ---------------- Accounts and sync (Supabase) ---------------- */
 const cloudOn = () => !!(SUPABASE_URL && SUPABASE_KEY);
@@ -1471,6 +1684,8 @@ function mergeCaches(doc) {
     if (!cur || (d.fetchedAt || 0) > (cur.fetchedAt || 0)) S.details[id] = d;
   }
   S.doneActivities = Array.from(new Set([...(S.doneActivities || []), ...(doc.doneActivities || [])])).slice(-3000);
+  if (doc.lastRideAt > (S.lastRideAt || 0)) S.lastRideAt = doc.lastRideAt;
+  if ((doc.dailyDay || '') > (S.dailyDay || '')) S.dailyDay = doc.dailyDay;
 }
 function applyRemote(doc, firstTime) {
   const m = syncMeta();
@@ -1500,7 +1715,7 @@ function buildDoc() {
     const h = ghash(g), at = h !== m.hash[g] ? now : (m.at[g] || now);
     groups[g] = { at, val: groupVal(g) }; pend[g] = { h, at };
   }
-  return { doc: { v: 1, groups, segments: S.segments, details: S.details, doneActivities: S.doneActivities || [] }, pend };
+  return { doc: { v: 1, groups, segments: S.segments, details: S.details, doneActivities: S.doneActivities || [], lastRideAt: S.lastRideAt || null, dailyDay: S.dailyDay || '' }, pend };
 }
 async function pullNow() {
   if (!sb || !cloudUser) return null;
@@ -1967,11 +2182,9 @@ function showTab(name) {
 $$('nav.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
 
 /* ---------------- Events ---------------- */
-$('#btnStarred').onclick = importStarred;
-$('#btnRides').onclick = importRides;
+$('#btnRefresh').onclick = refreshData;
 $('#btnAdd').onclick = addByIds;
 $('#btnShareIds').onclick = shareSegmentList;
-$('#btnKom').onclick = () => fetchKoms();
 $('#btnStop').onclick = () => { abortFlag = true; setStatus('Stopping…'); };
 $('#timeSel').onchange = e => { S.hourKey = e.target.value; save(); renderWind(); renderList(); renderMap(); };
 $('#riderSel').onchange = e => { S.activeProfile = e.target.value; save(); renderAll(); };
@@ -2081,8 +2294,6 @@ $('#appOffer').addEventListener('click', e => {
   $('#g3').scrollIntoView({ block: 'center' });
 });
 $('#authFix').onclick = () => showTab('setup');
-$('#gStarred').onclick = () => { showTab('ride'); importStarred(); };
-$('#gRides').onclick = () => { showTab('ride'); importRides(); };
 ['#clientId', '#clientSecret'].forEach(s => $(s).addEventListener('change', () => { S.auth.clientId = $('#clientId').value.trim(); S.auth.clientSecret = $('#clientSecret').value.trim(); S.auth.sharedFrom = ''; save(); renderAuthState(); }));
 
 /* ---------------- Backup / share files ---------------- */
