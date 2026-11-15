@@ -75,6 +75,15 @@ tr.flag td{background:var(--fail-bg)}
 .res td .tag{display:block;margin:2px 0 0;text-align:center}
 .tw{overflow-x:auto}
 .res tr.lim td:last-child{box-shadow:inset -4px 0 0 var(--bar)}
+.grid.hcg{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.timer .big{font-size:44px;font-variant-numeric:tabular-nums}
+.timer #tNext{font-size:15px;color:var(--ink);margin-top:4px}
+.res tr.next td{background:var(--krd-lime)!important;font-weight:700}
+.res tr.gone td{color:var(--ink-3)}
+.res tr.gone td b{font-weight:400}
+.res tr.flash td{background:var(--bar)!important;color:#fff}
+.res .cd{display:block;font-size:12px;color:var(--ink-2);font-weight:600}
+.timer.go{background:var(--krd-lime)}
 .infonote,.warnnote{font-size:13px;padding:10px 12px;margin-top:12px;line-height:1.45}
 .infonote{background:#fff;border-left:3px solid var(--field)}
 .warnnote{background:#FFF4E0;border-left:3px solid var(--bar)}
@@ -98,7 +107,7 @@ dialog .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 dialog label.c{display:flex;gap:10px;align-items:center;margin:8px 0}
 .disc{font-size:12px;color:var(--ink-3);margin-top:8px}
 #report{display:none}
-@media (max-width:1150px){.grid{grid-template-columns:minmax(0,1fr)}.res{position:static}}
+@media (max-width:1150px){.grid,.grid.hcg{grid-template-columns:minmax(0,1fr)}.res{position:static}}
 @media (max-width:760px){
  #app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
  .panel{padding:14px 12px}
@@ -132,6 +141,20 @@ dialog label.c{display:flex;gap:10px;align-items:center;margin:8px 0}
  #report .grp{break-inside:avoid;page-break-inside:avoid;margin-bottom:10px}
  #report ol{padding-left:22px;line-height:1.6}
  #report ol li{margin-bottom:4px}
+ #report table.xl{border:1.5px solid #000}
+ #report table.xl th{background:#414142;color:#fff;border-bottom:0;padding:4px 6px}
+ #report table.xl td{border-bottom:1px solid #bbb;padding:4px 6px}
+ #report table.xl tbody tr:nth-child(even) td{background:#f1f1f1}
+ #report table.xl tfoot td{font-weight:700;border-top:1.5px solid #000;background:#fff}
+ #report table.xl .n{text-align:right}
+ #report .xlrow{display:flex;gap:24px;align-items:flex-start;margin-bottom:8px}
+ #report .xlrow>div:first-child{flex:1}
+ #report .xlgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px}
+ #report .xlgrid h2,#report .xlrow h2{font-size:12pt;margin:10px 0 0;display:flex;justify-content:space-between}
+ #report .xlgrid h2 .gs{font-size:11pt}
+ #report .gd{font-size:9.5pt;color:#444;margin:1px 0 4px}
+ #report .xlgrid table{font-size:10pt}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
@@ -233,6 +256,8 @@ const f2 = v => v == null || !isFinite(v) ? '–' : v.toFixed(2);
 function titleCase(s) { return String(s || '').toLowerCase().replace(/(^|[\s\-'’])([a-z])/g, (m, a, b) => a + b.toUpperCase()).trim(); }
 function mmss(min) { if (min == null || !isFinite(min)) return '–'; const s = Math.round(min * 60); const neg = s < 0; const a = Math.abs(s); return (neg ? '-' : '') + Math.floor(a / 60) + ':' + String(a % 60).padStart(2, '0'); }
 function hhmmss(min) { const s = Math.round(min * 60); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); }
+function clockFull(baseMs, min) { if (baseMs == null || min == null) return '–'; const d = new Date(baseMs + Math.round(min * 60) * 1000); return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0'); }
+function plannedBase(r) { const m = /^(\d{1,2}):(\d{2})/.exec(r.start || ''); if (!m) return null; const d = r.date ? new Date(r.date + 'T00:00:00') : new Date(); d.setHours(+m[1], +m[2], 0, 0); return d.getTime(); }
 const round30 = min => Math.round(min * 2) / 2;
 function fmtDate(d) { if (!d) return ''; const t = new Date(d + 'T00:00:00'); if (isNaN(t)) return d; return t.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
 function todayISO() { const t = new Date(); return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'); }
@@ -241,7 +266,7 @@ function clockAdd(hm, sec) { const m = /^(\d{1,2}):(\d{2})/.exec(hm || ''); if (
 /* ============ State ============ */
 const TYPES = { handicap: 'Handicap', scratch: 'Scratch race', tt: 'Time trial' };
 const TABS = {
-  handicap: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['hc', 'Handicaps'], ['results', 'Results']],
+  handicap: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['hc', 'Handicaps']],
   scratch: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['grades', 'Grades']],
   tt: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['start', 'Start list']],
 };
@@ -251,6 +276,8 @@ try { Object.assign(UI, JSON.parse(localStorage.getItem('mcc.ui') || '{}')); } c
 const saveUI = () => { try { localStorage.setItem('mcc.ui', JSON.stringify(UI)); } catch (e) {} };
 let Store = null, canEdit = false, loadErr = null, status = '';
 const pending = new Map();
+let TIMER = {}; try { TIMER = JSON.parse(localStorage.getItem('mcc.timer') || '{}'); } catch (e) {}
+const saveTimer = () => { try { localStorage.setItem('mcc.timer', JSON.stringify(TIMER)); } catch (e) {} };
 const lastSaved = new Map();
 
 function applyDocs() {
@@ -425,8 +452,9 @@ function render() {
   else if (!race) v.innerHTML = '<div class="panel empty">' + (racesOf(UI.view).length ? 'Pick a race above.' : 'No ' + TYPES[UI.view].toLowerCase() + 's yet.' + (canEdit ? ' Click <b>New race</b> to start one.' : '')) + '</div>';
   else {
     const t = curTab();
-    v.innerHTML = t === 'race' ? viewRace(race) : t === 'entries' ? viewEntries(race) : t === 'hc' ? viewHc(race) : t === 'results' ? viewResults(race) : t === 'grades' ? viewGrades(race) : viewStart(race);
+    v.innerHTML = t === 'race' ? viewRace(race) : t === 'entries' ? viewEntries(race) : t === 'hc' ? viewHc(race) : t === 'grades' ? viewGrades(race) : viewStart(race);
   }
+  tick();
   if (key) { const el = document.querySelector('[data-k="' + CSS.escape(key) + '"]'); if (el) { el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
 }
 let renderWaiting = false;
@@ -530,28 +558,31 @@ function viewHc(r) {
   const d = dis(); const G = hcGroups(r); const D = num(r.dist); const g = r.hc.g || {};
   const ids = entrantIds(r); const un = ids.filter(id => !(g[id] >= 0));
   const opts = cur => G.map(x => '<option value="' + x.i + '"' + (x.i === cur ? ' selected' : '') + '>Group ' + x.i + '</option>').join('') + '<option value="' + G.length + '">Group ' + G.length + '</option>';
-  let h = '<div class="grid"><div class="panel"><h2>Grouping</h2><p class="lead">Entrants sorted by average speed (all races). Groups whose starts would be less than 1 minute apart are merged automatically. Move a rider with the Group column; the last number starts a new group, and a group left empty is removed.</p>';
+  let h = '<div class="grid hcg"><div class="panel"><h2>Grouping</h2><p class="lead">Entrants sorted by average speed (all races). Groups whose starts would be less than 1 minute apart are merged automatically. Move a rider with the Group column; the last number starts a new group, and a group left empty is removed.</p>';
   if (canEdit) h += '<div class="row"><button class="btn" data-act="regroup"' + (D > 0 && r.hc.manual ? '' : ' disabled') + '>Re-group automatically</button><span class="mute" style="font-size:13px">' + (r.hc.manual ? 'Groups have been adjusted by hand. Re-grouping clears your moves and edited speeds.' : 'Groups are automatic and update as entries and speeds change, until you move a rider or edit a speed.') + '</span></div>';
   if (!ids.length) h += '<div class="empty">No entrants yet – add them on the Entry list tab.</div>';
   else {
     h += '<div class="tw"><table><thead><tr><th>Rider</th><th class="hide-sm">Category</th><th class="n">Races</th><th class="n">Avg (km/h)</th><th>Group</th></tr></thead><tbody>';
     const row = (id, cur) => '<tr' + (avgOf(id) == null ? ' class="flag"' : '') + '><td>' + esc(riderById(id).name) + (avgOf(id) == null ? '<span class="tag bad">no speeds</span>' : '') + '</td><td class="hide-sm">' + esc(entryOf(r, id).cat || '') + '</td><td class="n">' + speedsOf(id).length + '</td><td class="n">' + f2(avgOf(id)) + '</td>' +
       '<td><select data-k="grp.' + id + '" data-act="moveGroup" data-id="' + id + '"' + d + '>' + (cur < 0 ? '<option value="-1" selected>Unassigned</option>' : '') + opts(cur) + '</select></td></tr>';
-    G.forEach(x => { h += '<tr class="gh"><td colspan="5">Group ' + x.i + ' <span class="mute">· ' + x.m.length + ' rider' + (x.m.length === 1 ? '' : 's') + (x.start != null ? ' · starts +' + mmss(x.start) : '') + '</span></td></tr>'; x.m.forEach(id => { h += row(id, x.i); }); });
+    G.forEach(x => { h += '<tr class="gh"><td colspan="5">Group ' + x.i + ' <span class="mute">· ' + x.m.length + ' rider' + (x.m.length === 1 ? '' : 's') + (x.start != null ? ' · starts +' + mmss(x.start) + (TIMER[r.id] || plannedBase(r) ? ' (' + clockFull(TIMER[r.id] || plannedBase(r), x.start) + ')' : '') : '') + '</span></td></tr>'; x.m.forEach(id => { h += row(id, x.i); }); });
     if (un.length) { h += '<tr class="gh"><td colspan="5">Unassigned</td></tr>'; un.forEach(id => { h += row(id, -1); }); }
     h += '</tbody></table></div>';
   }
   h += '</div><div class="res">';
-  const st = G.filter(x => x.start != null); const span = st.length ? Math.max(...st.map(x => x.start)) : null; const lim = G.find(x => x.lim);
-  h += '<div class="answer"><div><div class="k">Limit group starts at 0:00</div><div class="big">' + (span != null ? mmss(span) : '–') + '</div><div class="k">first to last start</div></div><div class="k">' + (lim ? 'Limit: Group ' + lim.i : '') + '<br>' + (D > 0 ? D + ' km' : '') + '</div></div>';
-  h += '<table><thead><tr><th>Group</th><th class="n">Riders</th><th class="n">Calc avg</th><th class="n">Expected (km/h)</th><th class="n">Race time</th><th class="n">Start</th></tr></thead><tbody>';
+  const run = TIMER[r.id] || null; const base = run || plannedBase(r);
+  const st = G.filter(x => x.start != null); const span = st.length ? Math.max(...st.map(x => x.start)) : null;
+  h += '<div class="answer timer"><div style="flex:1"><div class="k">' + (run ? 'Started ' + clockFull(run, 0) : 'Start timer') + '</div><div class="big" id="tElapsed">' + (run ? '0:00' : (span != null ? mmss(span) : '–')) + '</div><div class="k" id="tNext">' + (run ? '' : 'first to last start') + '</div></div>' +
+    '<div class="tbtns">' + (run ? '<button class="btn" data-act="timerReset">Reset</button>' : '<button class="btn pri" data-act="timerStart"' + (st.length ? '' : ' disabled') + '>Start</button>') + '</div></div>';
+  if (!run) h += '<div class="row"><label class="f"><span>First group starts at</span><input type="time" data-k="r.start" data-f="start" value="' + esc(r.start || '') + '"' + d + '></label><span class="mute" style="font-size:13px;flex:1">Press Start when the limit group goes; start times then follow the real clock.</span></div>';
+  h += '<table><thead><tr><th>Group</th><th class="n">Riders</th><th class="n">Speed (km/h)</th><th class="n">Race time</th><th class="n">Gap</th><th class="n">Start time</th></tr></thead><tbody>';
   G.slice().sort((a, b) => (a.start == null) - (b.start == null) || (a.start - b.start) || a.i - b.i).forEach(x => {
-    h += '<tr class="' + (x.lim ? 'lim' : '') + '"><td class="nw">Group ' + x.i + '</td><td class="n">' + x.m.length + '</td><td class="n">' + f2(x.ca) + '</td>' +
-      '<td class="n nw"><input class="num" type="number" step="0.01" inputmode="decimal" data-k="exp.' + x.i + '" data-f="exp" data-g="' + x.i + '" value="' + (x.ex != null ? x.ex.toFixed(2) : '') + '"' + d + '>' + (x.edited ? '<span class="tag edit">edited' + (canEdit ? ' <button class="x" style="font-size:13px;padding:0 2px" title="Back to calculated" data-act="expReset" data-g="' + x.i + '">↺ reset</button>' : '') + '</span>' : '') + '</td>' +
-      '<td class="n">' + mmss(x.t) + '</td><td class="n">+' + mmss(x.start) + '</td></tr>';
+    h += '<tr class="' + (x.lim ? 'lim' : '') + '" data-tg="' + x.i + '" data-st="' + (x.start == null ? '' : x.start) + '"><td class="nw">Group ' + x.i + '</td><td class="n">' + x.m.length + '</td>' +
+      '<td class="n nw"><input class="num" type="number" step="0.01" inputmode="decimal" data-k="exp.' + x.i + '" data-f="exp" data-g="' + x.i + '" value="' + (x.ex != null ? x.ex.toFixed(2) : '') + '"' + d + '>' + (x.edited ? '<span class="tag edit">edited (calc ' + f2(x.ca) + ')' + (canEdit ? ' <button class="x" style="font-size:13px;padding:0 2px" title="Back to calculated" data-act="expReset" data-g="' + x.i + '">↺ reset</button>' : '') + '</span>' : '') + '</td>' +
+      '<td class="n">' + mmss(x.t) + '</td><td class="n">+' + mmss(x.start) + '</td><td class="n"><b>' + clockFull(base, x.start) + '</b><span class="cd"></span></td></tr>';
   });
   h += '</tbody></table>';
-  h += '<div class="infonote">Race time = distance ÷ expected speed × 60' + (D > 0 ? ' = ' + D + ' ÷ speed × 60' : '') + '. Start = slowest group\'s race time − this group\'s race time, rounded to the nearest 30 s. Expected speed defaults to the group\'s calculated average; type over it to adjust.</div>';
+  h += '<div class="infonote">Race time = distance ÷ expected speed × 60' + (D > 0 ? ' = ' + D + ' ÷ speed × 60' : '') + '. Start = slowest group\'s race time − this group\'s race time, rounded to the nearest 30 s. Speed is the group\'s average; type over it to adjust.</div>';
   const w = [];
   if (!(D > 0)) w.push('Enter the race distance on the Race & briefing tab.');
   G.filter(x => x.ex == null).forEach(x => w.push('Group ' + x.i + ' has no speed – enter an expected speed.'));
@@ -559,22 +590,6 @@ function viewHc(r) {
   if (un.length) w.push(un.length + ' rider' + (un.length > 1 ? 's are' : ' is') + ' unassigned' + (un.some(id => avgOf(id) == null) ? ' (no recorded speeds – add one on Average speeds, or pick a group)' : '') + '.');
   if (w.length) h += '<div class="warnnote"><ul>' + w.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>';
   return h + '</div></div>';
-}
-
-/* ----- Handicap results ----- */
-function viewResults(r) {
-  hcSync(r); const d = dis(); const res = r.hc.res; const ids = entrantIds(r); const g = r.hc.g || {};
-  const pos = {}; ids.forEach(id => { const p = res[id] && res[id].pos; if (p) pos[p] = (pos[p] || 0) + 1; });
-  let h = '<div class="panel"><h2>Results</h2><p class="lead">Finish position and average speed for each rider. Speeds entered here are added to each rider\'s history on Average speeds.</p>';
-  if (!ids.length) return h + '<div class="empty">No entrants yet.</div></div>';
-  h += '<table><thead><tr><th>Rider</th><th>Group</th><th class="n">Finish pos</th><th class="n">Avg speed (km/h)</th></tr></thead><tbody>';
-  ids.slice().sort((a, b) => { const pa = res[a] && res[a].pos, pb = res[b] && res[b].pos; if (pa && pb) return pa - pb; if (pa) return -1; if (pb) return 1; return riderById(a).name.localeCompare(riderById(b).name); }).forEach(id => {
-    const x = res[id] || {}; const dup = x.pos && pos[x.pos] > 1;
-    h += '<tr' + (dup ? ' class="flag"' : '') + '><td>' + esc(riderById(id).name) + (dup ? '<span class="tag bad">same position as another rider</span>' : '') + '</td><td>' + (g[id] >= 0 ? 'Group ' + g[id] : '–') + '</td>' +
-      '<td class="n"><input class="num" type="number" min="1" step="1" data-k="pos.' + id + '" data-f="resPos" data-id="' + id + '" value="' + (x.pos || '') + '"' + d + '></td>' +
-      '<td class="n"><input class="num" type="number" min="0" step="0.01" inputmode="decimal" data-k="spd.' + id + '" data-f="resSpd" data-id="' + id + '" value="' + (x.spd || '') + '"' + d + '></td></tr>';
-  });
-  return h + '</tbody></table></div>';
 }
 
 /* ----- Scratch grades ----- */
@@ -661,6 +676,7 @@ function field(t, committed) {
     case 'date': r.date = v; save(r); if (committed) render(); break;
     case 'dist': r.dist = num(v); save(r); if (committed) { if (r.type === 'handicap') { hcSync(r); save(r); } render(); } break;
     case 'laps': r.laps = num(v); save(r); break;
+    case 'start': r.start = v; save(r); if (committed) render(); break;
     case 'sharedText': { const it = S.brief.items.find(x => x.id === t.dataset.id); if (it) { it.t = v; save(S.brief); } if (committed) render(); break; }
     case 'ownText': { const it = r.brief.items.find(x => x.id === t.dataset.id); if (it) { it.t = v; save(r); } if (committed) render(); break; }
     case 'entryCat': { const e = entryOf(r, t.dataset.id); if (e) { e.cat = v.trim(); save(r); } if (committed) render(); break; }
@@ -681,6 +697,8 @@ function act(a, el) {
     case 'signIn': $('#signMsg').textContent = ''; $('#signPass').value = ''; $('#dlgSign').showModal(); $('#signPass').focus(); return;
     case 'signOut': canEdit = false; EDIT.pass = null; try { sessionStorage.removeItem('mcc.edit'); } catch (x) {} status = ''; render(); return;
     case 'pdf': openPdf(); return;
+    case 'timerStart': TIMER[r.id] = Date.now(); saveTimer(); beeped = {}; unlockAudio(); wake(true); render(); tick(); return;
+    case 'timerReset': if (confirm('Reset the start timer for this race?')) { delete TIMER[r.id]; saveTimer(); wake(false); render(); } return;
     case 'importHist': $('#fileHist').value = ''; $('#fileHist').click(); return;
     case 'importStart': $('#fileStart').value = ''; $('#fileStart').click(); return;
   }
@@ -743,6 +761,42 @@ document.addEventListener('pointerup', () => {
   document.querySelectorAll('#ttTable tr.drag,#ttTable tr.drop').forEach(x => x.classList.remove('drag', 'drop'));
   if (d.to != null) ttMove(curRace(), d.from, d.to);
 });
+
+/* ============ Start timer (this device only) ============ */
+let beeped = {}, actx = null, wakeLock = null;
+function unlockAudio() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }
+function beep(ms, freq) {
+  try { if (!actx) return; const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = freq; o.connect(g); g.connect(actx.destination); g.gain.value = 0.25; o.start(); o.stop(actx.currentTime + ms / 1000); } catch (e) {}
+}
+async function wake(on) {
+  try { if (on && navigator.wakeLock && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } else if (!on && wakeLock) { wakeLock.release(); wakeLock = null; } } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { const r = curRace(); if (!document.hidden && r && TIMER[r.id]) wake(true); });
+function tick() {
+  const r = curRace(); if (!r || UI.view !== 'handicap' || curTab() !== 'hc') return;
+  const run = TIMER[r.id]; const el = $('#tElapsed'); if (!run || !el) return;
+  const now = (Date.now() - run) / 60000;
+  el.textContent = mmss(Math.max(0, now));
+  const rows = [...document.querySelectorAll('.res tr[data-tg]')].filter(tr => tr.dataset.st !== '');
+  let next = null;
+  rows.forEach(tr => {
+    const s = +tr.dataset.st; const left = (s - now) * 60; const cd = tr.querySelector('.cd'); const gi = tr.dataset.tg;
+    tr.classList.toggle('gone', left <= 0); tr.classList.remove('next');
+    if (left > 0 && (!next || s < +next.dataset.st)) next = tr;
+    if (cd) cd.textContent = left > 0 ? 'in ' + mmss(Math.ceil(left) / 60) : 'Gone';
+    [[30, 140, 880], [10, 140, 880], [0, 700, 1320]].forEach(([at, ms, f]) => {
+      const k = gi + '@' + at;
+      if (beeped[k]) return;
+      if (left <= at && left > at - 2) { beeped[k] = 1; beep(ms, f); if (at === 0) { tr.classList.add('flash'); setTimeout(() => tr.classList.remove('flash'), 3000); } }
+      else if (left <= at - 2) beeped[k] = 1;
+    });
+  });
+  if (next) next.classList.add('next');
+  const n = $('#tNext');
+  if (n) { if (next) { const left = (+next.dataset.st - now) * 60; n.innerHTML = 'Next: <b>Group ' + next.dataset.tg + '</b> at ' + next.cells[5].querySelector('b').textContent + ' · in <b>' + mmss(Math.ceil(left) / 60) + '</b>'; } else n.textContent = 'All groups started'; }
+  const box = document.querySelector('.timer'); if (box) box.classList.toggle('go', !!next && (+next.dataset.st - now) * 60 <= 10);
+}
+setInterval(tick, 250);
 
 /* ============ Sign in ============ */
 $('#signGo').addEventListener('click', async () => {
@@ -810,7 +864,7 @@ function importHistory(rows) {
 
 /* ============ PDF ============ */
 const SHEETS = {
-  handicap: [['start', 'Start sheet'], ['brief', 'Briefing'], ['finish', 'Blank finish-order sheet']],
+  handicap: [['start', 'Handicaps (groups with start times)'], ['brief', 'Briefing'], ['finish', 'Results sheet (names, blank finish positions)']],
   scratch: [['entries', 'Entry list by grade'], ['brief', 'Briefing'], ['results', 'Blank results sheet (one per grade)']],
   tt: [['start', 'Start sheet'], ['brief', 'Briefing'], ['timing', 'Blank timing sheet']],
 };
@@ -837,15 +891,18 @@ function buildReport(r, ks) {
     if (k === 'brief') pages.push(rhead(r, 'Rider briefing') + briefList(r));
     if (r.type === 'handicap' && k === 'start') {
       const G = hcGroups(r).slice().sort((a, b) => (a.start == null) - (b.start == null) || a.start - b.start || a.i - b.i);
-      let h = rhead(r, 'Handicap start sheet');
-      G.forEach(x => { h += '<div class="grp"><h2>Group ' + x.i + ' – start +' + mmss(x.start) + ' <span style="font-weight:400;font-size:11pt">(' + f2(x.ex) + ' km/h)</span></h2><table><thead><tr><th style="width:50%">Rider</th><th>Category</th><th style="width:16%">Present</th></tr></thead><tbody>' + x.m.map(id => '<tr><td>' + esc(riderById(id).name) + '</td><td>' + esc(entryOf(r, id).cat || '') + '</td><td></td></tr>').join('') + '</tbody></table></div>'; });
+      const base = TIMER[r.id] || plannedBase(r);
+      let h = rhead(r, 'Handicaps') + '<div class="xlgrid">' + G.map(x => '<div class="grp"><h2>Group ' + x.i + ' <span class="gs">start +' + mmss(x.start) + (base ? ' (' + clockFull(base, x.start) + ')' : '') + '</span></h2><div class="gd">' + f2(x.ex) + ' km/h · race time ' + mmss(x.t) + '</div><table class="xl"><thead><tr><th>Name</th><th class="n">Average Speed</th></tr></thead><tbody>' +
+        x.m.map(id => '<tr><td>' + esc(riderById(id).name) + '</td><td class="n">' + f2(avgOf(id)) + '</td></tr>').join('') +
+        '</tbody><tfoot><tr><td>' + x.m.length + '</td><td class="n">' + f2(x.ca) + '</td></tr></tfoot></table></div>').join('') + '</div>';
       const un = entrantIds(r).filter(id => !(r.hc.g && r.hc.g[id] >= 0));
-      if (un.length) h += '<div class="grp"><h2>Unassigned</h2><table><tbody>' + un.map(id => '<tr><td>' + esc(riderById(id).name) + '</td></tr>').join('') + '</tbody></table></div>';
+      if (un.length) h += '<div class="grp"><h2>Unassigned</h2><table class="xl"><tbody>' + un.map(id => '<tr><td>' + esc(riderById(id).name) + '</td></tr>').join('') + '</tbody></table></div>';
       pages.push(h);
     }
     if (r.type === 'handicap' && k === 'finish') {
-      const n = entrantIds(r).length + 3;
-      pages.push(rhead(r, 'Finish order') + '<table class="blank"><thead><tr><th style="width:12%">Pos</th><th style="width:48%">Rider</th><th style="width:20%">Group</th><th>Notes</th></tr></thead><tbody>' + Array.from({ length: n }, (_, i) => '<tr><td>' + (i + 1) + '</td><td></td><td></td><td></td></tr>').join('') + '</tbody></table>');
+      const G = hcGroups(r).slice().sort((a, b) => (a.start == null) - (b.start == null) || a.start - b.start || a.i - b.i); const L = num(r.laps);
+      const ids = G.flatMap(x => x.m).concat(entrantIds(r).filter(id => !(r.hc.g && r.hc.g[id] >= 0)));
+      pages.push(rhead(r, 'Results' + (L ? ' (' + L + ' Lap' + (L > 1 ? 's' : '') + ')' : '')) + '<table class="xl blank"><thead><tr><th style="width:60%">Name</th><th>Finish Pos</th></tr></thead><tbody>' + ids.map(id => '<tr><td>' + esc(riderById(id).name) + '</td><td></td></tr>').join('') + '<tr><td></td><td></td></tr><tr><td></td><td></td></tr></tbody><tfoot><tr><td>' + ids.length + '</td><td></td></tr></tfoot></table>');
     }
     if (r.type === 'scratch' && k === 'entries') {
       const I = scInfo(r); let h = rhead(r, 'Entry list by grade');
