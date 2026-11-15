@@ -76,13 +76,15 @@ tr.flag td{background:var(--fail-bg)}
 .tw{overflow-x:auto}
 .res tr.lim td:last-child{box-shadow:inset -4px 0 0 var(--bar)}
 .grid.hcg{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.tabs .sm-only{display:none}
+@media (max-width:760px){.tabs .sm-only{display:block}.grid.hcg .res{display:none}.grid.hcg.timer-only>.panel{display:none}.grid.hcg.timer-only .res{display:block;padding:12px}.timer-only .res th,.timer-only .res td{padding:4px 4px}.timer-only .res td input.num{width:62px}}
 .timer .big{font-size:44px;font-variant-numeric:tabular-nums}
 .timer #tNext{font-size:15px;color:var(--ink);margin-top:4px}
 .res tr.next td{background:var(--krd-lime)!important;font-weight:700}
 .res tr.gone td{color:var(--ink-3)}
 .res tr.gone td b{font-weight:400}
 .res tr.flash td{background:var(--bar)!important;color:#fff}
-.res .cd{display:block;font-size:12px;color:var(--ink-2);font-weight:600}
+.res td.cd{font-weight:700;white-space:nowrap}
 .timer.go{background:var(--krd-lime)}
 .infonote,.warnnote{font-size:13px;padding:10px 12px;margin-top:12px;line-height:1.45}
 .infonote{background:#fff;border-left:3px solid var(--field)}
@@ -118,7 +120,8 @@ dialog label.c{display:flex;gap:10px;align-items:center;margin:8px 0}
  aside nav{display:flex;flex-wrap:wrap;gap:2px}
  aside nav button{width:auto;padding:8px 10px;font-size:13px}
  .top,#view{padding-left:12px;padding-right:12px}
- .tabs{padding:0 8px}
+ .tabs{padding:0 4px}
+ .tabs button{padding:12px 10px}
  .hide-sm{display:none}
 }
 @media print{
@@ -266,7 +269,7 @@ function clockAdd(hm, sec) { const m = /^(\d{1,2}):(\d{2})/.exec(hm || ''); if (
 /* ============ State ============ */
 const TYPES = { handicap: 'Handicap', scratch: 'Scratch race', tt: 'Time trial' };
 const TABS = {
-  handicap: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['hc', 'Handicaps']],
+  handicap: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['hc', 'Handicaps'], ['timer', 'Timer']],
   scratch: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['grades', 'Grades']],
   tt: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['start', 'Start list']],
 };
@@ -452,7 +455,7 @@ function render() {
   else if (!race) v.innerHTML = '<div class="panel empty">' + (racesOf(UI.view).length ? 'Pick a race above.' : 'No ' + TYPES[UI.view].toLowerCase() + 's yet.' + (canEdit ? ' Click <b>New race</b> to start one.' : '')) + '</div>';
   else {
     const t = curTab();
-    v.innerHTML = t === 'race' ? viewRace(race) : t === 'entries' ? viewEntries(race) : t === 'hc' ? viewHc(race) : t === 'grades' ? viewGrades(race) : viewStart(race);
+    v.innerHTML = t === 'race' ? viewRace(race) : t === 'entries' ? viewEntries(race) : t === 'hc' ? viewHc(race) : t === 'timer' ? viewHc(race, true) : t === 'grades' ? viewGrades(race) : viewStart(race);
   }
   tick();
   if (key) { const el = document.querySelector('[data-k="' + CSS.escape(key) + '"]'); if (el) { el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
@@ -466,7 +469,9 @@ function renderSoon() {
   }
   render();
 }
-function curTab() { const tabs = TABS[UI.view] || []; const t = UI.tab[UI.view]; return tabs.some(x => x[0] === t) ? t : (tabs[0] || [])[0]; }
+const PHONE = window.matchMedia ? window.matchMedia('(max-width:760px)') : { matches: false };
+try { PHONE.addEventListener('change', () => render()); } catch (e) {}
+function curTab() { const tabs = TABS[UI.view] || []; let t = UI.tab[UI.view]; if (t === 'timer' && !PHONE.matches) t = 'hc'; return tabs.some(x => x[0] === t) ? t : (tabs[0] || [])[0]; }
 function renderTop() {
   const parts = [];
   if (UI.view !== 'speeds') {
@@ -485,7 +490,7 @@ function renderTabs() {
   const el = $('#tabs');
   if (UI.view === 'speeds' || !curRace()) { el.style.display = 'none'; el.innerHTML = ''; return; }
   el.style.display = ''; const t = curTab();
-  el.innerHTML = TABS[UI.view].map(([k, l]) => '<button data-act="tab" data-tab="' + k + '" class="' + (k === t ? 'on' : '') + '">' + l + '</button>').join('');
+  el.innerHTML = TABS[UI.view].map(([k, l]) => '<button data-act="tab" data-tab="' + k + '" class="' + (k === t ? 'on' : '') + (k === 'timer' ? ' sm-only' : '') + '">' + l + '</button>').join('');
 }
 
 /* ----- Race & briefing ----- */
@@ -553,12 +558,12 @@ function viewEntries(r) {
 }
 
 /* ----- Handicaps ----- */
-function viewHc(r) {
+function viewHc(r, timerOnly) {
   const before = canon(r.hc); hcSync(r); if (canEdit && canon(r.hc) !== before) save(r);
   const d = dis(); const G = hcGroups(r); const D = num(r.dist); const g = r.hc.g || {};
   const ids = entrantIds(r); const un = ids.filter(id => !(g[id] >= 0));
   const opts = cur => G.map(x => '<option value="' + x.i + '"' + (x.i === cur ? ' selected' : '') + '>Group ' + x.i + '</option>').join('') + '<option value="' + G.length + '">Group ' + G.length + '</option>';
-  let h = '<div class="grid hcg"><div class="panel"><h2>Grouping</h2><p class="lead">Entrants sorted by average speed (all races). Groups whose starts would be less than 1 minute apart are merged automatically. Move a rider with the Group column; the last number starts a new group, and a group left empty is removed.</p>';
+  let h = '<div class="grid hcg' + (timerOnly ? ' timer-only' : '') + '"><div class="panel"><h2>Grouping</h2><p class="lead">Entrants sorted by average speed (all races). Groups whose starts would be less than 1 minute apart are merged automatically. Move a rider with the Group column; the last number starts a new group, and a group left empty is removed.</p>';
   if (canEdit) h += '<div class="row"><button class="btn" data-act="regroup"' + (D > 0 && r.hc.manual ? '' : ' disabled') + '>Re-group automatically</button><span class="mute" style="font-size:13px">' + (r.hc.manual ? 'Groups have been adjusted by hand. Re-grouping clears your moves and edited speeds.' : 'Groups are automatic and update as entries and speeds change, until you move a rider or edit a speed.') + '</span></div>';
   if (!ids.length) h += '<div class="empty">No entrants yet – add them on the Entry list tab.</div>';
   else {
@@ -575,11 +580,11 @@ function viewHc(r) {
   h += '<div class="answer timer"><div style="flex:1"><div class="k">' + (run ? 'Started ' + clockFull(run, 0) : 'Start timer') + '</div><div class="big" id="tElapsed">' + (run ? '0:00' : (span != null ? mmss(span) : '–')) + '</div><div class="k" id="tNext">' + (run ? '' : 'first to last start') + '</div></div>' +
     '<div class="tbtns">' + (run ? '<button class="btn" data-act="timerReset">Reset</button>' : '<button class="btn pri" data-act="timerStart"' + (st.length ? '' : ' disabled') + '>Start</button>') + '</div></div>';
   if (!run) h += '<div class="row"><label class="f"><span>First group starts at</span><input type="time" data-k="r.start" data-f="start" value="' + esc(r.start || '') + '"' + d + '></label><span class="mute" style="font-size:13px;flex:1">Press Start when the limit group goes; start times then follow the real clock.</span></div>';
-  h += '<table><thead><tr><th>Group</th><th class="n">Riders</th><th class="n">Speed (km/h)</th><th class="n">Race time</th><th class="n">Gap</th><th class="n">Start time</th></tr></thead><tbody>';
+  h += '<table><thead><tr><th>Group</th><th class="n hide-sm">Riders</th><th class="n">Speed (km/h)</th><th class="n hide-sm">Race time</th><th class="n">Gap</th><th class="n">Start time</th><th class="n">Starts in</th></tr></thead><tbody>';
   G.slice().sort((a, b) => (a.start == null) - (b.start == null) || (a.start - b.start) || a.i - b.i).forEach(x => {
-    h += '<tr class="' + (x.lim ? 'lim' : '') + '" data-tg="' + x.i + '" data-st="' + (x.start == null ? '' : x.start) + '"><td class="nw">Group ' + x.i + '</td><td class="n">' + x.m.length + '</td>' +
+    h += '<tr class="' + (x.lim ? 'lim' : '') + '" data-tg="' + x.i + '" data-st="' + (x.start == null ? '' : x.start) + '"><td class="nw">Group ' + x.i + '</td><td class="n hide-sm">' + x.m.length + '</td>' +
       '<td class="n nw"><input class="num" type="number" step="0.01" inputmode="decimal" data-k="exp.' + x.i + '" data-f="exp" data-g="' + x.i + '" value="' + (x.ex != null ? x.ex.toFixed(2) : '') + '"' + d + '>' + (x.edited ? '<span class="tag edit">edited (calc ' + f2(x.ca) + ')' + (canEdit ? ' <button class="x" style="font-size:13px;padding:0 2px" title="Back to calculated" data-act="expReset" data-g="' + x.i + '">↺ reset</button>' : '') + '</span>' : '') + '</td>' +
-      '<td class="n">' + mmss(x.t) + '</td><td class="n">+' + mmss(x.start) + '</td><td class="n"><b>' + clockFull(base, x.start) + '</b><span class="cd"></span></td></tr>';
+      '<td class="n hide-sm">' + mmss(x.t) + '</td><td class="n">+' + mmss(x.start) + '</td><td class="n"><b>' + clockFull(base, x.start) + '</b></td><td class="n cd"></td></tr>';
   });
   h += '</tbody></table>';
   h += '<div class="infonote">Race time = distance ÷ expected speed × 60' + (D > 0 ? ' = ' + D + ' ÷ speed × 60' : '') + '. Start = slowest group\'s race time − this group\'s race time, rounded to the nearest 30 s. Speed is the group\'s average; type over it to adjust.</div>';
@@ -773,7 +778,7 @@ async function wake(on) {
 }
 document.addEventListener('visibilitychange', () => { const r = curRace(); if (!document.hidden && r && TIMER[r.id]) wake(true); });
 function tick() {
-  const r = curRace(); if (!r || UI.view !== 'handicap' || curTab() !== 'hc') return;
+  const r = curRace(); if (!r || UI.view !== 'handicap' || (curTab() !== 'hc' && curTab() !== 'timer')) return;
   const run = TIMER[r.id]; const el = $('#tElapsed'); if (!run || !el) return;
   const now = (Date.now() - run) / 60000;
   el.textContent = mmss(Math.max(0, now));
@@ -783,17 +788,17 @@ function tick() {
     const s = +tr.dataset.st; const left = (s - now) * 60; const cd = tr.querySelector('.cd'); const gi = tr.dataset.tg;
     tr.classList.toggle('gone', left <= 0); tr.classList.remove('next');
     if (left > 0 && (!next || s < +next.dataset.st)) next = tr;
-    if (cd) cd.textContent = left > 0 ? 'in ' + mmss(Math.ceil(left) / 60) : 'Gone';
-    [[30, 140, 880], [10, 140, 880], [0, 700, 1320]].forEach(([at, ms, f]) => {
+    if (cd) cd.textContent = left > 0 ? mmss(Math.ceil(left) / 60) : 'Gone';
+    [[30, 140, 880], [10, 140, 880], [5, 120, 880], [4, 120, 880], [3, 120, 880], [2, 120, 880], [1, 120, 880], [0, 700, 1320]].forEach(([at, ms, f]) => {
       const k = gi + '@' + at;
       if (beeped[k]) return;
-      if (left <= at && left > at - 2) { beeped[k] = 1; beep(ms, f); if (at === 0) { tr.classList.add('flash'); setTimeout(() => tr.classList.remove('flash'), 3000); } }
-      else if (left <= at - 2) beeped[k] = 1;
+      if (left <= at && left > at - 1) { beeped[k] = 1; beep(ms, f); if (at === 0) { tr.classList.add('flash'); setTimeout(() => tr.classList.remove('flash'), 3000); } }
+      else if (left <= at - 1) beeped[k] = 1;
     });
   });
   if (next) next.classList.add('next');
   const n = $('#tNext');
-  if (n) { if (next) { const left = (+next.dataset.st - now) * 60; n.innerHTML = 'Next: <b>Group ' + next.dataset.tg + '</b> at ' + next.cells[5].querySelector('b').textContent + ' · in <b>' + mmss(Math.ceil(left) / 60) + '</b>'; } else n.textContent = 'All groups started'; }
+  if (n) { if (next) { const left = (+next.dataset.st - now) * 60; n.innerHTML = 'Next: <b>Group ' + next.dataset.tg + '</b> at ' + next.querySelector('td b').textContent + ' · in <b>' + mmss(Math.ceil(left) / 60) + '</b>'; } else n.textContent = 'All groups started'; }
   const box = document.querySelector('.timer'); if (box) box.classList.toggle('go', !!next && (+next.dataset.st - now) * 60 <= 10);
 }
 setInterval(tick, 250);
