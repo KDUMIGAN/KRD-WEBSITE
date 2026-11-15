@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCC Race sheet test</title>
+<link rel="icon" href="data:image/webp;base64,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">
+<style>
+:root{--krd-grey:#414142;--krd-lime:#E3E421;--ink:#232325;--ink-2:#4A4A4D;--ink-3:#66666A;--rule:#D9D9DB;--rule-2:#EBEBEC;--field:#A8A8AC;--ground:#F3F3F2;--white:#FFFFFF;--sel:#EEEEEC;--pass-bg:#E2F0E5;--pass:#1D5A2C;--fail-bg:#F6E0DD;--fail:#8A2A1E;--bar:#E07B00;--res:#F4F4F5;--res-2:#E2E2E4}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--ground)}
+#app{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
+aside{background:var(--krd-grey);color:#fff;padding:20px 16px}
+aside .logo{background:#fff;padding:8px;display:block}
+aside .logo img{width:100%;display:block}
+aside .sub{font-size:13px;color:#cfcfd2;margin:10px 0 20px}
+aside nav button{display:block;width:100%;text-align:left;padding:11px 12px;margin:0 0 2px;color:#fff;background:none;border:0;font:inherit;font-size:14px;cursor:pointer}
+aside nav button.on{background:var(--krd-lime);color:var(--ink);font-weight:700}
+aside nav button:not(.on):hover{background:#4d4d4f}
+main{min-width:0}
+.top{background:#fff;border-bottom:1px solid var(--rule);padding:12px 24px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.top .sp{flex:1}
+.status{font-size:13px;color:var(--ink-3);align-self:center;margin-right:6px}
+.status.err{color:var(--fail);font-weight:600}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
+label.f>span{display:block}
+input,select,textarea{height:44px;border:1px solid var(--field);border-radius:0;padding:0 10px;font:inherit;background:#fff;color:var(--ink);min-width:0}
+input:disabled,select:disabled{background:var(--sel);color:var(--ink-2)}
+input[type=checkbox]{height:20px;width:20px;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.btn{height:44px;padding:0 16px;border:1px solid var(--ink);background:#fff;font:inherit;cursor:pointer;color:var(--ink);white-space:nowrap}
+.btn.pri{background:var(--ink);color:#fff}
+.btn.sm{height:34px;padding:0 10px;font-size:13px}
+.btn.link{border:0;background:none;text-decoration:underline;padding:0 6px}
+.btn.danger{border-color:var(--fail);color:var(--fail)}
+.btn:disabled{opacity:.45;cursor:default}
+.x{border:0;background:none;font-size:20px;line-height:1;cursor:pointer;color:var(--ink-3);padding:4px 8px}
+.x:hover{color:var(--fail)}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--rule);padding:0 24px;overflow-x:auto}
+.tabs button{padding:12px 16px;background:none;border:0;border-bottom:3px solid transparent;font:inherit;font-size:14px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.tabs button.on{border-color:var(--krd-lime);color:var(--ink);font-weight:700}
+#view{padding:20px 24px}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+.panel{background:#fff;border:1px solid var(--rule);padding:18px 20px;margin-bottom:20px}
+.sec+.sec{margin-top:22px;padding-top:18px;border-top:1px solid var(--rule-2)}
+h2{font-size:17px;margin:0 0 4px}
+h3{font-size:15px;margin:0 0 6px}
+.lead{color:var(--ink-3);font-size:13px;margin:0 0 14px}
+.row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--rule);padding:6px 8px;white-space:nowrap}
+td{border-bottom:1px solid var(--rule-2);padding:4px 8px;height:42px;vertical-align:middle}
+td.n,th.n{text-align:right}
+td.nw{white-space:nowrap}
+td input,td select{height:34px}
+td input.num{width:84px;text-align:right}
+.gh td{background:var(--res);font-weight:700;border-top:2px solid var(--rule)}
+.gh td .mute{font-weight:400}
+.tag{display:inline-block;font-size:11px;padding:2px 6px;background:var(--sel);color:var(--ink-2);margin-left:6px;font-weight:600;white-space:nowrap;vertical-align:middle}
+.tag.edit{background:#FFF1D6;color:#7A4A00}
+.tag.bad{background:var(--fail);color:#fff}
+.tag.warn{background:#FFF1D6;color:#7A4A00}
+tr.flag td{background:var(--fail-bg)}
+.mute{color:var(--ink-3)}
+.res{background:var(--res);border:1px solid var(--rule);padding:18px 20px;position:sticky;top:12px}
+.answer{background:#fff;border:1px solid var(--rule);padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.answer .big{font-size:34px;font-weight:300;line-height:1.1}
+.answer .k{font-size:13px;color:var(--ink-3)}
+.res table td{background:#fff}
+.res th,.res td{padding:4px 6px}
+.res td input.num{width:70px}
+.res td .tag{display:block;margin:2px 0 0;text-align:center}
+.tw{overflow-x:auto}
+.res tr.lim td:last-child{box-shadow:inset -4px 0 0 var(--bar)}
+.infonote,.warnnote{font-size:13px;padding:10px 12px;margin-top:12px;line-height:1.45}
+.infonote{background:#fff;border-left:3px solid var(--field)}
+.warnnote{background:#FFF4E0;border-left:3px solid var(--bar)}
+.warnnote ul{margin:4px 0 0;padding-left:18px}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:2px;background:var(--sel);font-size:12px;padding:2px 2px 2px 7px;white-space:nowrap}
+.chip.race{background:#E6EEF8}
+.chip .x{font-size:15px;padding:0 4px}
+.chip b{font-weight:600}
+.bl{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.bl input[type=text]{flex:1}
+.handle{cursor:grab;touch-action:none;user-select:none;color:var(--ink-3);font-size:18px;padding:0 6px}
+tr.drag td{background:#FFFBD0}
+tr.drop td{box-shadow:inset 0 3px 0 var(--bar)}
+.empty{padding:28px;text-align:center;color:var(--ink-3)}
+.banner{background:#FFF4E0;border-bottom:1px solid var(--rule);padding:8px 24px;font-size:13px}
+dialog{border:1px solid var(--rule);padding:22px;max-width:440px;width:92vw}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog h2{margin-bottom:12px}
+dialog .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+dialog label.c{display:flex;gap:10px;align-items:center;margin:8px 0}
+.disc{font-size:12px;color:var(--ink-3);margin-top:8px}
+#report{display:none}
+@media (max-width:1150px){.grid{grid-template-columns:minmax(0,1fr)}.res{position:static}}
+@media (max-width:760px){
+ #app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
+ .panel{padding:14px 12px}
+ td input[data-f=riderName]{width:140px!important}
+ aside{padding:10px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+ aside .logo{width:120px;padding:4px}
+ aside .sub{display:none}
+ aside nav{display:flex;flex-wrap:wrap;gap:2px}
+ aside nav button{width:auto;padding:8px 10px;font-size:13px}
+ .top,#view{padding-left:12px;padding-right:12px}
+ .tabs{padding:0 8px}
+ .hide-sm{display:none}
+}
+@media print{
+ @page{size:A4 portrait;margin:14mm}
+ body{background:#fff;font-size:12pt}
+ #app,dialog,.banner{display:none!important}
+ #report{display:block}
+ .page{page-break-after:always;break-after:page}
+ .page:last-child{page-break-after:auto;break-after:auto}
+ .rh{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:14px}
+ .rh img{height:58px}
+ .rh .t{text-align:right}
+ .rh .t b{font-size:16pt;display:block}
+ .rh .t span{font-size:10pt}
+ #report h2{font-size:14pt;margin:14px 0 6px}
+ #report table{font-size:11pt}
+ #report th{color:#000;border-bottom:1.5px solid #000;font-size:10pt}
+ #report td{height:auto;padding:5px 6px;border-bottom:1px solid #999}
+ #report .blank td{height:30px}
+ #report .grp{break-inside:avoid;page-break-inside:avoid;margin-bottom:10px}
+ #report ol{padding-left:22px;line-height:1.6}
+ #report ol li{margin-bottom:4px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+ <aside>
+  <span class="logo"><img src="data:image/webp;base64,UklGRkYpAABXRUJQVlA4IDopAAAQmQCdASrgAcEAPjEWikMiISESafXgIAMEpu+F+8kw0ffof8SHEw8JZD/jvyq8EDAvc/79+2/9u/WT5mrO/evw1+THye/4fdt2P5s/mH6N/qP7V/f/89/gv//9Sv7//V/yn+Vv3Se4b+tn+0/vX+S/239g7kP7pfir8Bf6V/XP9d/iPdt/0f/D/uHuw/pv+7/33uAfz/+9dZ3+6nsKfz3/Eemd/4v9V8K39c/23/k/0vs7/9H87PkA9ADqP+qv90/JLv+/sn9d/YP94+2c8h+w37sfXvej7HtSP4z9aPt/9d/Zv8u/vf/R/8T8dPNngBfjX8q/v/5f/2b9pOOk2L9y/UF94PrP+i/Lf/NfEn89/n/Qb7G/677afsA/l39B/w/90/cX+3////0fgf+98IT7t/tvoA+wH+Xf0//bf3f8oPpq/ov+V/o/yT9tH59/j/+L/kvyo+wv+T/1n/W/3v/E/+//Of///7fe57Bf3Q9jL9cf/uZMQD0sDL5uaR3d+3gDU5gMvSolmzDuhpq0PtknnNfo5Z91i1RxZnKImWkSndSOJIJs44DIFjSwbNuvskbHEh0zEkrnmeK+/UvQM5lXy5LKtVMOaLTtmC3Ky9rVKqzLE46xYS72yXj44mXoQHU+e4GbNuvskVKKSnsIMhZYN8yKeBLZ/h/kSnBle4QYc5LAR9KwDryKhMzcz7dzXt6UxTkwt1w78UqPdLAW4ImVHwGnjA6Dl99hX6XXf4FBrdFq8B2HMRr+lEPWXLi1khPRQWwvCRdjvxSo90sUqPdJQ2UGCoiHgzAwBbLbAD+1BfmEsrbs4iZ3Ou8zHOFtkceLneua+afq/QNS7JGxxiAeaWI/RYMqhWFtvY+w47xUUVKVjeVicetEDtMhEvHH/6ls/LQKyheMMERmmWXtUI9ntB9nPFKj3SxPXBiWoExgSCTw6zU+9ch0HuKKDiutH4Y81xwb/n/FXy2jlwv6WxjJb2qrX9jAKm1cqVUhr472LKTz4A5HLJLEJvtOqrFv/4rR56HykwQQ9jKctmUdYfzco2TEW5CnQS3KNCDPD5zhS4RQDOwf/Ow+3uRC4gayKJ9BdVO0KSygA9r025dRNueS6/iQzb1JgedJyTyQ7zbIKtkTzAkitu6nZhf+urXVtBF7nzjl7KXjcgZE125Yvmo2osMt0VC6OSpA0Hjh/MsQb7q3UDDQ/gCcMSTR97iPPZFlFsiIcoWsyZnXR5vRY/syE+yW2Vn6+i1FdPEIT6fO3v5lCNthzGF5SL51iMMiMzwnSknUK0UxNaSFhniMxkf3X27zJ1S7Bebp9Pz9VX1RZM2IkCg6SX3IdbN55M/KL839Q0I38hbx7reoDsHCYMOy1W0g6sGddyhf8TR5R7+vvO+aiTgaOT7A9TpcfvJrwppwGv0sF7Iuqyb4th7m5tqWVWY6RbsF4077dfD7SfKJmyz+FcHL/ekg7+Xdz3JPagJUU4Iicii0BvsvdVMZ2ytY+bg7eX+ceCvyi6DMWCrugXe9m8LYvZnUNmmUPVZ/471DlH2Z5awVd04HX2SNjmT6cPX9M1lg0FVk7bQQbNtmgv/WLVVr37nspX/+gsi68p+x70MXmRV/Wso2OMQD0sUqPdLFKj3SzFq9EbHGIB6V7AAA/v+teAxQpeB00fBqpZHz5bA9QWF8PbM1U0VjckSbaQ51ywXY1EGfQVDMXG0NC3falPQNM0es34Q5pHQ05syJskkMLgmdHoYBzQ45TwoQmUpqoy2Ta9kUU94WJbzhNdZeZw6tz7SNzY+vzSpetFHugQnvUbhtSM5kGdMs0rZOfZZi3CfCS8HzER8CS4t65Fg35rFL71IYhwT+bIGuhZIBomDb6vRRWEDXmbg/igLkF6YszNt6XfQfEVmpUe9zVMv0E9eButzj1AHnl3CFRfg90uTWQMa2PJlHsnlano2xRsDc/hyHT8Wqq4uNLDMM01nqo1Io//cmcRMo+FQ3+8WDc3Zoo4sedxr+quDCT7dFQ7F0m5e6/oxAueYx8vg5CAWwZbjFVTNiPP/XLJtORocF8Kd/Lwz+SsvUNtQPyvFnr+g9/2ZrzMiKMfSvAcOvvvplWoMlUbsAQ/5UEXW+716TjJTqu8YxnJnrLumm6YscNXlCB8FKDkDcqWrqWFO+UdpXxVHfiMms/TgX1pnvADTkZsWc2K6vzUygEYL/SfQC1g/5wW3N3pqmeZTEYodDng0XTWlJLl8Vnk6/IGmYtQgSZwBKH6HMDrHfBz3g/LH6GXk2o1OQc1j/Hq55QnWWDqSvf/r0Q/nxDR/ddVB1SgzOgcfnwHUyVUyf7qx4A3MDuPZ0/Xe7Ck8WAHeGOqsgHO2xtuw6yhfcZA/qDPKPfD7/u5h7h4djHySKmtPVCItKADHpEh/aNdhriOMFVmS1JBGHIZ2hg9PwhndriFCrRD7yP5kH64Spaym2fZnNzQHzfW7MchS83n7FZqE40cEsjSPjvVzH5dh1aQF3qcl64JnXHlzELpWKppgbRKXFlwwe2RmyxaKwK4mDyza+FnW0Qjkxi883tEYDkdQtGW/f1Uf4MUfvxmQBEJpLft7ob343HHVVFeVtmmkyHGeTvjiw3tZbvaYZp2JaH/IlZ3fCb37T0VBOQDwCUI2DaujbyoUJBmlg8LYxiIk5S2zAKCwi6jDavoegt91K6ntismpByYwpDChCONjLg0AQfdW0LgKtndLm7SCfJ8E9odSr0PsdYLLjboO7Jhys78J2az9IZeIDsTZgvGp0ADVdeA9ED+auOBNKEOjW1dx8yeR/IhL1LoxA6Wn3aHJsaJoQt8deXL5qSA+TTaV0t/6rWpNnzCpD8x1MrDGlxgTiczrxtvPODfuEl29+mBKBsj82Pkw4X9HG/Yzx3g5HCLiX7o2ju83DEyFfCPUj4CLNiRNcP009MIYxz6Clvd/PVONO9apbtHvtp/6HtsDUrUJ4nGWu5nyL6hZ8qofKpVDq1/0PCNacILoAUBR2y2HQ5mlA2KwDoIuqF7NzCTWZFAARUKCAwZwqtVdJM+F6nuGITyPMVFGdDPVD5CEPKyJsaJWjde+OGYbYsRATEd1fpZ4VDTtioHXUIEiohBWgt+VFWxSq2N478Ifhmdwa4DFdjfVAxieDkToWbaJIYa6YWA6AvOmWgZQtKigtx14OqPol2jKEmtg1qC/15vs0isp8fAXnbVFM1MEJM0fESdnWOVUwLNVpODlgUf1BillRuwHU5dyOi4vaHWc2TnhpnnKbPCgpkRlt8ZC4u5dy2wJQhoPo0rdrR3RpHQUcQwpcn4TjfBhrIN6kgs+4EMNRI0GwgX8O82qS/xP9QPvAcjbeJLr9ZMnY3TbS3kiGkPpeZD6/QKJt+3qeZP4lbGmz0YExkoUwh5vZsEVcl29NMY8XosNcLv3q/1aNIeiRvtpORvg0Gc0B3vDI/QPJ1s5rPDS5jhPH9l9Urp6ZQA6stviY+pVTcqKiD0xqFJ+2vXn1TLUKWuWHwIAcpIbILpmV/o5HAylc1owisl+eAb9WtS7MobvB/PLT0yS+FTbCaixWXwiAFbJKwotvXHxHfOIrYvmZzKUZRKZzuXV6cem1gQic9EFH7Ae1BlHl8ER36hQ0/aTu4ctMv6235CYWTipW1qTYTr+MtKo6Ix8NEr6Q/wyPl8sZfQ4uJ0tbO3o+GiMFsDw86xkDXQLnZAPK9MQKM5tO/E9Gtkrnal8NXMVZ8SSMnPtZvU6fcSSArxG69Ec1RAACTaVW7rm8wug/GOtx7AFr+pA6A3j/OOiKej3wffj6tD2/y1jIo326uTxGjlFs1EaXp49OI7jNsh8+yEv5NwtUn7QBOdzQmfw/sBKAP1SH8YQ8FlwV7sssB5myFKfXvEuv9lQ4RzarBPJAX3zD1iBHoMlLLZci55E55WsNiRI7C6dMzAB/O6ZPaAx+O0cema8fLo2ER/nzPFu9smQWF/+jZMWQUQBKlFVwf7pbk/y9I+wUTq3gmIcIjVJpmOY6KdViBasu3+UtB2OAM07YwhYXJp3vSzJ2V9qqlZ+Z2tx47bmZUM2mfidnt71xYlF1iw3wuNc6F3Cipm83DejX7SfPCU14y39F66ZpQxIYZfDj6/0U2347zX51Z4+KpEJ6O0AggTl5aI9LdlhuCYk/mZNa1NRpykX59URaC3oeuXgsnEVGoqcwUq04aquAVpd+TND7T3/Kn6mwNfSdtgvdL7634wE3iUhI58mlopHR5THElAG7dTY5kJ2XMiaJpkYGrQqyRwfdcTdRfoYh44nejufbzVyFrOebBCrIuVJDGGwqCZkIBOzEMwDvHEBYVwAhY/ECeDFjBhyfXyG6m0eY1WvBu6XGfXtFTAPP1Jserk1yHbdOwdBiQVU+2umD6kMZRpHYIOBJJhWNq5ZqzcnSAAGr7LxCpMsweEBMDQWnftJgqnhEAQ0wdmuLv/x3i6+amlD0+w3b3rnCRV28pdH9LaU3MdyONtni/nfRXd+cCG78dpYgmu76a2eu2ZhDVM3dgFhti3QGsH/QQbzUczKlBAYsTipoapWg/V0Kd7Ew/yO2j1i6dtjGO7Khb5CpC3MNBXqFVV+dsiGHgx0ycVLbRBr5ezbYWjh9/tN8eAAvo9x/BnqNU0yz+I1lDIcVWv+n8K2/Z8tPSOJAcz29wm2tduRQBubGuGF/Qm4VqVriSKaRgt32ZsE6D9OM2mMFPoYBBlEqcj7QrqnEGRvWFmJHa/t9koe+6S12FETgn1Fn9nxYINDjHlyKYlieu+0Ce0N+R2J2mlYzhuD2B4XRK4Aad/CyCAY2xrkmD2I0byTD57e7FTOABpA2XQhPfXaQNKjfZdv9EQbhrnhkfmVKKJMKsf/woT5UWU0invkRXsUDE/9wagqqp+0RBB4fwORD0/cV6wRX0kmfmDR4tjYLFSUYhcykz+jqPtSsY2783ZVEOzxX5gyQR+DJIUYMYazQxfRMzZ/hJqMavbodcYjV9txZStm1Z0pMJp7BXdu8f6iU5M9qQXF9fmQ4SJC+Cqq7F/fXgte6pBD45WQa8CE+Ka3mzWYh+Se7DXo3eXPzRHRlK5z6rrvgzELjRF/NjBOz61vozUi44XrDdp7/lBBl602d3Nk3OdThJZS3kABrXd/84+T2fFW0y2fJYZ0Mjv1oJoQmLOu0K9Dql0SF/ZnqzQtgfHy05dcDBLFZGyodv9pkJzD57tt/12jjlHfFAFCofctugohxHd6X517y9Bx+HjeQ+1l5Yn+bXJ5TgQB/VH95WJ51mpV3IYHQEKpXNXwBh2A3+gthsB3nhNCOBBb98AGz9sBVFlm2S6TDKesVSfu7ngspjIVTjxtDyxyRwKq4Tnis2WmbBHiC0/R21s3MMeHno6vXvUYfxDLm/qftCOnksy9nhrfyKtB9XWdzwyVmptom5PSylcH932nXhEGgtWYVXehtpdRgIP7igzJTkBAipHt0FR9wEeg97RJHOKz8BALtTqbEDDWnUOS+C5p3xWx9FWrn2dExEyYaGfXfK2PNUHYzScZ8BP1Bb7LZ+vWjmLCMOnDlQwhwdi8JN99AFL5Uja0z2s7TZrZL12+9hyOM/LfMkoXuqY01F874RV7BIdSY3XmgzwdwzGpy5s3Eor34XCcjBt4vxEW8K/8gAOhFdLIusP7RPVPVAWb6D7KTcZWwQgIR/f0OM5AyIs8tTcX0EoW78WdXeGv5aG3bdnPUXvDhEQdICy2kF6Ef5Tv8KvVbNSCwqm1f3et+99TIy9S2rydegEAiGUViVc2WAR+mppeTm3s50TwLf+T4T5SPdEwqV3ept8B2C1Xy/WQSOQsoOV1wiVJqDvXOcFoNwlMVjT/Le8kpTRE5clLsNIk4wKjStN1WsL4R2JtQ3qFK2k+ICjGjgY9InEl+grBfbrKGfr558HhOIU6II9Cla12r5YA/njxWt3Dq8m+Nv3Wt7P2r9n+mpHepEjC+YvwuT3oenIoV1viWqBOHOLAZ+71UmHZ7Dhc8hqVMBlFJkLk5GQNO7X9iCAWAnaV02m8X92kIvlzFLHsSaWfYpObfFTe+OZV+8v0D7YIST+e++mLsSOfrJPi0JUL0abbaJOXCJOX97s0UETn3GljuAoAIIL8vgfMB2QwMljfARRN1xPpC9QT9no8ud35q4kq89DU9CCrNeWR9YBtTOvL6wR1HeqCFyp1GlFJvrE4Gei+cD9Eg2MkWGPGG58pGJRD+1q7OSboGu2TMFsCsjgwRXRqJWO5Fexm1uGaKa583+dLz6MBRegG1NnthYJtX+QUNRX4dWZbwp0JtboxyiOUTiqhPkfnH76Y/AC/Z0L5+hdeYApjtzl/5uyN80BEi0XmuaotDBcF6SfICPT87bulyC9d8RPSR++6XCqmgMatVDL2luJbJ7UwLWZmqBPciJCLt0IE9y7aXgqdUG6gHQvMCqtUq/cTXaPPKatxS/DYzhGwiAI53tiuiLIc3NcgEebsZlv8feGNptDzPbxzfh+mpZZnJ+hmq1jSLa3BVK9TcD7jM8awxDQ2XIfhFfncyBYf4vttNoEU/HxdwLK3RIGRXeoyKcHYm1FIiIijwWNe6r/vy5cFQZHMjsi6sWMu2CX/50EIBq01v+gtGDxe4+a+TGxzr+R8MTYTS6nj96MtLKHHgmLqjngywTLbWhhCSveJYT0qcs/zuhK9XUljL1VZj4JI6Xu051nmjzYmDr7vPQKoRHFKvzSgDDgFuILuzcq7MZLlEqYu0ozk5VzIG7jq8zc9YOI6fjpa0lSp5juxjoAMdYmvz53EZnKZQLw4zpq5mCDdO6Qk/Xmo5h5OuKw4hNenVISccJw8vr/ew0rwIiKHgujq70U9AL4lipPivgG+BU/agV2C6bbbs/NzYWCEq+vaCZ6ZIk4N/vlfhgF+zwrXnwl7IOinf+aSZTuSXp7oWbOSUyQpDdPM1FYLjKovWF8ZcBNZ81H8MWa1903eQ9bD63zdSWPidP+tLdKLwZQysOSK2MPoSUcGbiLi4zJA8qS9w0/UjB+YpT8S17VeIdfPfd3ofjUkco7CmYGczp+uxWZYQXYPlfTonklH7tFKaQOBM6HYunBxy77O/5zx0wk9PAixNX/GyE07iMNHb1FOSF21hge3Nl43kqdx51WkxWTQPhRkiXKpPL8xY0aGJLKngpkZGoxCG1JjHj8IhivlmqimFE8la/fdUbEWujiqFGlaBonhtis7tSdQH0Bm+PbPyxu75mHvHvNFfJYSpqitZitY/m6HkbUkYCZEqJqFPEMShO/eBg5AqUmZFFQuZmSSOpkJn7XgyJxuN1CUzRxIbqHSigrsem0qYyGNmrQinldZpBHVghmTnaxY1RjEV5oxdcGlJq+UsdVYoBWGAc1wX6l2iVWY20U86j+lv5AqCPQPNAEbs6xr49lqGaGg4+Maqj2J27ZgD2iT3eFRn4LqbeQiKQnySkqJHB+JJiRXsGJVxd4W7p/ChHemSSpkMKf5K+n4jzO4FTsBrstMGaxNFkwoNDb+KDLbjgVDGKRZ29enUtkrkTmA0Ez7ApnvkxdYgT9P+h/LkwNswxVSs0ygavB4JaCmi2TzHTvFdJEQMZp+etrOuW2Wi0k9pwng5EZa8XsdAG6tFY6R0JbipEGhqY+GkDzBdSbqk9Ep/UTL9laHM+8+M9TgDecaPM4S7HdVQ5SGBdDpbCB9089lfejVX3FIVlpqXOKeda4zgllxLwBaGSPg78l2a7cxBqH2tR8h3COTfHv8hfM95NzGYWwqzwPZBln6WKuk9IovspSx/imowizmufcrfSIOvZT85RFChgX7Kwg96NOoUmkXLscnZl8iANSFsMJ6QiG59Gxy6pqNZyrPuhRNw0tD8n8vDEPXfGVvS/PV9POPR2lJHcifPr2ZeS8VI9kVreaQ2zzgtKLI8oGtHvHdbo2kdYvN4V56WVYPBsvEF3vunE20scGnk21fey5Aid+V4XgUWZ2ho7MMa6Q0SDqPP6+DYXUDO8SIQ8fdLQaO/fm4UnmyRoeubzYXPjHvee83d1aiKK+ffvFF4+/vXVYPCDsBJLJRSQZolMPl+1D/5zMEWLqpRnDMTepiZfPKRkZchO7Srl+3B48Xb8ssmTqPKg41sWbGaTy24vxRve5tbkMotLTOuXv3qe6tZhQG8dPjyhfN6VxG4c7N+pcxnf1hM3BtHjcXnsQ0Uu3S14Zm/0KFbEtuNsvbLomO5u9rhuSDPmEgW7d9v5MeLYslWmdr3Bpl4J68xwRw9KqjW+zq1/LjN2qfdv8aJpecrZgGFWnAOy2OouKdLFX0hgUF3JYQNbPmBr+et3eX1UY+5SBKhcHPSs2/DLKCt/9hyS/q0L01YdfLlUZhkvfBo8Nv5nuU76jyi0CUyenNKDctnJErbmvahdR1uSDnpze4hpcLlDIcn5s+XFf7d0/Fhqwvi7RfdiQRvxcGAewDEv/8p7FPwYvfQy+pSgVMh5x9YZ83GxMWOzyMH5RC3Vzy9IItF3oBEKVVI2t9H5BeQFBuUNncWA9GbPfRikfG7TmeczvYq78K3hP7J/tIpk1fosNgIgDljvXb8iFNQJgebArFBBpfrOk19RSAjY3Vo6NuY5SyggqlFWaxC2j5/d7fs2DuYjQ7fSCzLneGVZsdEFgSn81k4fZSywGwNP4QCmww34VZOX+rFs2pHI41jfMti9GLILjj3uWspEY6Q7L/lAuLiUlT0HtcqAhddlLJ61QuEFAJ/Nov2ImGPv8fgEVQvrobWQT4SMyVz3sxaKDLEQ7GI5trGz9AD4Rl/C2anhNwKCZu22W4PmOOUn8fnKiBlFkTJcLv8A/+C3ZI+fNy2z8dXj0VCfX+rTB/9haVnzaqtPcIvuYcThFajymZ66Qzxo2sNn5DbRyCciwsTYjJTU9gmL9TbTleXnKvsRDAhYCPHiwrBmEoy/KT/dTYZhLLjcYzJc7MeasyvKfcf3H4/mofEtNTgffmM/eYzRJY5qM7OSjYz4LCRObLZb4Ols8uncQDKmHPwg33tG382MuBtP98A1fmCYBbZkRt3E3PyUlbKDbDy5KOnuY4KnCLvraLGnvmVl38f4ajpsQaG/Skps8JsqTJl0zWX0VX6ALvo4YbRoR+Hhporkl2So0VVcX15OkZNXRRHXmIbc5YQ/dHl60LqkcQkRArmudYQ3+H0mmmHbU1EH7ZJ0VY2IKRJYAPnSJQpd3zZiWTEKeBHCKqrfQpGiMt81TIzADHcC6KkAsoys2N6JZC5+v+cyyrFf3MMWhjZIPz6zpXcRji13j9QVljwWrPd5UPiMX30ZEaznxFxS/jg4mSSetaZsdMX7T+fRtRKRXYtOEwfeEQKxuXc4s4cAjohJWXZXSW51a+FERT+Fz+FzaXJIXabzqA59aCdljkYxlB9GJ2ZJ++piZsopYQ3GqDra4H0wVz732y6lbJcxlEK9f9fMR4hXf/Pf2ao1GQu0mL6oZLVMpqycMbTx/uUJCy1hp7HHGCFEkEou42eNtBV7Ir/jTPcU8p0dQSD57SIBuU6MKfwVfzbkielbQTkGGhDN4hLFTxJYcPLXL9cnqhJGIhBcS7wsdTNNryN2sUhG0gZ2hgGZQYkf3h2mnYm35qIVoz5TGy1AXonvu3UiiuP7DhYTX6dws+ofhoj5dgowHPWnLc5LrmAGkj1DY2UtPvwy+vz3hjeAX4v/7C5VmSobHgCu+b0HFLuUOVe6/FyleHY3lgxPQGL7j8lfvFZDHVFm/OX/QIy/OOQ/AQ27chCMlMs6gsD9cFBbyHwsosiQDW0d1ClY3+pvMN6M3CP3E9vohl4OuUoSQv4xrURyN6K5KabU0hwkbgrMsH/JrX4ZQblOsKqlSwxBFsE59H4/XsfCO/oyX9l7TX0vXzguRulvrqma7W7m3CXUuAOTdiwU4h/Q18XJrkpcrseMxqsjVKJpdcEXv0uNfYyAxmwDzcRcU7w0wRWQYLDHRAF1VuJ2k9J420QL5jyFlQXWe4HIsiqp92Vm+vhOVGqb2Rwr6EAd2ryblYbTgTyav0AH21PRlogJLeB49HmXcSdcvC6rVJVx2LQfvNaitXsgsq2SgS6ZFWmjzDToBXyYCSoOAelmc/QJ9c14nSexpZWU5ww42ZvW/4oeEp5RXgZri1FvcgR0PeTySk+Gemf9/B+3AxL45Ml80ugWfISkGVZqjIf96ty+lvNwVB23JdQaTonPMHVWqrlkhy9ZeFR8XcLzCWuf1zBXYJbia4J7hs8ys8a5XuTt6qPVZZeaY5V8HI6IzWma2TvGOV5eQKXLyWGG2x2/WqgBHGkcJi+XKb/hjM+JPIw14//F32GlWsQw1c4lAi4vUhwwJFCSdhALeUxSxBFBd+G1PFk2LEjNbnd3+5KhQoeaooD5pMkQZQI+1tkHz1h5kudESapZtrSCTOdDAZ09tk4EHia6hcuc6eHZxoa/1bB28K8XGmfOfEzpQBPihoXAJyMwb5zADsYcF9djf2bKxmHx8fblIS3bjBxfTWwu4DVLEw+05aiDGwymhXLF47vuKqhRSkE4/X77UAktRlZpaf6MoWAnGhF4Vm9zAjf3rmS5qaSA8Usp0V4noWvHZrQd9a+cEyTU2j3VKtjBKvmCgXH8TtCfJYsNfpIq90HwJlNL/n6azgfu9bPwsv/l7X5TA4yPng9BlKn+GyRVeeEve7Cj0BoO3uxhofIrDJIvRhxuu1N7uh0pFOQQCJdymWyp52CMw97+SvDbYGtemWbV5wxPeMtszAJ7NgehvQAm/4HeEqimFoCrdOv/VLqSCA9pFeBgVKoAQq1mAcpaJojBFAgHjgpVY9InyfdAT6QTxCDEgjIhWbw66HqNsdJFu/oA6kXpTnpPFola8Q7xNzjR/a1srGQXZEc4kDD1BgmIJbbd8oZa7ByDBmI5CDAAJGdU/DuGLRBpImD9xXHHogPIXSjIdGx/fYwkWAlr0G6N11CNj1TS86HfCur6iP5mq86nYWp8DK1IG+YpfQxj5HUDqOCTMap8pMzVNujUyuY/6gLcOM7IfNDSq4d8NpuTdr+pfG5UwLe/Fix2kb6OPj14EgL/naBZBoRKeyGvdXS/vb/OCKuypzCJd3LS7JSBXQgD7fthAiEh6eXz/Ywm+3HvCVUioPZs7QFz3koItUDGw4EQ71Tvgr97O2i10kYJJs69NbHdJgygOyfYHH20A6GRt0OwGK0B4yY92kWMRTj1kro6w4gYsDS5YsJdGll+NrTfdlf8731yHBGwTm+KDl5rlfLbFHIhCuZ7466G7qRiPh6heOR6y1PY8kZXxeyyVr/iQiyukONy3OAtSRGYLo0UynRII1g5OjxeEs5GuzcQn/e+E735CwPFv/sH0IQuKRtoOA19lDfnNWVJpVRQTRslexZM1uDPzggW0bAIDSa+VwL4EAOfq5EDSIM6M7/c0xoN11MBNBNpyHXmps9Hwujc2y59e5hUbuPhbc9LpsuHMT6npWrqiI6Fpp39BQ7e7izAbAgYhEMpFgrJed8i8IP02XpqYzLcDV7lJQqX4wImy6ZD8gBCGZra86F3r0OdiqdUKaCH4f/IW2DEa0WqsvVs8GY//wqlBZ5fyKj7UGkzdZO5qixAdlGRi4w0c7AnHU3KcAG+6tERZaRvp7ue92w4di4+67cC/0MniAoq6NCWe1vsoAJbgrblXL3ARTL8HiXidWRYb3RwAbncuZ+LsC8k1IMngjO2ODj8fVJE+MHVR2U7jwRuOIg10R4436PhngvgKqfyGU2nbL5gB7tiVv8cD/LZsaK9uClFpDdCDN0QZSF5vGmI0Wh4ZjMnNLlP03SJF7mAPeILrp8DfmPg358aXOVoBsAmQchox5n8NBquA4HIZDxhUdNhuHceC5pO7Rwbr00Fgi77wCPA+JgbY51l+UG0iblhhikViuRrBd8ij3gTHtTLI0RyU/PtZccGmeQHAV1EiiHhT53/DRkb3UHmQ71JNYmKPKBDAgnv24HYk6eM3FKZ7Dp0XlG7C/Hp4DaVSQl6t9Slc1MY4mD6s69vLE4b0H3ZNABY6WksT+trm+4FHGKyx8dxV8dJ6hg1x2BYmqDjnN/5tnMTK4S1wGv9s7SvTh6e9BoDLdrtfUCn+TFKAFkDRbHlIAzC9O6j02E6w+4Nt189+qdClsTudu8XQpE5L3tjFqDjD6RLMIbh2kZCh0b5bOxYy6V7TTLF2rq8d+4jwzCepcMLr2ruZBXaHicwx/5C7C5CtO48ct3DBYB0Ag+PkEJyYr6gikyPp1P3hw9bcrDGUfjzTB2yJ0NmCMka8IUy3+woPgrP2OAq2jLsVZH76FMCuxrJYHzRWj3zAYIMAWlOKdxlXqkmyCdvKn5h08qBU7HwOBA96GDFs2EN+TOsgFr2e99W53kxJEhwvh3glFGHISlvcLcu4lfPUs2dUTY2QCgPnOXuu5DClGlWpw0p6VCq4aTHPaqui5bP9qkCzh1hAMHGau1b/oMO4n2AJfl9NuyjBJPZSsG1d3gPO1BJ5W2aB9mCeo/nJ7mbP3PVIyV9kAeCfb6rC2XVxCL8kX/xtnWI8nXBqjB2Thv7GVlEmRY35hSjXds4t4MjhP/R85UGd1FYJrwU5lcfRsPAK4itYNlDwmeo/mW0Z+UCeWCbr7U+IahwvPgQFj0dwYj42xzzcG4QAMkZore4P1gV5qkJfp8wjt+EZMtYcHmVbhEZ9Z/2O9RaiVof2jMRVq2IEE+UNKr8Wo2VcZMK61iXBOp5YVUGP2++/OPoXV0yFprMeYMSBSd5w825npblPobmo6BsfY9fD7UetUwr+0qcOCYoMWBDEPbgVdkTMj7myuznX1B+rqheSXyYSkW4TgYJRnpfZvtcB02E5DenLr0HP29bzobBqe196v5bCUF2am2+OPP8kmyclRQzDoK5j+9G2/AIkp0HqN6/PxMiVDLta1dL4Rmub8JPWBd6W3/hPByiGYbSML6ir/wyG+VbfFVhn69RqWVDqfJTGD0u1PKYWAB54837/icR0bwIwgLfjBGueALOkEXKM3ucREaMJTmvppeahCPdHzfcsLeIzEnYbQe5qy/KmXoCiHlQFjFOwLHfoTdBCEXnZ3JUFx5NeT0+PCeuECdv0BO7zhZEwXIaPsxB1aDM7mYX9bdnO8XEuR6TFbjaCiZdgYcpIG8u3dTGHVCa2d75b8dgZI6ohOKlrHJtz/Ut4jyM5sY5P20hYRFK9FM20mPrqsxeNEAX75eeyu0yciCwqQ3Hbv/4fRcfGhzZBo/XWe172ff+kU1yNLbWjG20HWiwqzf3BBIEepo41Dz+ZZwXD8plhW8ifrvEfSP41HaUG9GOhVCatULnzPJDB+bKlDDQqlHBSYzJl4p06vwjukIpouIVAAAAiP1wODpLUSNXHmZxA95LLboKWbfJ/sC7eboAld58DAScsdMMlFGHu5suPQOEmqSxyIfzAi+2eHkJ1WjgghBLvZ8T17/JKuAxe8EVMa+7OouTPHbL2Z4v6mniPRR9B/Yc5RVgfa8WU61FB6Mh1VfacUF0xbPUV4a7dMDQCBbCo/PDIsFR4a0YUduTG72lWJ5HYmLFo0fphX2b1rgPfjx3Ut8VuchqABaug19TsyrUaGFfa2O9Kf0kCPr4eftPv7evA2hgJx69l8jnV/FogUfr0mAyS/hkswxHN22yAY2d0S5zliEJdg6XRRbXCtpyskQMRZlSi9qJfyLO2+UK8Ss6hiYnbxZAHDqKCLyABozZUBRSPZW/48mq2II2ZlwtpOb8Wp5edsfOk1rIp40yHa2Oj4MU7sTVlNlzcHNGwAThX4DEdyWB5M12rAph/JP1SHb0edxtne1HUXsW9S7E7hiJ4KCVyn4sjM9niSZsXFgvAVGALztP8EfIHfJUzxXruwg066af6j3RxLoQXZxi23AZlV8cFqG3oKr/3/lUDd2j52vVrRn4Yf5DZVodSmwJeWiBC0cs65fRD5uCjUxr/j6a2oeAuNLrrS4bBlvQOXtnxw+m97PImYLpS76VKFvtzApbNWTwT01WcQH3z3JiGNazW/02kMJNNOYmpweZ9XAFI3sZiTANLtI76eSloYIX3hfxfO8YlIMG6OXtsrYAAAAAAAAAAAAAAA=" alt="Mackay Cycling Club"></span>
+  <div class="sub">Race sheet</div>
+  <nav id="nav">
+   <button data-view="handicap">Handicap</button>
+   <button data-view="scratch">Scratch race</button>
+   <button data-view="tt">Time trial</button>
+   <button data-view="speeds">Average speeds</button>
+  </nav>
+ </aside>
+ <main>
+  <div id="banner"></div>
+  <div class="top" id="top"></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+ </main>
+</div>
+<div id="report"></div>
+
+<dialog id="dlgSign">
+ <h2>Sign in to edit</h2>
+ <label class="f"><span>Password</span><input type="password" id="signPass" autocomplete="current-password"></label>
+ <div class="disc" id="signMsg"></div>
+ <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn pri" id="signGo">Sign in</button></div>
+</dialog>
+
+<dialog id="dlgPdf">
+ <h2>Export PDF</h2>
+ <p class="lead">Pick the sheets to print. In the print dialog choose Save as PDF (or your printer) and set Layout: Portrait.</p>
+ <div id="pdfOpts"></div>
+ <div class="acts"><button class="btn" data-close>Cancel</button><button class="btn pri" id="pdfGo">Export</button></div>
+</dialog>
+
+<input type="file" id="fileStart" accept=".xlsx,.xls,.csv" hidden>
+<input type="file" id="fileHist" accept=".xlsx,.xls" hidden>
+
+<script>
+"use strict";
+/* ============ Storage (Supabase, shared) ============ */
+const SB_URL = (window.__SB_TEST && window.__SB_TEST.url) || 'https://ypcnmpnelzoxwxitwdym.supabase.co';
+const SB_KEY = (window.__SB_TEST && window.__SB_TEST.key) || 'sb_publishable_GjZtxpzDLoZdcZdDCKqneg_T7TsN-xJ';
+const EDIT = { pass: null };
+try { EDIT.pass = sessionStorage.getItem('mcc.edit') || null; } catch (e) {}
+
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src)); document.head.appendChild(s); });
+}
+async function makeStore() {
+  let sb;
+  if (window.__fakeSupabase) sb = window.__fakeSupabase();
+  else { if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js'); sb = window.supabase.createClient(SB_URL, SB_KEY); }
+  const docs = new Map(); let onChange = () => {};
+  async function loadAll() {
+    const { data, error } = await sb.from('mcc_docs').select('path,data');
+    if (error) throw error;
+    docs.clear(); data.forEach(r => docs.set(r.path, r.data));
+  }
+  await loadAll();
+  try {
+    sb.channel('mcc_docs').on('postgres_changes', { event: '*', schema: 'public', table: 'mcc_docs' }, p => {
+      if (p.eventType === 'DELETE') onChange(p.old.path, null); else onChange(p.new.path, p.new.data);
+    }).subscribe();
+  } catch (e) {}
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadAll().then(() => onChange('*')).catch(() => {}); });
+  return {
+    docs,
+    reload: loadAll,
+    onChange: f => { onChange = f; },
+    check: async pass => { const { data, error } = await sb.rpc('mcc_check', { pass }); if (error) throw error; return data === true; },
+    save: async (path, data) => {
+      const { error } = await sb.rpc('mcc_save', { pass: EDIT.pass || '', doc_path: path, doc: data });
+      if (error) throw { bad: /password/i.test(error.message || ''), message: error.message };
+    },
+  };
+}
+
+/* ============ Helpers ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const num = v => { const x = parseFloat(String(v).replace(',', '.')); return isFinite(x) ? x : null; };
+const f2 = v => v == null || !isFinite(v) ? '–' : v.toFixed(2);
+function titleCase(s) { return String(s || '').toLowerCase().replace(/(^|[\s\-'’])([a-z])/g, (m, a, b) => a + b.toUpperCase()).trim(); }
+function mmss(min) { if (min == null || !isFinite(min)) return '–'; const s = Math.round(min * 60); const neg = s < 0; const a = Math.abs(s); return (neg ? '-' : '') + Math.floor(a / 60) + ':' + String(a % 60).padStart(2, '0'); }
+function hhmmss(min) { const s = Math.round(min * 60); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); }
+const round30 = min => Math.round(min * 2) / 2;
+function fmtDate(d) { if (!d) return ''; const t = new Date(d + 'T00:00:00'); if (isNaN(t)) return d; return t.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
+function todayISO() { const t = new Date(); return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'); }
+function clockAdd(hm, sec) { const m = /^(\d{1,2}):(\d{2})/.exec(hm || ''); if (!m) return '–'; let s = (+m[1]) * 3600 + (+m[2]) * 60 + sec; s = ((s % 86400) + 86400) % 86400; const h = Math.floor(s / 3600), mi = Math.floor(s % 3600 / 60), x = s % 60; return h + ':' + String(mi).padStart(2, '0') + (x ? ':' + String(x).padStart(2, '0') : ''); }
+
+/* ============ State ============ */
+const TYPES = { handicap: 'Handicap', scratch: 'Scratch race', tt: 'Time trial' };
+const TABS = {
+  handicap: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['hc', 'Handicaps'], ['results', 'Results']],
+  scratch: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['grades', 'Grades']],
+  tt: [['race', 'Race & briefing'], ['entries', 'Entry list'], ['start', 'Start list']],
+};
+const S = { riders: { list: [] }, brief: { items: [] }, races: {} };
+let UI = { view: 'handicap', race: {}, tab: {}, q: '' };
+try { Object.assign(UI, JSON.parse(localStorage.getItem('mcc.ui') || '{}')); } catch (e) {}
+const saveUI = () => { try { localStorage.setItem('mcc.ui', JSON.stringify(UI)); } catch (e) {} };
+let Store = null, canEdit = false, loadErr = null, status = '';
+const pending = new Map();
+
+function applyDocs() {
+  const d = Store.docs;
+  S.riders = d.get('riders') || { list: [] };
+  S.brief = d.get('briefing') || { items: [] };
+  S.races = {};
+  for (const [k, v] of d) if (k.startsWith('race/') && v && v.id) S.races[v.id] = v;
+}
+function pathOf(obj) { return obj === S.riders ? 'riders' : obj === S.brief ? 'briefing' : 'race/' + obj.id; }
+function save(obj) {
+  if (!canEdit) return;
+  const path = pathOf(obj);
+  Store.docs.set(path, obj);
+  clearTimeout(pending.get(path));
+  setStatus('Saving…');
+  pending.set(path, setTimeout(() => flush(path), 500));
+}
+function flush(path) {
+  const data = Store.docs.get(path);
+  return Store.save(path, data === undefined ? null : JSON.parse(JSON.stringify(data))).then(() => {
+    pending.delete(path); if (!pending.size) setStatus('Saved');
+  }).catch(e => {
+    pending.delete(path);
+    if (e && e.bad) { canEdit = false; EDIT.pass = null; try { sessionStorage.removeItem('mcc.edit'); } catch (x) {} setStatus('Not saved – password rejected. Sign in again.', true); render(); }
+    else setStatus('Not saved – ' + ((e && e.message) || 'connection problem'), true);
+  });
+}
+function removeDoc(path) {
+  Store.docs.delete(path);
+  setStatus('Saving…');
+  Store.save(path, null).then(() => setStatus('Saved')).catch(e => setStatus('Not saved – ' + ((e && e.message) || 'connection problem'), true));
+}
+function setStatus(t, err) { status = t; const el = $('#status'); if (el) { el.textContent = t; el.className = 'status' + (err ? ' err' : ''); } }
+
+/* ============ Riders & speeds ============ */
+const riderById = id => S.riders.list.find(r => r.id === id);
+const riderByName = n => { const k = norm(n); return S.riders.list.find(r => norm(r.name) === k); };
+function addRider(name) { const r = { id: uid(), name: name.trim(), speeds: [] }; S.riders.list.push(r); save(S.riders); return r; }
+function speedsOf(rid) {
+  const r = riderById(rid); const out = [];
+  if (r) (r.speeds || []).forEach(s => out.push({ v: s.v, l: s.l, id: s.id }));
+  Object.values(S.races).filter(x => x.type === 'handicap').sort((a, b) => (a.date || '').localeCompare(b.date || '')).forEach(x => {
+    const q = x.hc && x.hc.res && x.hc.res[rid];
+    if (q && q.spd > 0) out.push({ v: q.spd, l: x.name + (x.date ? ' (' + x.date + ')' : ''), race: x.id });
+  });
+  return out;
+}
+let AVG = new Map();
+function buildAvg() { AVG = new Map(); S.riders.list.forEach(r => { const s = speedsOf(r.id); AVG.set(r.id, s.length ? mean(s.map(x => x.v)) : null); }); }
+const avgOf = rid => AVG.has(rid) ? AVG.get(rid) : null;
+
+/* ============ Races ============ */
+const curRace = () => { const id = UI.race[UI.view]; const r = id && S.races[id]; return r && r.type === UI.view ? r : null; };
+function racesOf(type) { return Object.values(S.races).filter(r => r.type === type).sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.name.localeCompare(b.name)); }
+function newRace(type) {
+  const r = { id: uid(), type, name: 'New ' + TYPES[type].toLowerCase(), date: todayISO(), dist: null, laps: null, entries: [], brief: { off: [], items: [] } };
+  if (type === 'handicap') r.hc = { exp: {}, res: {} };
+  if (type === 'scratch') r.sc = { grade: {} };
+  if (type === 'tt') r.tt = { interval: 60, first: '07:00', order: [] };
+  S.races[r.id] = r; UI.race[type] = r.id; UI.tab[type] = 'race'; saveUI(); save(r); return r;
+}
+function entrantIds(race) { return race.entries.map(e => e.rid).filter(id => riderById(id)); }
+function entryOf(race, rid) { return race.entries.find(e => e.rid === rid); }
+function addEntrant(race, rid, cat) {
+  const e = entryOf(race, rid);
+  if (e) { if (cat != null && cat !== '') e.cat = cat; return false; }
+  race.entries.push({ rid, cat: cat || '' }); return true;
+}
+function syncRace(race) { if (race.type === 'handicap') hcSync(race); if (race.type === 'tt') ttSync(race); }
+
+/* ============ Handicap ============ */
+function autoGroups(race) {
+  const D = num(race.dist);
+  const ents = entrantIds(race).filter(id => avgOf(id) != null).map(id => ({ id, a: avgOf(id) })).sort((x, y) => y.a - x.a);
+  const g = {};
+  if (D > 0 && ents.length) {
+    let grp = ents.map(e => [e]); const T = m => D / mean(m.map(e => e.a)) * 60;
+    while (grp.length > 1) {
+      let bi = -1, bd = 1;
+      for (let i = 0; i < grp.length - 1; i++) { const d = Math.abs(T(grp[i]) - T(grp[i + 1])); if (d < bd) { bd = d; bi = i; } }
+      if (bi < 0) break;
+      grp.splice(bi, 2, grp[bi].concat(grp[bi + 1]));
+    }
+    grp.forEach((m, i) => m.forEach(e => { g[e.id] = i; }));
+  }
+  race.hc.g = g; race.hc.exp = {}; race.hc.manual = false;
+}
+function hcCompact(race) {
+  const g = race.hc.g || {}; const used = [...new Set(Object.values(g).filter(x => x >= 0))].sort((a, b) => a - b);
+  const map = {}; used.forEach((o, i) => { map[o] = i; });
+  for (const k in g) if (g[k] >= 0) g[k] = map[g[k]];
+  const exp = {}; for (const o in (race.hc.exp || {})) if (map[o] != null) exp[map[o]] = race.hc.exp[o];
+  race.hc.exp = exp;
+}
+function hcSync(race) {
+  race.hc = race.hc || { exp: {}, res: {} }; race.hc.exp = race.hc.exp || {}; race.hc.res = race.hc.res || {};
+  const ids = entrantIds(race);
+  // Groups stay fully automatic until the user moves a rider or edits a speed (hc.manual).
+  if (!race.hc.manual || !race.hc.g) { autoGroups(race); return; }
+  const g = race.hc.g;
+  for (const k of Object.keys(g)) if (!ids.includes(k)) delete g[k];
+  const G = hcGroups(race);
+  for (const id of ids) if (!(id in g)) {
+    const a = avgOf(id); let best = -1, bd = Infinity;
+    if (a != null) G.forEach(x => { if (x.ca != null && Math.abs(x.ca - a) < bd) { bd = Math.abs(x.ca - a); best = x.i; } });
+    g[id] = best;
+  }
+  hcCompact(race);
+}
+function hcGroups(race) {
+  const g = (race.hc && race.hc.g) || {}; const D = num(race.dist);
+  const n = Math.max(-1, ...Object.values(g)) + 1; const out = [];
+  for (let i = 0; i < n; i++) {
+    const m = entrantIds(race).filter(id => g[id] === i).sort((a, b) => (avgOf(b) || 0) - (avgOf(a) || 0));
+    const sp = m.map(avgOf).filter(v => v != null);
+    const ca = sp.length ? mean(sp) : null;
+    const ov = race.hc.exp && race.hc.exp[i] != null ? race.hc.exp[i] : null;
+    const ex = ov != null ? ov : ca;
+    const t = D > 0 && ex > 0 ? D / ex * 60 : null;
+    out.push({ i, m, ca, ex, edited: ov != null, t });
+  }
+  const ts = out.map(x => x.t).filter(t => t != null); const mx = ts.length ? Math.max(...ts) : null;
+  out.forEach(x => { x.start = x.t != null && mx != null ? round30(mx - x.t) : null; x.lim = x.t != null && x.t === mx; });
+  return out;
+}
+
+/* ============ Scratch ============ */
+const gradeKey = c => String(c || '').trim().toUpperCase();
+function scInfo(race) {
+  race.sc = race.sc || { grade: {} };
+  const ids = entrantIds(race);
+  const grades = [...new Set(ids.map(id => gradeKey(entryOf(race, id).cat)).filter(Boolean))].sort();
+  const gAvg = {};
+  grades.forEach(gr => { const s = ids.filter(id => gradeKey(entryOf(race, id).cat) === gr).map(avgOf).filter(v => v != null); gAvg[gr] = s.length ? mean(s) : null; });
+  const withAvg = grades.filter(gr => gAvg[gr] != null);
+  const rows = ids.map(id => {
+    const req = gradeKey(entryOf(race, id).cat); const a = avgOf(id);
+    let fit = null;
+    if (a != null && req && withAvg.length > 1) { let bd = Infinity; withAvg.forEach(gr => { const d = Math.abs(gAvg[gr] - a); if (d < bd) { bd = d; fit = gr; } }); if (fit === req) fit = null; }
+    const fin = race.sc.grade[id] || req || '';
+    return { id, req, a, fit, fin };
+  });
+  const finals = [...new Set(grades.concat(rows.map(r => r.fin).filter(Boolean)))].sort();
+  return { grades, gAvg, rows, finals };
+}
+
+/* ============ Time trial ============ */
+function ttSync(race) {
+  race.tt = race.tt || { interval: 60, first: '07:00', order: [] };
+  const ids = entrantIds(race);
+  race.tt.order = race.tt.order.filter(id => ids.includes(id));
+  ids.forEach(id => { if (!race.tt.order.includes(id)) race.tt.order.push(id); });
+}
+function ttMove(race, from, to) {
+  const o = race.tt.order; if (from === to || from < 0 || to < 0 || from >= o.length || to > o.length) return;
+  const [x] = o.splice(from, 1); o.splice(to > from ? to - 1 : to, 0, x); save(race); render();
+}
+
+/* ============ Rendering ============ */
+const dis = () => canEdit ? '' : ' disabled';
+function render() {
+  buildAvg();
+  const ae = document.activeElement; const key = ae && ae.dataset && ae.dataset.k; let sel = null;
+  try { sel = key && ae.selectionStart != null ? [ae.selectionStart, ae.selectionEnd] : null; } catch (e) {}
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.view === UI.view));
+  $('#banner').innerHTML = loadErr ? '<div class="banner">Could not reach the shared race data (' + esc(loadErr) + '). Check your connection and reload.</div>' : '';
+  renderTop(); renderTabs();
+  const v = $('#view'); const race = curRace();
+  if (UI.view === 'speeds') v.innerHTML = viewSpeeds();
+  else if (!race) v.innerHTML = '<div class="panel empty">' + (racesOf(UI.view).length ? 'Pick a race above.' : 'No ' + TYPES[UI.view].toLowerCase() + 's yet.' + (canEdit ? ' Click <b>New race</b> to start one.' : '')) + '</div>';
+  else {
+    const t = curTab();
+    v.innerHTML = t === 'race' ? viewRace(race) : t === 'entries' ? viewEntries(race) : t === 'hc' ? viewHc(race) : t === 'results' ? viewResults(race) : t === 'grades' ? viewGrades(race) : viewStart(race);
+  }
+  if (key) { const el = document.querySelector('[data-k="' + CSS.escape(key) + '"]'); if (el) { el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
+}
+function curTab() { const tabs = TABS[UI.view] || []; const t = UI.tab[UI.view]; return tabs.some(x => x[0] === t) ? t : (tabs[0] || [])[0]; }
+function renderTop() {
+  const parts = [];
+  if (UI.view !== 'speeds') {
+    const rs = racesOf(UI.view); const cur = curRace();
+    parts.push('<label class="f"><span>' + esc(TYPES[UI.view]) + '</span><select data-act="pickRace" style="min-width:260px">' +
+      (cur ? '' : '<option value="">' + (rs.length ? 'Choose a race…' : 'No races yet') + '</option>') +
+      rs.map(r => '<option value="' + r.id + '"' + (cur && cur.id === r.id ? ' selected' : '') + '>' + esc(r.name) + (r.date ? ' – ' + esc(fmtDate(r.date)) : '') + '</option>').join('') + '</select></label>');
+    if (canEdit) parts.push('<button class="btn" data-act="newRace">New race</button>');
+  } else parts.push('<div><h2 style="margin:0">Average speeds</h2><div class="mute" style="font-size:13px">Every rider and every recorded speed. Handicap grouping and scratch grade checks use these averages.</div></div>');
+  parts.push('<div class="sp"></div><span id="status" class="status' + (/^Not saved/.test(status) ? ' err' : '') + '">' + esc(status || (canEdit ? 'Editing' : 'View only')) + '</span>');
+  parts.push(canEdit ? '<button class="btn" data-act="signOut">Sign out</button>' : '<button class="btn" data-act="signIn">Sign in to edit</button>');
+  if (UI.view !== 'speeds') parts.push('<button class="btn pri" data-act="pdf"' + (curRace() ? '' : ' disabled') + '>Export PDF</button>');
+  $('#top').innerHTML = parts.join('');
+}
+function renderTabs() {
+  const el = $('#tabs');
+  if (UI.view === 'speeds' || !curRace()) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = ''; const t = curTab();
+  el.innerHTML = TABS[UI.view].map(([k, l]) => '<button data-act="tab" data-tab="' + k + '" class="' + (k === t ? 'on' : '') + '">' + l + '</button>').join('');
+}
+
+/* ----- Race & briefing ----- */
+function viewRace(r) {
+  const d = dis();
+  const shared = S.brief.items || []; const off = (r.brief && r.brief.off) || [];
+  const own = (r.brief && r.brief.items) || [];
+  let h = '<div class="grid"><div><div class="panel"><div class="sec"><h2>Race details</h2><p class="lead">Distance is used for the handicap start gaps.</p><div class="fields">' +
+    '<label class="f" style="grid-column:1/-1"><span>Race name</span><input type="text" data-k="r.name" data-f="name" value="' + esc(r.name) + '"' + d + '></label>' +
+    '<label class="f"><span>Date</span><input type="date" data-k="r.date" data-f="date" value="' + esc(r.date || '') + '"' + d + '></label>' +
+    '<label class="f"><span>Distance (km)</span><input type="number" step="0.01" min="0" inputmode="decimal" data-k="r.dist" data-f="dist" value="' + esc(r.dist == null ? '' : r.dist) + '"' + d + '></label>' +
+    '<label class="f"><span>Laps</span><input type="number" step="1" min="0" data-k="r.laps" data-f="laps" value="' + esc(r.laps == null ? '' : r.laps) + '"' + d + '></label>' +
+    '</div></div>';
+  h += '<div class="sec"><h2>Briefing</h2><p class="lead">Shared points appear in every race; untick any that don\'t apply to this one. Editing a shared point changes it for all races.</p><h3>Shared points</h3>';
+  if (!shared.length) h += '<p class="mute" style="font-size:13px">No shared points yet.</p>';
+  shared.forEach(it => {
+    h += '<div class="bl"><input type="checkbox" title="Include in this race" data-act="briefToggle" data-id="' + it.id + '"' + (off.includes(it.id) ? '' : ' checked') + d + '>' +
+      '<input type="text" data-k="bs.' + it.id + '" data-f="sharedText" data-id="' + it.id + '" value="' + esc(it.t) + '"' + d + '>' +
+      (canEdit ? '<button class="x" title="Delete shared point" data-act="sharedDel" data-id="' + it.id + '">×</button>' : '') + '</div>';
+  });
+  if (canEdit) h += '<button class="btn sm" data-act="sharedAdd">Add shared point</button>';
+  h += '<h3 style="margin-top:18px">This race only</h3>';
+  if (!own.length) h += '<p class="mute" style="font-size:13px">No race-specific points yet.</p>';
+  own.forEach(it => {
+    h += '<div class="bl"><input type="text" data-k="bo.' + it.id + '" data-f="ownText" data-id="' + it.id + '" value="' + esc(it.t) + '"' + d + '>' +
+      (canEdit ? '<button class="x" title="Delete" data-act="ownDel" data-id="' + it.id + '">×</button>' : '') + '</div>';
+  });
+  if (canEdit) h += '<button class="btn sm" data-act="ownAdd">Add point for this race</button>';
+  h += '</div>';
+  if (canEdit) h += '<div class="sec"><button class="btn danger sm" data-act="delRace">Delete this race</button></div>';
+  h += '</div></div><div class="res"><h3>Briefing as printed</h3>' + briefList(r, true) + '</div></div>';
+  return h;
+}
+function briefPoints(r) {
+  const off = (r.brief && r.brief.off) || [];
+  return (S.brief.items || []).filter(i => !off.includes(i.id) && i.t.trim()).map(i => i.t).concat(((r.brief && r.brief.items) || []).filter(i => i.t.trim()).map(i => i.t));
+}
+function briefList(r, screen) { const p = briefPoints(r); return p.length ? '<ol' + (screen ? ' style="padding-left:20px;line-height:1.5;margin:0;background:#fff;padding:12px 12px 12px 32px;border:1px solid var(--rule)"' : '') + '>' + p.map(t => '<li>' + esc(t) + '</li>').join('') + '</ol>' : '<p class="mute">No briefing points.</p>'; }
+
+/* ----- Entry list ----- */
+function viewEntries(r) {
+  const d = dis(); const ids = entrantIds(r); const isNew = r.newIds || [];
+  const catLabel = r.type === 'scratch' ? 'Requested grade' : 'Category';
+  let h = '<div class="panel"><h2>Entry list <span class="mute" style="font-weight:400">(' + ids.length + ' riders)</span></h2><p class="lead">' +
+    (r.type === 'scratch' ? 'Category from the start list is the rider\'s requested grade (A, B…).' : 'Category comes from the start list and shows on the printed sheets.') +
+    ' New names are added to Average speeds as new riders.</p>';
+  if (canEdit) {
+    h += '<div class="row"><label class="f" style="flex:1;min-width:220px"><span>Add rider</span><input type="text" list="riderList" data-k="addEntrant" id="addEntrant" placeholder="Start typing a name"></label>' +
+      '<label class="f" style="width:150px"><span>' + catLabel + '</span><input type="text" id="addCat" data-k="addCat"></label>' +
+      '<button class="btn" data-act="addEntrant">Add</button><button class="btn" data-act="importStart">Import start list</button></div>' +
+      '<datalist id="riderList">' + S.riders.list.filter(x => !ids.includes(x.id)).map(x => '<option value="' + esc(x.name) + '">').join('') + '</datalist>';
+  }
+  if (!ids.length) return h + '<div class="empty">No entries yet.</div></div>';
+  h += '<table><thead><tr><th>Rider</th><th>' + catLabel + '</th><th class="n">Races</th><th class="n">Avg (km/h)</th>' + (canEdit ? '<th></th>' : '') + '</tr></thead><tbody>';
+  ids.slice().sort((a, b) => riderById(a).name.localeCompare(riderById(b).name)).forEach(id => {
+    const e = entryOf(r, id); const n = speedsOf(id).length;
+    h += '<tr' + (isNew.includes(id) ? ' class="flag"' : '') + '><td>' + esc(riderById(id).name) + (isNew.includes(id) ? '<span class="tag bad">new rider – check spelling</span>' : '') + (n ? '' : '<span class="tag warn">no speeds</span>') + '</td>' +
+      '<td><input type="text" style="width:110px" data-k="cat.' + id + '" data-f="entryCat" data-id="' + id + '" value="' + esc(e.cat || '') + '"' + d + '></td>' +
+      '<td class="n">' + n + '</td><td class="n">' + f2(avgOf(id)) + '</td>' +
+      (canEdit ? '<td class="n"><button class="x" title="Remove from this race" data-act="rmEntrant" data-id="' + id + '">×</button></td>' : '') + '</tr>';
+  });
+  h += '</tbody></table>';
+  if (isNew.length && canEdit) h += '<div class="infonote">Riders marked "new" weren\'t found in Average speeds. If one is a misspelling of an existing rider, fix the name on the Average speeds page and remove the duplicate. <button class="btn link" data-act="clearNew">Clear new-rider marks</button></div>';
+  return h + '</div>';
+}
+
+/* ----- Handicaps ----- */
+function viewHc(r) {
+  const before = JSON.stringify(r.hc); hcSync(r); if (canEdit && JSON.stringify(r.hc) !== before) save(r);
+  const d = dis(); const G = hcGroups(r); const D = num(r.dist); const g = r.hc.g || {};
+  const ids = entrantIds(r); const un = ids.filter(id => !(g[id] >= 0));
+  const opts = cur => G.map(x => '<option value="' + x.i + '"' + (x.i === cur ? ' selected' : '') + '>Group ' + x.i + '</option>').join('') + '<option value="' + G.length + '">Group ' + G.length + '</option>';
+  let h = '<div class="grid"><div class="panel"><h2>Grouping</h2><p class="lead">Entrants sorted by average speed (all races). Groups whose starts would be less than 1 minute apart are merged automatically. Move a rider with the Group column; the last number starts a new group, and a group left empty is removed.</p>';
+  if (canEdit) h += '<div class="row"><button class="btn" data-act="regroup"' + (D > 0 && r.hc.manual ? '' : ' disabled') + '>Re-group automatically</button><span class="mute" style="font-size:13px">' + (r.hc.manual ? 'Groups have been adjusted by hand. Re-grouping clears your moves and edited speeds.' : 'Groups are automatic and update as entries and speeds change, until you move a rider or edit a speed.') + '</span></div>';
+  if (!ids.length) h += '<div class="empty">No entrants yet – add them on the Entry list tab.</div>';
+  else {
+    h += '<div class="tw"><table><thead><tr><th>Rider</th><th class="hide-sm">Category</th><th class="n">Races</th><th class="n">Avg (km/h)</th><th>Group</th></tr></thead><tbody>';
+    const row = (id, cur) => '<tr' + (avgOf(id) == null ? ' class="flag"' : '') + '><td>' + esc(riderById(id).name) + (avgOf(id) == null ? '<span class="tag bad">no speeds</span>' : '') + '</td><td class="hide-sm">' + esc(entryOf(r, id).cat || '') + '</td><td class="n">' + speedsOf(id).length + '</td><td class="n">' + f2(avgOf(id)) + '</td>' +
+      '<td><select data-k="grp.' + id + '" data-act="moveGroup" data-id="' + id + '"' + d + '>' + (cur < 0 ? '<option value="-1" selected>Unassigned</option>' : '') + opts(cur) + '</select></td></tr>';
+    G.forEach(x => { h += '<tr class="gh"><td colspan="5">Group ' + x.i + ' <span class="mute">· ' + x.m.length + ' rider' + (x.m.length === 1 ? '' : 's') + (x.start != null ? ' · starts +' + mmss(x.start) : '') + '</span></td></tr>'; x.m.forEach(id => { h += row(id, x.i); }); });
+    if (un.length) { h += '<tr class="gh"><td colspan="5">Unassigned</td></tr>'; un.forEach(id => { h += row(id, -1); }); }
+    h += '</tbody></table></div>';
+  }
+  h += '</div><div class="res">';
+  const st = G.filter(x => x.start != null); const span = st.length ? Math.max(...st.map(x => x.start)) : null; const lim = G.find(x => x.lim);
+  h += '<div class="answer"><div><div class="k">Limit group starts at 0:00</div><div class="big">' + (span != null ? mmss(span) : '–') + '</div><div class="k">first to last start</div></div><div class="k">' + (lim ? 'Limit: Group ' + lim.i : '') + '<br>' + (D > 0 ? D + ' km' : '') + '</div></div>';
+  h += '<table><thead><tr><th>Group</th><th class="n">Riders</th><th class="n">Calc avg</th><th class="n">Expected (km/h)</th><th class="n">Race time</th><th class="n">Start</th></tr></thead><tbody>';
+  G.slice().sort((a, b) => (a.start == null) - (b.start == null) || (a.start - b.start) || a.i - b.i).forEach(x => {
+    h += '<tr class="' + (x.lim ? 'lim' : '') + '"><td class="nw">Group ' + x.i + '</td><td class="n">' + x.m.length + '</td><td class="n">' + f2(x.ca) + '</td>' +
+      '<td class="n nw"><input class="num" type="number" step="0.01" inputmode="decimal" data-k="exp.' + x.i + '" data-f="exp" data-g="' + x.i + '" value="' + (x.ex != null ? x.ex.toFixed(2) : '') + '"' + d + '>' + (x.edited ? '<span class="tag edit">edited' + (canEdit ? ' <button class="x" style="font-size:13px;padding:0 2px" title="Back to calculated" data-act="expReset" data-g="' + x.i + '">↺ reset</button>' : '') + '</span>' : '') + '</td>' +
+      '<td class="n">' + mmss(x.t) + '</td><td class="n">+' + mmss(x.start) + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  h += '<div class="infonote">Race time = distance ÷ expected speed × 60' + (D > 0 ? ' = ' + D + ' ÷ speed × 60' : '') + '. Start = slowest group\'s race time − this group\'s race time, rounded to the nearest 30 s. Expected speed defaults to the group\'s calculated average; type over it to adjust.</div>';
+  const w = [];
+  if (!(D > 0)) w.push('Enter the race distance on the Race & briefing tab.');
+  G.filter(x => x.ex == null).forEach(x => w.push('Group ' + x.i + ' has no speed – enter an expected speed.'));
+  G.filter(x => x.m.length === 1).forEach(x => w.push('Group ' + x.i + ' has only 1 rider.'));
+  if (un.length) w.push(un.length + ' rider' + (un.length > 1 ? 's are' : ' is') + ' unassigned' + (un.some(id => avgOf(id) == null) ? ' (no recorded speeds – add one on Average speeds, or pick a group)' : '') + '.');
+  if (w.length) h += '<div class="warnnote"><ul>' + w.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>';
+  return h + '</div></div>';
+}
+
+/* ----- Handicap results ----- */
+function viewResults(r) {
+  hcSync(r); const d = dis(); const res = r.hc.res; const ids = entrantIds(r); const g = r.hc.g || {};
+  const pos = {}; ids.forEach(id => { const p = res[id] && res[id].pos; if (p) pos[p] = (pos[p] || 0) + 1; });
+  let h = '<div class="panel"><h2>Results</h2><p class="lead">Finish position and average speed for each rider. Speeds entered here are added to each rider\'s history on Average speeds.</p>';
+  if (!ids.length) return h + '<div class="empty">No entrants yet.</div></div>';
+  h += '<table><thead><tr><th>Rider</th><th>Group</th><th class="n">Finish pos</th><th class="n">Avg speed (km/h)</th></tr></thead><tbody>';
+  ids.slice().sort((a, b) => { const pa = res[a] && res[a].pos, pb = res[b] && res[b].pos; if (pa && pb) return pa - pb; if (pa) return -1; if (pb) return 1; return riderById(a).name.localeCompare(riderById(b).name); }).forEach(id => {
+    const x = res[id] || {}; const dup = x.pos && pos[x.pos] > 1;
+    h += '<tr' + (dup ? ' class="flag"' : '') + '><td>' + esc(riderById(id).name) + (dup ? '<span class="tag bad">same position as another rider</span>' : '') + '</td><td>' + (g[id] >= 0 ? 'Group ' + g[id] : '–') + '</td>' +
+      '<td class="n"><input class="num" type="number" min="1" step="1" data-k="pos.' + id + '" data-f="resPos" data-id="' + id + '" value="' + (x.pos || '') + '"' + d + '></td>' +
+      '<td class="n"><input class="num" type="number" min="0" step="0.01" inputmode="decimal" data-k="spd.' + id + '" data-f="resSpd" data-id="' + id + '" value="' + (x.spd || '') + '"' + d + '></td></tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+
+/* ----- Scratch grades ----- */
+function viewGrades(r) {
+  const d = dis(); const I = scInfo(r);
+  let h = '<div class="grid"><div class="panel"><h2>Grades</h2><p class="lead">Final grade starts as the rider\'s requested grade. A rider is flagged when their average speed is closer to another grade\'s average than to their requested grade\'s.</p>';
+  if (!I.rows.length) return h + '<div class="empty">No entrants yet.</div></div></div>';
+  h += '<table><thead><tr><th>Rider</th><th>Requested</th><th class="n">Avg (km/h)</th><th>Check</th><th>Final grade</th></tr></thead><tbody>';
+  I.rows.sort((a, b) => a.fin.localeCompare(b.fin) || (b.a || 0) - (a.a || 0)).forEach(x => {
+    const opts = I.finals.map(gr => '<option' + (gr === x.fin ? ' selected' : '') + '>' + esc(gr) + '</option>').join('');
+    h += '<tr' + (x.fit ? ' class="flag"' : '') + '><td>' + esc(riderById(x.id).name) + '</td><td>' + (esc(x.req) || '<span class="tag bad">none</span>') + '</td><td class="n">' + f2(x.a) + '</td><td>' +
+      (x.fit ? '<span class="tag bad">speed fits ' + esc(x.fit) + '</span>' : x.a == null ? '<span class="mute">no speeds</span>' : '') + '</td>' +
+      '<td><select data-k="gr.' + x.id + '" data-act="setGrade" data-id="' + x.id + '"' + d + '>' + (x.fin ? '' : '<option value="" selected>–</option>') + opts + '</select>' + (r.sc.grade[x.id] && r.sc.grade[x.id] !== x.req ? '<span class="tag edit">changed</span>' : '') + '</td></tr>';
+  });
+  h += '</tbody></table></div><div class="res"><h3>Grade averages</h3><table><thead><tr><th>Grade</th><th class="n">Requested</th><th class="n">Avg (km/h)</th><th class="n">Final</th></tr></thead><tbody>';
+  I.finals.forEach(gr => { h += '<tr><td>' + esc(gr) + '</td><td class="n">' + I.rows.filter(x => x.req === gr).length + '</td><td class="n">' + f2(I.gAvg[gr]) + '</td><td class="n">' + I.rows.filter(x => x.fin === gr).length + '</td></tr>'; });
+  h += '</tbody></table><div class="infonote">Grade average = mean of the averages of riders who requested that grade (riders with no speeds are left out).</div>';
+  const none = I.rows.filter(x => !x.fin).length; const fl = I.rows.filter(x => x.fit).length;
+  if (none || fl) h += '<div class="warnnote"><ul>' + (fl ? '<li>' + fl + ' rider' + (fl > 1 ? 's' : '') + ' flagged – check their grade.</li>' : '') + (none ? '<li>' + none + ' rider' + (none > 1 ? 's have' : ' has') + ' no grade – set a Category on the Entry list.</li>' : '') + '</ul></div>';
+  return h + '</div></div>';
+}
+
+/* ----- TT start list ----- */
+function viewStart(r) {
+  ttSync(r); const d = dis(); const T = r.tt;
+  let h = '<div class="panel"><h2>Start list</h2><p class="lead">Riders start in this order at a fixed interval.' + (canEdit ? ' Drag ⠿ to reorder.' : '') + '</p><div class="row">' +
+    '<label class="f"><span>First start</span><input type="time" data-k="tt.first" data-f="ttFirst" value="' + esc(T.first || '') + '"' + d + '></label>' +
+    '<label class="f"><span>Interval (seconds)</span><input type="number" min="5" step="5" style="width:140px" data-k="tt.int" data-f="ttInt" value="' + esc(T.interval) + '"' + d + '></label></div>';
+  if (!T.order.length) return h + '<div class="empty">No entrants yet.</div></div>';
+  h += '<table id="ttTable"><thead><tr>' + (canEdit ? '<th></th>' : '') + '<th class="n">No.</th><th>Rider</th><th>Category</th><th class="n">Start time</th></tr></thead><tbody>';
+  T.order.forEach((id, i) => {
+    h += '<tr data-i="' + i + '">' + (canEdit ? '<td style="width:30px"><span class="handle" data-i="' + i + '" title="Drag to reorder">⠿</span></td>' : '') + '<td class="n">' + (i + 1) + '</td><td>' + esc(riderById(id).name) + '</td><td>' + esc(entryOf(r, id).cat || '') + '</td><td class="n">' + clockAdd(T.first, i * (num(T.interval) || 0)) + '</td></tr>';
+  });
+  return h + '</tbody></table></div>';
+}
+
+/* ----- Average speeds ----- */
+function viewSpeeds() {
+  const d = dis(); const q = norm(UI.q);
+  const list = S.riders.list.filter(r => !q || norm(r.name).includes(q)).sort((a, b) => (avgOf(a.id) == null) - (avgOf(b.id) == null) || (avgOf(b.id) || 0) - (avgOf(a.id) || 0) || a.name.localeCompare(b.name));
+  let h = '<div class="panel"><div class="row"><label class="f" style="flex:1;min-width:200px"><span>Search</span><input type="search" data-k="q" data-f="q" value="' + esc(UI.q) + '" placeholder="Rider name"></label>';
+  if (canEdit) h += '<label class="f" style="flex:1;min-width:200px"><span>New rider</span><input type="text" id="newRider" data-k="newRider"></label><button class="btn" data-act="addRider">Add rider</button><button class="btn" data-act="importHist">Import Handicap sheet</button>';
+  h += '</div><p class="lead">Average = mean of every speed listed (handicap results plus speeds added by hand). ' + S.riders.list.length + ' riders.</p>';
+  if (!list.length) return h + '<div class="empty">' + (S.riders.list.length ? 'No riders match.' : 'No riders yet.' + (canEdit ? ' Add one, or import your Handicap sheet.' : '')) + '</div></div>';
+  h += '<div class="tw"><table><thead><tr><th>Rider</th><th class="n">Races</th><th class="n">Avg (km/h)</th><th>Speeds (km/h)</th>' + (canEdit ? '<th>Add speed</th><th></th>' : '') + '</tr></thead><tbody>';
+  list.forEach(r => {
+    const sp = speedsOf(r.id);
+    h += '<tr><td>' + (canEdit ? '<input type="text" style="width:190px" data-k="rn.' + r.id + '" data-f="riderName" data-id="' + r.id + '" value="' + esc(r.name) + '">' : esc(r.name)) + '</td><td class="n">' + sp.length + '</td><td class="n"><b>' + f2(avgOf(r.id)) + '</b></td><td><div class="chips">' +
+      sp.map(s => '<span class="chip' + (s.race ? ' race' : '') + '" title="' + esc(s.l || '') + (s.race ? ' – from handicap results' : '') + '"><b>' + f2(s.v) + '</b>' + (s.l ? '&nbsp;<span class="mute">' + esc(s.l) + '</span>' : '') + (canEdit && !s.race ? '<button class="x" title="Delete speed" data-act="delSpeed" data-id="' + r.id + '" data-s="' + s.id + '">×</button>' : '&nbsp;') + '</span>').join('') + '</div></td>';
+    if (canEdit) h += '<td class="nw"><input class="num" type="number" step="0.01" inputmode="decimal" placeholder="km/h" data-k="as.v.' + r.id + '" id="asv_' + r.id + '"> <input type="text" placeholder="Label" style="width:120px;height:34px" data-k="as.l.' + r.id + '" id="asl_' + r.id + '"> <button class="btn sm" data-act="addSpeed" data-id="' + r.id + '">Add</button></td><td><button class="x" title="Delete rider" data-act="delRider" data-id="' + r.id + '">×</button></td>';
+    h += '</tr>';
+  });
+  return h + '</tbody></table></div></div>';
+}
+
+/* ============ Events ============ */
+document.addEventListener('click', e => {
+  const nb = e.target.closest('#nav button'); if (nb) { UI.view = nb.dataset.view; saveUI(); render(); return; }
+  const cl = e.target.closest('[data-close]'); if (cl) { cl.closest('dialog').close(); return; }
+  const b = e.target.closest('[data-act]'); if (!b || b.tagName === 'SELECT' || (b.tagName === 'INPUT' && b.type !== 'checkbox' && b.type !== 'button')) return;
+  act(b.dataset.act, b);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('select[data-act]') || t.matches('input[type=checkbox][data-act]')) { if (t.type === 'checkbox') return; act(t.dataset.act, t); return; }
+  if (t.dataset.f) field(t, true);
+});
+document.addEventListener('input', e => { const t = e.target; if (t.dataset.f && t.type !== 'checkbox') field(t, false); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const t = e.target;
+  if (t.id === 'signPass') { e.preventDefault(); $('#signGo').click(); }
+  else if (t.id === 'addEntrant' || t.id === 'addCat') { e.preventDefault(); act('addEntrant'); }
+  else if (t.id === 'newRider') { e.preventDefault(); act('addRider'); }
+  else if (t.id && t.id.startsWith('as')) { e.preventDefault(); act('addSpeed', { dataset: { id: t.id.slice(4) } }); }
+});
+
+function field(t, committed) {
+  const f = t.dataset.f, r = curRace(), v = t.value;
+  if (f === 'q') { UI.q = v; if (committed) return; render(); return; }
+  if (!canEdit) return;
+  switch (f) {
+    case 'name': r.name = v; save(r); if (committed) render(); else renderTop(); break;
+    case 'date': r.date = v; save(r); if (committed) render(); break;
+    case 'dist': r.dist = num(v); save(r); if (committed) { if (r.type === 'handicap') { hcSync(r); save(r); } render(); } break;
+    case 'laps': r.laps = num(v); save(r); break;
+    case 'sharedText': { const it = S.brief.items.find(x => x.id === t.dataset.id); if (it) { it.t = v; save(S.brief); } if (committed) render(); break; }
+    case 'ownText': { const it = r.brief.items.find(x => x.id === t.dataset.id); if (it) { it.t = v; save(r); } if (committed) render(); break; }
+    case 'entryCat': { const e = entryOf(r, t.dataset.id); if (e) { e.cat = v.trim(); save(r); } if (committed) render(); break; }
+    case 'exp': if (committed) { const x = num(v); if (x > 0) { r.hc.exp[t.dataset.g] = x; r.hc.manual = true; } else delete r.hc.exp[t.dataset.g]; save(r); render(); } break;
+    case 'resPos': { const x = parseInt(v, 10); r.hc.res[t.dataset.id] = Object.assign(r.hc.res[t.dataset.id] || {}, { pos: x > 0 ? x : null }); save(r); if (committed) render(); break; }
+    case 'resSpd': { const x = num(v); r.hc.res[t.dataset.id] = Object.assign(r.hc.res[t.dataset.id] || {}, { spd: x > 0 ? x : null }); save(r); if (committed) render(); break; }
+    case 'ttFirst': r.tt.first = v; save(r); if (committed) render(); break;
+    case 'ttInt': { const x = num(v); if (x > 0) { r.tt.interval = x; save(r); } if (committed) render(); break; }
+    case 'riderName': { const rd = riderById(t.dataset.id); if (rd && v.trim()) { rd.name = v.trim(); save(S.riders); } if (committed) render(); break; }
+  }
+}
+
+function act(a, el) {
+  const r = curRace(); const id = el && el.dataset && el.dataset.id;
+  switch (a) {
+    case 'tab': UI.tab[UI.view] = el.dataset.tab; saveUI(); render(); return;
+    case 'pickRace': UI.race[UI.view] = el.value || null; saveUI(); render(); return;
+    case 'signIn': $('#signMsg').textContent = ''; $('#signPass').value = ''; $('#dlgSign').showModal(); $('#signPass').focus(); return;
+    case 'signOut': canEdit = false; EDIT.pass = null; try { sessionStorage.removeItem('mcc.edit'); } catch (x) {} status = ''; render(); return;
+    case 'pdf': openPdf(); return;
+    case 'importHist': $('#fileHist').value = ''; $('#fileHist').click(); return;
+    case 'importStart': $('#fileStart').value = ''; $('#fileStart').click(); return;
+  }
+  if (!canEdit) return;
+  switch (a) {
+    case 'newRace': newRace(UI.view); render(); { const n = document.querySelector('[data-k="r.name"]'); if (n) { n.focus(); n.select(); } } break;
+    case 'delRace': if (confirm('Delete "' + r.name + '"? This can\'t be undone.' + (r.type === 'handicap' ? ' Its result speeds will be removed from riders\' averages.' : ''))) { delete S.races[r.id]; removeDoc('race/' + r.id); UI.race[UI.view] = null; saveUI(); render(); } break;
+    case 'briefToggle': { r.brief.off = r.brief.off || []; const i = r.brief.off.indexOf(id); if (el.checked) { if (i >= 0) r.brief.off.splice(i, 1); } else if (i < 0) r.brief.off.push(id); save(r); render(); break; }
+    case 'sharedAdd': { const it = { id: uid(), t: '' }; S.brief.items.push(it); save(S.brief); render(); const n = document.querySelector('[data-k="bs.' + it.id + '"]'); if (n) n.focus(); break; }
+    case 'sharedDel': { const it = S.brief.items.find(x => x.id === id); if (it && (!it.t.trim() || confirm('Delete this shared point from every race?\n\n' + it.t))) { S.brief.items = S.brief.items.filter(x => x.id !== id); save(S.brief); render(); } break; }
+    case 'ownAdd': { const it = { id: uid(), t: '' }; r.brief.items.push(it); save(r); render(); const n = document.querySelector('[data-k="bo.' + it.id + '"]'); if (n) n.focus(); break; }
+    case 'ownDel': r.brief.items = r.brief.items.filter(x => x.id !== id); save(r); render(); break;
+    case 'addEntrant': {
+      const inp = $('#addEntrant'); const name = inp && inp.value.trim(); if (!name) return;
+      let rd = riderByName(name); let created = false;
+      if (!rd) { rd = addRider(name === name.toUpperCase() ? titleCase(name) : name); created = true; }
+      addEntrant(r, rd.id, ($('#addCat').value || '').trim());
+      if (created) { r.newIds = r.newIds || []; r.newIds.push(rd.id); }
+      syncRace(r); save(r); render(); const n = $('#addEntrant'); if (n) n.focus(); break;
+    }
+    case 'rmEntrant': r.entries = r.entries.filter(e => e.rid !== id); if (r.newIds) r.newIds = r.newIds.filter(x => x !== id); syncRace(r); save(r); render(); break;
+    case 'clearNew': r.newIds = []; save(r); render(); break;
+    case 'regroup': if (r.hc.manual && !confirm('Re-group automatically? Your manual moves and edited speeds for this race will be cleared.')) return; autoGroups(r); hcSync(r); save(r); render(); break;
+    case 'moveGroup': { const to = parseInt(el.value, 10); r.hc.g[id] = to; r.hc.manual = true; hcCompact(r); save(r); render(); break; }
+    case 'expReset': delete r.hc.exp[el.dataset.g]; save(r); render(); break;
+    case 'setGrade': { const req = gradeKey(entryOf(r, id).cat); if (el.value === req || !el.value) delete r.sc.grade[id]; else r.sc.grade[id] = el.value; save(r); render(); break; }
+    case 'addRider': { const inp = $('#newRider'); const name = inp && inp.value.trim(); if (!name) return; if (riderByName(name)) { alertMsg(name + ' is already in the list.'); return; } addRider(name); render(); break; }
+    case 'delRider': {
+      const rd = riderById(id); const used = Object.values(S.races).filter(x => entryOf(x, id));
+      if (!confirm('Delete ' + rd.name + ' and all their speeds?' + (used.length ? '\nThey will also be removed from ' + used.length + ' race' + (used.length > 1 ? 's' : '') + '.' : ''))) return;
+      S.riders.list = S.riders.list.filter(x => x.id !== id); save(S.riders);
+      used.forEach(x => { x.entries = x.entries.filter(e => e.rid !== id); syncRace(x); save(x); });
+      render(); break;
+    }
+    case 'addSpeed': {
+      const v = num(($('#asv_' + id) || {}).value); const l = (($('#asl_' + id) || {}).value || '').trim();
+      if (!(v > 0)) { const n = $('#asv_' + id); if (n) n.focus(); return; }
+      const rd = riderById(id); rd.speeds = rd.speeds || []; rd.speeds.push({ id: uid(), v, l }); save(S.riders); render(); break;
+    }
+    case 'delSpeed': { const rd = riderById(id); rd.speeds = rd.speeds.filter(s => s.id !== el.dataset.s); save(S.riders); render(); break; }
+  }
+}
+function alertMsg(t) { setStatus(t, true); }
+
+/* ----- TT drag (pointer events: mouse and touch) ----- */
+let drag = null;
+document.addEventListener('pointerdown', e => {
+  const hd = e.target.closest('.handle'); if (!hd || !canEdit) return;
+  e.preventDefault(); drag = { from: +hd.dataset.i, to: null };
+  hd.closest('tr').classList.add('drag');
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  document.querySelectorAll('#ttTable tr.drop').forEach(x => x.classList.remove('drop'));
+  const el = document.elementFromPoint(e.clientX, e.clientY); const tr = el && el.closest('#ttTable tbody tr');
+  if (tr) { const rc = tr.getBoundingClientRect(); const i = +tr.dataset.i; drag.to = e.clientY > rc.top + rc.height / 2 ? i + 1 : i; const t2 = document.querySelector('#ttTable tbody tr[data-i="' + drag.to + '"]'); if (t2) t2.classList.add('drop'); }
+});
+document.addEventListener('pointerup', () => {
+  if (!drag) return; const d = drag; drag = null;
+  document.querySelectorAll('#ttTable tr.drag,#ttTable tr.drop').forEach(x => x.classList.remove('drag', 'drop'));
+  if (d.to != null) ttMove(curRace(), d.from, d.to);
+});
+
+/* ============ Sign in ============ */
+$('#signGo').addEventListener('click', async () => {
+  const p = $('#signPass').value; if (!p) return;
+  $('#signMsg').textContent = 'Checking…';
+  try {
+    if (await Store.check(p)) { EDIT.pass = p; try { sessionStorage.setItem('mcc.edit', p); } catch (e) {} canEdit = true; status = ''; $('#dlgSign').close(); render(); }
+    else $('#signMsg').textContent = 'Wrong password.';
+  } catch (e) { $('#signMsg').textContent = 'Could not check the password – ' + ((e && e.message) || 'connection problem'); }
+});
+
+/* ============ Imports ============ */
+async function readSheet(file) {
+  if (!window.XLSX) await loadScript('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js');
+  const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+  return wb;
+}
+$('#fileStart').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return; const r = curRace(); if (!r || !canEdit) return;
+  try { const wb = await readSheet(f); importStartList(r, XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' })); }
+  catch (err) { setStatus('Import failed – ' + (err.message || err), true); }
+});
+function importStartList(r, rows) {
+  const hi = rows.findIndex(row => row.some(c => /^last ?name$/i.test(String(c).trim())));
+  if (hi < 0) { setStatus('Import failed – no LastName column found', true); return; }
+  const H = rows[hi].map(c => String(c).trim().toLowerCase().replace(/\s+/g, ''));
+  const iL = H.indexOf('lastname'), iF = H.indexOf('firstname'), iC = H.indexOf('category');
+  let added = 0, created = 0; r.newIds = r.newIds || [];
+  rows.slice(hi + 1).forEach(row => {
+    const last = String(row[iL] || '').trim(), first = iF >= 0 ? String(row[iF] || '').trim() : '';
+    if (!last && !first) return;
+    const name = titleCase((first + ' ' + last).trim());
+    let rd = riderByName(name);
+    if (!rd) { rd = { id: uid(), name, speeds: [] }; S.riders.list.push(rd); created++; r.newIds.push(rd.id); }
+    if (addEntrant(r, rd.id, iC >= 0 ? String(row[iC] || '').trim() : '')) added++;
+  });
+  if (created) save(S.riders);
+  syncRace(r); save(r); render();
+  setStatus('Imported: ' + added + ' added' + (created ? ', ' + created + ' new riders' : '') + '. Saving…');
+}
+$('#fileHist').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f || !canEdit) return;
+  try {
+    const wb = await readSheet(f);
+    const sn = wb.SheetNames.find(n => /average/i.test(n)) || wb.SheetNames[0];
+    importHistory(XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: '' }));
+  } catch (err) { setStatus('Import failed – ' + (err.message || err), true); }
+});
+function importHistory(rows) {
+  const hi = rows.findIndex(row => row.some(c => /^name$/i.test(String(c).trim())));
+  if (hi < 0) { setStatus('Import failed – no Name column found', true); return; }
+  const H = rows[hi].map(c => String(c).trim());
+  const iN = H.findIndex(c => /^name$/i.test(c));
+  const rc = H.map((c, i) => /^R\d+$/i.test(c) ? i : -1).filter(i => i >= 0);
+  let nr = 0, ns = 0;
+  rows.slice(hi + 1).forEach(row => {
+    const name = String(row[iN] || '').trim(); if (!name) return;
+    let rd = riderByName(name); if (!rd) { rd = { id: uid(), name, speeds: [] }; S.riders.list.push(rd); nr++; }
+    rd.speeds = rd.speeds || [];
+    rc.forEach(i => { const v = num(row[i]); if (!(v > 0)) return; const l = 'Sheet ' + H[i].toUpperCase(); if (rd.speeds.some(s => s.l === l)) return; rd.speeds.push({ id: uid(), v, l }); ns++; });
+  });
+  save(S.riders); render();
+  setStatus('Imported ' + ns + ' speeds' + (nr ? ', ' + nr + ' new riders' : '') + '. Saving…');
+}
+
+/* ============ PDF ============ */
+const SHEETS = {
+  handicap: [['start', 'Start sheet'], ['brief', 'Briefing'], ['finish', 'Blank finish-order sheet']],
+  scratch: [['entries', 'Entry list by grade'], ['brief', 'Briefing'], ['results', 'Blank results sheet (one per grade)']],
+  tt: [['start', 'Start sheet'], ['brief', 'Briefing'], ['timing', 'Blank timing sheet']],
+};
+function openPdf() {
+  const r = curRace(); if (!r) return; const sel = UI.pdf || {};
+  $('#pdfOpts').innerHTML = SHEETS[r.type].map(([k, l]) => '<label class="c"><input type="checkbox" data-sheet="' + k + '"' + (sel[r.type + k] === false ? '' : ' checked') + '> ' + l + '</label>').join('');
+  $('#dlgPdf').showModal();
+}
+$('#pdfGo').addEventListener('click', () => {
+  const r = curRace(); UI.pdf = UI.pdf || {};
+  const ks = [...document.querySelectorAll('#pdfOpts input')].filter(x => { UI.pdf[r.type + x.dataset.sheet] = x.checked; return x.checked; }).map(x => x.dataset.sheet);
+  saveUI(); $('#dlgPdf').close(); if (!ks.length) return;
+  $('#report').innerHTML = buildReport(r, ks);
+  const old = document.title; document.title = r.name + (r.date ? ' ' + r.date : '');
+  setTimeout(() => { window.print(); document.title = old; }, 50);
+});
+function rhead(r, title) {
+  return '<div class="rh"><img src="' + document.querySelector('aside .logo img').src + '" alt=""><div class="t"><b>' + esc(title) + '</b><span>' + esc(r.name) + (r.date ? ' · ' + esc(fmtDate(r.date)) : '') + (num(r.dist) ? ' · ' + num(r.dist) + ' km' : '') + (num(r.laps) ? ' (' + num(r.laps) + ' lap' + (num(r.laps) > 1 ? 's' : '') + ')' : '') + '</span></div></div>';
+}
+function buildReport(r, ks) {
+  buildAvg(); syncRace(r);
+  const pages = [];
+  ks.forEach(k => {
+    if (k === 'brief') pages.push(rhead(r, 'Rider briefing') + briefList(r));
+    if (r.type === 'handicap' && k === 'start') {
+      const G = hcGroups(r).slice().sort((a, b) => (a.start == null) - (b.start == null) || a.start - b.start || a.i - b.i);
+      let h = rhead(r, 'Handicap start sheet');
+      G.forEach(x => { h += '<div class="grp"><h2>Group ' + x.i + ' – start +' + mmss(x.start) + ' <span style="font-weight:400;font-size:11pt">(' + f2(x.ex) + ' km/h)</span></h2><table><thead><tr><th style="width:50%">Rider</th><th>Category</th><th style="width:16%">Present</th></tr></thead><tbody>' + x.m.map(id => '<tr><td>' + esc(riderById(id).name) + '</td><td>' + esc(entryOf(r, id).cat || '') + '</td><td></td></tr>').join('') + '</tbody></table></div>'; });
+      const un = entrantIds(r).filter(id => !(r.hc.g && r.hc.g[id] >= 0));
+      if (un.length) h += '<div class="grp"><h2>Unassigned</h2><table><tbody>' + un.map(id => '<tr><td>' + esc(riderById(id).name) + '</td></tr>').join('') + '</tbody></table></div>';
+      pages.push(h);
+    }
+    if (r.type === 'handicap' && k === 'finish') {
+      const n = entrantIds(r).length + 3;
+      pages.push(rhead(r, 'Finish order') + '<table class="blank"><thead><tr><th style="width:12%">Pos</th><th style="width:48%">Rider</th><th style="width:20%">Group</th><th>Notes</th></tr></thead><tbody>' + Array.from({ length: n }, (_, i) => '<tr><td>' + (i + 1) + '</td><td></td><td></td><td></td></tr>').join('') + '</tbody></table>');
+    }
+    if (r.type === 'scratch' && k === 'entries') {
+      const I = scInfo(r); let h = rhead(r, 'Entry list by grade');
+      I.finals.concat(I.rows.some(x => !x.fin) ? [''] : []).forEach(gr => {
+        const rows = I.rows.filter(x => x.fin === gr).sort((a, b) => riderById(a.id).name.localeCompare(riderById(b.id).name));
+        if (!rows.length) return;
+        h += '<div class="grp"><h2>' + (gr ? 'Grade ' + esc(gr) : 'No grade') + ' (' + rows.length + ')</h2><table><thead><tr><th style="width:60%">Rider</th><th>Present</th></tr></thead><tbody>' + rows.map(x => '<tr><td>' + esc(riderById(x.id).name) + '</td><td></td></tr>').join('') + '</tbody></table></div>';
+      });
+      pages.push(h);
+    }
+    if (r.type === 'scratch' && k === 'results') {
+      const I = scInfo(r);
+      (I.finals.length ? I.finals : ['']).forEach(gr => {
+        const n = I.rows.filter(x => x.fin === gr).length + 3;
+        pages.push(rhead(r, 'Results' + (gr ? ' – Grade ' + gr : '')) + '<table class="blank"><thead><tr><th style="width:12%">Place</th><th style="width:55%">Rider</th><th>Notes</th></tr></thead><tbody>' + Array.from({ length: n }, (_, i) => '<tr><td>' + (i + 1) + '</td><td></td><td></td></tr>').join('') + '</tbody></table>');
+      });
+    }
+    if (r.type === 'tt' && (k === 'start' || k === 'timing')) {
+      const T = r.tt; const iv = num(T.interval) || 0;
+      const rows = T.order.map((id, i) => ({ i, name: riderById(id).name, cat: entryOf(r, id).cat || '', st: clockAdd(T.first, i * iv) }));
+      if (k === 'start') pages.push(rhead(r, 'Time trial start sheet') + '<p>First start ' + esc(T.first || '–') + ', ' + iv + ' s interval.</p><table><thead><tr><th style="width:8%">No.</th><th style="width:50%">Rider</th><th>Category</th><th>Start time</th></tr></thead><tbody>' + rows.map(x => '<tr><td>' + (x.i + 1) + '</td><td>' + esc(x.name) + '</td><td>' + esc(x.cat) + '</td><td>' + x.st + '</td></tr>').join('') + '</tbody></table>');
+      else pages.push(rhead(r, 'Time trial timing sheet') + '<table class="blank"><thead><tr><th style="width:7%">No.</th><th style="width:33%">Rider</th><th style="width:14%">Start</th><th style="width:16%">Finish</th><th style="width:16%">Time</th><th>Place</th></tr></thead><tbody>' + rows.map(x => '<tr><td>' + (x.i + 1) + '</td><td>' + esc(x.name) + '</td><td>' + x.st + '</td><td></td><td></td><td></td></tr>').join('') + '</tbody></table>');
+    }
+  });
+  return pages.map(p => '<div class="page">' + p + '</div>').join('');
+}
+
+/* ============ Start ============ */
+(async function init() {
+  setStatus('Loading…'); render();
+  try { Store = await makeStore(); applyDocs(); }
+  catch (e) { loadErr = (e && e.message) || String(e); Store = { docs: new Map(), save: async () => { throw { message: 'not connected' }; }, check: async () => false, onChange() {} }; }
+  if (EDIT.pass && !loadErr) { try { canEdit = await Store.check(EDIT.pass); } catch (e) { canEdit = false; } }
+  status = '';
+  Store.onChange((path, data) => {
+    if (path === '*') { if (!pending.size) { applyDocs(); render(); } return; }
+    if (pending.has(path)) return;
+    if (data == null) Store.docs.delete(path); else Store.docs.set(path, data);
+    applyDocs(); render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
