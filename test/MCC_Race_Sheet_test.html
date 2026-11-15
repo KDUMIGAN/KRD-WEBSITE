@@ -224,6 +224,7 @@ async function makeStore() {
 /* ============ Helpers ============ */
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const canon = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x) ? Object.keys(x).sort().reduce((o, key) => { o[key] = x[key]; return o; }, {}) : x);
 const uid = () => Math.random().toString(36).slice(2, 10);
 const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
@@ -250,6 +251,7 @@ try { Object.assign(UI, JSON.parse(localStorage.getItem('mcc.ui') || '{}')); } c
 const saveUI = () => { try { localStorage.setItem('mcc.ui', JSON.stringify(UI)); } catch (e) {} };
 let Store = null, canEdit = false, loadErr = null, status = '';
 const pending = new Map();
+const lastSaved = new Map();
 
 function applyDocs() {
   const d = Store.docs;
@@ -269,6 +271,7 @@ function save(obj) {
 }
 function flush(path) {
   const data = Store.docs.get(path);
+  lastSaved.set(path, canon(data === undefined ? null : data));
   return Store.save(path, data === undefined ? null : JSON.parse(JSON.stringify(data))).then(() => {
     pending.delete(path); if (!pending.size) setStatus('Saved');
   }).catch(e => {
@@ -426,6 +429,15 @@ function render() {
   }
   if (key) { const el = document.querySelector('[data-k="' + CSS.escape(key) + '"]'); if (el) { el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
 }
+let renderWaiting = false;
+function renderSoon() {
+  const ae = document.activeElement;
+  if (ae && ae.closest && ae.closest('#view') && /^(SELECT|INPUT|TEXTAREA)$/.test(ae.tagName)) {
+    if (!renderWaiting) { renderWaiting = true; ae.addEventListener('blur', () => { renderWaiting = false; setTimeout(render, 0); }, { once: true }); }
+    return;
+  }
+  render();
+}
 function curTab() { const tabs = TABS[UI.view] || []; const t = UI.tab[UI.view]; return tabs.some(x => x[0] === t) ? t : (tabs[0] || [])[0]; }
 function renderTop() {
   const parts = [];
@@ -514,7 +526,7 @@ function viewEntries(r) {
 
 /* ----- Handicaps ----- */
 function viewHc(r) {
-  const before = JSON.stringify(r.hc); hcSync(r); if (canEdit && JSON.stringify(r.hc) !== before) save(r);
+  const before = canon(r.hc); hcSync(r); if (canEdit && canon(r.hc) !== before) save(r);
   const d = dis(); const G = hcGroups(r); const D = num(r.dist); const g = r.hc.g || {};
   const ids = entrantIds(r); const un = ids.filter(id => !(g[id] >= 0));
   const opts = cur => G.map(x => '<option value="' + x.i + '"' + (x.i === cur ? ' selected' : '') + '>Group ' + x.i + '</option>').join('') + '<option value="' + G.length + '">Group ' + G.length + '</option>';
@@ -611,8 +623,8 @@ function viewSpeeds() {
   list.forEach(r => {
     const sp = speedsOf(r.id);
     h += '<tr><td>' + (canEdit ? '<input type="text" style="width:190px" data-k="rn.' + r.id + '" data-f="riderName" data-id="' + r.id + '" value="' + esc(r.name) + '">' : esc(r.name)) + '</td><td class="n">' + sp.length + '</td><td class="n"><b>' + f2(avgOf(r.id)) + '</b></td><td><div class="chips">' +
-      sp.map(s => '<span class="chip' + (s.race ? ' race' : '') + '" title="' + esc(s.l || '') + (s.race ? ' – from handicap results' : '') + '"><b>' + f2(s.v) + '</b>' + (s.l ? '&nbsp;<span class="mute">' + esc(s.l) + '</span>' : '') + (canEdit && !s.race ? '<button class="x" title="Delete speed" data-act="delSpeed" data-id="' + r.id + '" data-s="' + s.id + '">×</button>' : '&nbsp;') + '</span>').join('') + '</div></td>';
-    if (canEdit) h += '<td class="nw"><input class="num" type="number" step="0.01" inputmode="decimal" placeholder="km/h" data-k="as.v.' + r.id + '" id="asv_' + r.id + '"> <input type="text" placeholder="Label" style="width:120px;height:34px" data-k="as.l.' + r.id + '" id="asl_' + r.id + '"> <button class="btn sm" data-act="addSpeed" data-id="' + r.id + '">Add</button></td><td><button class="x" title="Delete rider" data-act="delRider" data-id="' + r.id + '">×</button></td>';
+      sp.map(s => '<span class="chip' + (s.race ? ' race' : '') + '" title="' + (s.race ? esc(s.l) + ' – from handicap results' : '') + '"><b>' + f2(s.v) + '</b>' + (canEdit && !s.race ? '<button class="x" title="Delete speed" data-act="delSpeed" data-id="' + r.id + '" data-s="' + s.id + '">×</button>' : '&nbsp;') + '</span>').join('') + '</div></td>';
+    if (canEdit) h += '<td class="nw"><input class="num" type="number" step="0.01" inputmode="decimal" placeholder="km/h" data-k="as.v.' + r.id + '" id="asv_' + r.id + '"> <button class="btn sm" data-act="addSpeed" data-id="' + r.id + '">Add</button></td><td><button class="x" title="Delete rider" data-act="delRider" data-id="' + r.id + '">×</button></td>';
     h += '</tr>';
   });
   return h + '</tbody></table></div></div>';
@@ -704,7 +716,7 @@ function act(a, el) {
       render(); break;
     }
     case 'addSpeed': {
-      const v = num(($('#asv_' + id) || {}).value); const l = (($('#asl_' + id) || {}).value || '').trim();
+      const v = num(($('#asv_' + id) || {}).value); const l = '';
       if (!(v > 0)) { const n = $('#asv_' + id); if (n) n.focus(); return; }
       const rd = riderById(id); rd.speeds = rd.speeds || []; rd.speeds.push({ id: uid(), v, l }); save(S.riders); render(); break;
     }
@@ -869,10 +881,11 @@ function buildReport(r, ks) {
   if (EDIT.pass && !loadErr) { try { canEdit = await Store.check(EDIT.pass); } catch (e) { canEdit = false; } }
   status = '';
   Store.onChange((path, data) => {
-    if (path === '*') { if (!pending.size) { applyDocs(); render(); } return; }
+    if (path === '*') { if (!pending.size) { applyDocs(); renderSoon(); } return; }
     if (pending.has(path)) return;
+    if (lastSaved.get(path) === canon(data == null ? null : data)) return; // our own save coming back
     if (data == null) Store.docs.delete(path); else Store.docs.set(path, data);
-    applyDocs(); render();
+    applyDocs(); renderSoon();
   });
   render();
 })();
