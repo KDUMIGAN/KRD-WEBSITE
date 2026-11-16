@@ -779,6 +779,7 @@ async function boot() {
     if (!snap.metadata.fromCache) ready();
     render();
   }, e => { clearTimeout(timer); S.loading = false; S.error = e.message; render(); });
+  db.doc('stats/history').onSnapshot(d => { S.history = d.exists ? d.data() : null; render(); }, () => {});
   db.doc('stats/aliases').onSnapshot(d => { S.aliases = (d.exists && d.data().map) || {}; render(); }, () => {});
   db.doc('stats/baseline').onSnapshot(d => { S.baseline = d.exists ? d.data() : null; if (!d.metadata.fromCache) ready(); render(); },
     e => { ready(); });
@@ -874,7 +875,7 @@ function viewStandings() {
   const serSel = `<label class="row small muted" for="serSel">Show <select id="serSel" data-act="series"><option value="">Whole season</option>${(se.series || []).map(s => `<option value="${s.id}" ${S.ui.series === s.id ? 'selected' : ''}>${esc(s.name)} series</option>`).join('')}</select></label>`;
   let tables = '';
   const [kind, key] = sel.split(':');
-  if (kind === 'o') { const t = (se.overalls || []).find(t => t.id === key) || (se.overalls || [])[0]; if (t) tables = standingsTable(se, scored, 'overall', t.id, t.name); }
+  if (kind === 'o') { const t = (se.overalls || []).find(t => t.id === key) || (se.overalls || [])[0]; if (t) tables = standingsTable(se, scored, 'overall', t.id, t.name); else tables = (se.grades || []).map(g => standingsTable(se, scored, 'graded', g.id, g.name, true)).join(''); }
   else if (key === '*') tables = (se.grades || []).map(g => standingsTable(se, scored, 'graded', g.id, g.name, true)).join('');
   else tables = standingsTable(se, scored, 'graded', key, gradeName(key));
   const doneN = ENG.allRounds(se).filter(r => scored[r.id] && scored[r.id].has).length, allN = ENG.allRounds(se).length;
@@ -1260,7 +1261,7 @@ function computeStats() {
   const cutYear = cut ? Number(cut.slice(0, 4)) : 0;
   const after = (se, rounds) => { const last = rounds.map(r => r.date).filter(Boolean).sort().pop(); return last ? last > cut : se.year > cutYear; };
   const riders = new Map();
-  const R = n => { n = canon(n); if (!riders.has(n)) riders.set(n, { n, races: 0, r: {}, s: {} }); return riders.get(n); };
+  const R = n => { n = canon(n); if (!riders.has(n)) riders.set(n, { n, races: 0, r: {}, s: {}, c: {}, ct: 0 }); return riders.get(n); };
   B.riders.forEach(x => riders.set(x.n, clone(x)));
   const bump = (rec, sec, pos, grp) => {
     const add = k => { rec[sec][k] = rec[sec][k] || {}; rec[sec][k][grp] = (rec[sec][k][grp] || 0) + 1; };
@@ -1272,7 +1273,7 @@ function computeStats() {
     const races = racesFor(se.year); const sc = ENG.scoreAll(se, races);
     const grp = gid => ((se.grades || []).find(g => g.id === gid) || {}).group || 'Other';
     const rounds = ENG.allRounds(se);
-    const yr = { year: se.year, races: 0, types: {}, sets: {}, app: true };
+    const yr = { year: se.year, races: 0, types: {}, sets: {}, app: true, inferMen: !!se.genderFromWomenGrades };
     for (const r of rounds) {
       const s = sc[r.id]; if (!s || !s.has) continue;
       const grpKey = r.raceGroup ? 'g:' + r.raceGroup : r.id;
@@ -1290,7 +1291,7 @@ function computeStats() {
           const rec = R(n);
           const rk = (r.raceGroup ? 'g:' + r.raceGroup : r.id) + '|' + rec.n;
           if (!seen.has(rk) && !(yr.riderRaces = yr.riderRaces || new Set()).has(rk)) { rec.races++; seen.add(rk); yr.riderRaces.add(rk); }
-          if (c.pos) bump(rec, 'r', c.pos, grp(gid));
+          if (c.pos && g.titles !== false) bump(rec, 'r', c.pos, grp(gid)); // age categories (e.g. 2018 U15) don't add extra wins
         }
       }
     }
@@ -1299,7 +1300,7 @@ function computeStats() {
       const rs = ser.rounds || []; if (!rs.length) continue;
       if (!rs.every(r => sc[r.id] && sc[r.id].has) || !after(se, rs)) continue;
       for (const t of se.overalls || []) ENG.standings(se, sc, 'overall', t.id, { seriesId: ser.id }).rows.forEach(rw => bump(R(rw.name), 's', rw.place, 'Overall'));
-      for (const g of se.grades || []) ENG.standings(se, sc, 'graded', g.id, { seriesId: ser.id }).rows.forEach(rw => bump(R(rw.name), 's', rw.place, g.group));
+      for (const g of se.grades || []) if (g.titles !== false) ENG.standings(se, sc, 'graded', g.id, { seriesId: ser.id }).rows.forEach(rw => bump(R(rw.name), 's', rw.place, g.group));
     }
     // only the newest season can be in progress; older seasons are finished even if some rounds never ran
     const newest = Math.max(...Object.keys(S.seasons).map(Number));
@@ -1308,14 +1309,34 @@ function computeStats() {
     for (const t of se.overalls || []) lists.push({ table: t.name, top: ENG.standings(se, sc, 'overall', t.id).rows.slice(0, 10).map(r => r.name) });
     for (const g of se.grades || []) lists.push({ table: g.name, top: ENG.standings(se, sc, 'graded', g.id).rows.slice(0, 10).map(r => r.name) });
     lists.filter(l => l.top.length).forEach(l => resultsApp.push({ year: se.year, table: l.table, top: l.top, live: !complete }));
+    if (se.clubList && se.clubList.length) resultsApp.unshift({ year: se.year, table: 'Club Championship', top: se.clubList.map(canon), live: false });
+    // season titles: 1st overall = club title; top 3 of each grade that counts for titles = category result
+    if (complete) {
+      for (const t of se.overalls || []) { const w = ENG.standings(se, sc, 'overall', t.id).rows[0]; if (w) R(w.name).ct++; }
+      if (se.clubList && se.clubList.length) R(se.clubList[0]).ct++;
+      for (const g of se.grades || []) {
+        if (g.titles === false) continue;
+        ENG.standings(se, sc, 'graded', g.id).rows.slice(0, 3).forEach(rw => bump(R(rw.name), 'c', rw.place, g.group || g.name));
+      }
+    }
+  }
+  // years known only from season results (no race data)
+  const histYears = ((S.history || {}).years || []).slice().sort((a, b) => a.year - b.year);
+  for (const h of histYears) {
+    (h.lists || []).forEach(l => resultsApp.push({ year: h.year, table: l.table, top: l.top.map(canon), live: false }));
+    if (h.club && h.club.length) R(h.club[0]).ct++;
+    (h.categories || []).forEach(c => c.top.forEach((n, i) => { if (n) bump(R(n), 'c', i + 1, c.group || c.grade); }));
   }
   // summarise app years into baseline shape
   const yearsOut = B.years.map(y => ({ ...y })).concat(yearsApp.map(y => {
-    const tm = (pred) => { const all = new Set(), m = new Set(), f = new Set(); for (const [k, set] of Object.entries(y.sets)) { const [j, g, sx] = k.split('|'); if (!pred(j, g)) continue; set.forEach(n => { all.add(n); if (sx === 'M') m.add(n); if (sx === 'F') f.add(n); }); } return [all.size, m.size, f.size]; };
-    return { year: y.year, races: y.races, types: y.types, seniors: tm(j => j === 'S'), juniors: tm(j => j === 'J'), groups: Object.fromEntries(GROUPS.map(g => [g, tm((j, gg) => gg === g)])), app: true };
-  })).sort((a, b) => b.year - a.year);
+    // where grades were mixed (e.g. 2018 A/B/C), a rider who never raced a women's category is counted as a man
+    const women = new Set(); for (const [k, set] of Object.entries(y.sets)) if (k.split('|')[2] === 'F') set.forEach(n => women.add(n));
+    const tm = (pred) => { const all = new Set(), m = new Set(), f = new Set(); for (const [k, set] of Object.entries(y.sets)) { const [j, g, sx] = k.split('|'); if (!pred(j, g)) continue; set.forEach(n => { all.add(n); if (sx === 'M') m.add(n); if (sx === 'F' || (y.inferMen && women.has(n))) f.add(n); else if (y.inferMen) m.add(n); }); } return [all.size, m.size, f.size]; };
+    const everyone = new Set(); Object.values(y.sets).forEach(set => set.forEach(n => everyone.add(n)));
+    return { year: y.year, riders: everyone.size, races: y.races, types: y.types, seniors: tm(j => j === 'S'), juniors: tm(j => j === 'J'), groups: Object.fromEntries(GROUPS.map(g => [g, tm((j, gg) => gg === g)])), app: true };
+  })).concat(histYears.map(h => ({ year: h.year, races: h.races || 0, riders: h.riders || null, types: h.types || {}, partial: true }))).sort((a, b) => b.year - a.year);
   const tot = (o) => Object.values(o || {}).reduce((a, b) => a + b, 0);
-  const list = [...riders.values()].map(x => ({ ...x, W: tot((x.r || {}).W), P: tot((x.r || {}).P), T5: tot((x.r || {}).T5), T10: tot((x.r || {}).T10), SW: tot((x.s || {}).W), SP: tot((x.s || {}).P) }));
+  const list = [...riders.values()].map(x => ({ ...x, W: tot((x.r || {}).W), P: tot((x.r || {}).P), T5: tot((x.r || {}).T5), T10: tot((x.r || {}).T10), SW: tot((x.s || {}).W), SP: tot((x.s || {}).P), CT: x.ct || 0, CW: tot((x.c || {}).W) }));
   return { cut, years: yearsOut, riders: list, results: B.results.map(r => ({ ...r })).concat(resultsApp) };
 }
 function viewStats() {
@@ -1325,25 +1346,25 @@ function viewStats() {
   let best = {};
   const trio = (a, k) => a && a[0] ? `${a[0]}<span class="cell-pos"><span class="${a[1] > 0 && best[k + 'm'] === a[1] ? 'subtop' : ''}">${a[1]}M</span> <span class="${a[2] > 0 && best[k + 'f'] === a[2] ? 'subtop' : ''}">${a[2]}F</span></span>` : '<span class="muted">–</span>';
   best = {}; const bump = (k, v) => { if (v > 0 && v > (best[k] || 0)) best[k] = v; };
-  st.years.forEach(y => { bump('races', y.races); types.forEach(t => bump(t, (y.types || {})[t] || 0)); const tri = (k, a) => { a = a || []; bump(k, a[0] || 0); bump(k + 'm', a[1] || 0); bump(k + 'f', a[2] || 0); }; tri('S', y.seniors); tri('J', y.juniors); GROUPS.forEach(g => tri(g, (y.groups || {})[g])); });
+  st.years.forEach(y => { bump('races', y.races); bump('riders', y.riders || 0); types.forEach(t => bump(t, (y.types || {})[t] || 0)); const tri = (k, a) => { a = a || []; bump(k, a[0] || 0); bump(k + 'm', a[1] || 0); bump(k + 'f', a[2] || 0); }; tri('S', y.seniors); tri('J', y.juniors); GROUPS.forEach(g => tri(g, (y.groups || {})[g])); });
   const top = (k, v) => v > 0 && best[k] === v ? ' top' : '';
-  const yRows = st.years.map(y => `<tr><td><strong>${y.year}</strong></td><td class="c tot${top('races', y.races)}">${y.races}</td>${types.map(t => `<td class="c${top(t, (y.types || {})[t] || 0)}">${(y.types || {})[t] || '<span class="muted">–</span>'}</td>`).join('')}<td class="c sub${top('S', (y.seniors || [])[0] || 0)}">${trio(y.seniors, 'S')}</td><td class="c sub${top('J', (y.juniors || [])[0] || 0)}">${trio(y.juniors, 'J')}</td>${GROUPS.map(g => `<td class="c${top(g, ((y.groups || {})[g] || [])[0] || 0)}">${trio((y.groups || {})[g], g)}</td>`).join('')}</tr>`).join('');
+  const yRows = st.years.map(y => `<tr><td><strong>${y.year}</strong></td><td class="c tot${top('races', y.races)}">${y.races || '<span class="muted">–</span>'}</td><td class="c${top('riders', y.riders || 0)}">${y.riders || '<span class="muted">–</span>'}</td>${types.map(t => `<td class="c${top(t, (y.types || {})[t] || 0)}">${(y.types || {})[t] || '<span class="muted">–</span>'}</td>`).join('')}<td class="c sub${top('S', (y.seniors || [])[0] || 0)}">${trio(y.seniors, 'S')}</td><td class="c sub${top('J', (y.juniors || [])[0] || 0)}">${trio(y.juniors, 'J')}</td>${GROUPS.map(g => `<td class="c${top(g, ((y.groups || {})[g] || [])[0] || 0)}">${trio((y.groups || {})[g], g)}</td>`).join('')}</tr>`).join('');
   const q = S.ui.statQ.trim().toUpperCase();
   const sortKey = S.ui.statSort;
   const rs = st.riders.filter(r => !q || r.n.includes(q)).sort((a, b) => sortKey === 'n' ? a.n.localeCompare(b.n) : (b[sortKey] || 0) - (a[sortKey] || 0) || a.n.localeCompare(b.n));
-  const cols = [['n', 'Rider'], ['races', 'Races'], ['W', 'Wins'], ['P', 'Podiums'], ['T5', 'Top 5s'], ['T10', 'Top 10s'], ['SW', 'Series wins'], ['SP', 'Series podiums']];
+  const cols = [['n', 'Rider'], ['races', 'Races'], ['W', 'Wins'], ['P', 'Podiums'], ['T5', 'Top 5s'], ['T10', 'Top 10s'], ['SW', 'Series wins'], ['SP', 'Series podiums'], ['CT', 'Club titles'], ['CW', 'Category titles']];
   const th = cols.map(([k, l]) => `<th class="${k === 'n' ? '' : 'c'} sortable" data-act="statSort" data-v="${k}" aria-sort="${sortKey === k ? 'descending' : 'none'}">${l}${sortKey === k ? ' ▾' : ''}</th>`).join('');
   const brk = (sec, r) => { const ks = ['W', 'P', 'T5', 'T10']; const gs = [...new Set(ks.flatMap(k => Object.keys((r[sec] || {})[k] || {})))]; if (!gs.length) return '<span class="muted">None yet</span>'; return `<table><thead><tr><th>Group</th><th class="c">Wins</th><th class="c">Podiums</th><th class="c">Top 5s</th><th class="c">Top 10s</th></tr></thead><tbody>${gs.map(g => `<tr><td>${esc(g)}</td>${ks.map(k => `<td class="c">${((r[sec] || {})[k] || {})[g] || 0}</td>`).join('')}</tr>`).join('')}</tbody></table>`; };
-  const rRows = rs.slice(0, 400).map(r => `<tr class="sortable" data-act="statOpen" data-v="${esc(r.n)}"><td><strong>${esc(r.n)}</strong></td><td class="c">${r.races}</td><td class="c">${r.W}</td><td class="c">${r.P}</td><td class="c">${r.T5}</td><td class="c">${r.T10}</td><td class="c">${r.SW}</td><td class="c">${r.SP}</td></tr>` +
-    (S.ui.statOpen === r.n ? `<tr class="expand"><td colspan="8"><div class="row" style="align-items:flex-start;gap:24px"><div><h4>Race results</h4>${brk('r', r)}</div><div><h4>Series results</h4>${brk('s', r)}</div></div></td></tr>` : '')).join('');
+  const rRows = rs.slice(0, 400).map(r => `<tr class="sortable" data-act="statOpen" data-v="${esc(r.n)}"><td><strong>${esc(r.n)}</strong></td><td class="c">${r.races}</td><td class="c">${r.W}</td><td class="c">${r.P}</td><td class="c">${r.T5}</td><td class="c">${r.T10}</td><td class="c">${r.SW}</td><td class="c">${r.SP}</td><td class="c">${r.CT}</td><td class="c">${r.CW}</td></tr>` +
+    (S.ui.statOpen === r.n ? `<tr class="expand"><td colspan="10"><div class="row" style="align-items:flex-start;gap:24px"><div><h4>Race results</h4>${brk('r', r)}</div><div><h4>Series results</h4>${brk('s', r)}</div><div><h4>Season results (category)</h4>${brk('c', r)}${r.CT ? `<p class="small" style="margin-top:6px">Club titles: ${r.CT}</p>` : ''}</div></div></td></tr>` : '')).join('');
   const hy = [...new Set(st.results.map(r => r.year))].sort((a, b) => b - a);
   const hYear = hy.includes(S.ui.histYear) ? S.ui.histYear : hy[0];
   const hist = st.results.filter(r => r.year === hYear).map(r => `<div class="panel"><h3>${esc(r.table)}${r.live ? ' <span class="tag warn">in progress</span>' : ''}</h3><ol class="num">${r.top.map(n => `<li>${esc(n)}</li>`).join('')}</ol></div>`).join('');
   return `<div class="stack">
     <div><h2>Club stats</h2><p class="lede">Counted from every season on this page${st.years.length ? ', ' + Math.min(...st.years.map(y => y.year)) + ' onward' : ''}. Placings for carried-over rounds come from each round's points. Importing results updates these automatically.</p></div>
-    <section class="stack" style="gap:8px"><h3>Seasons</h3><div class="tablebox"><table><thead><tr><th>Year</th><th class="c">Races</th>${types.map(t => `<th class="c">${t}</th>`).join('')}<th class="c sub">Seniors</th><th class="c sub">Juniors</th>${GROUPS.map(g => `<th class="c">${esc(g)}</th>`).join('')}</tr></thead><tbody>${yRows || '<tr><td colspan="20" class="empty">No seasons yet</td></tr>'}</tbody></table></div><p class="small muted">Rider counts are unique riders, with men and women shown small. The biggest year in each column is shaded gold, and the biggest men's and women's numbers are marked in gold too.</p></section>
+    <section class="stack" style="gap:8px"><h3>Seasons</h3><div class="tablebox"><table><thead><tr><th>Year</th><th class="c">Races</th><th class="c">Riders</th>${types.map(t => `<th class="c">${t}</th>`).join('')}<th class="c sub">Seniors</th><th class="c sub">Juniors</th>${GROUPS.map(g => `<th class="c">${esc(g)}</th>`).join('')}</tr></thead><tbody>${yRows || '<tr><td colspan="20" class="empty">No seasons yet</td></tr>'}</tbody></table></div><p class="small muted">Rider counts are unique riders, with men and women shown small. Years with only season results (no race results) show what's known. The biggest year in each column is shaded gold, and the biggest men's and women's numbers are marked in gold too.</p></section>
     <section class="stack" style="gap:8px"><div class="row"><h3>Riders</h3><span class="small muted">${st.riders.length} riders. Select a rider to see results by grade.</span><span class="spacer"></span><input id="statQ" type="search" placeholder="Find a rider" value="${esc(S.ui.statQ)}" data-act="statQ" aria-label="Find a rider"></div>
-      <div class="tablebox" style="max-height:620px"><table><thead><tr>${th}</tr></thead><tbody>${rRows || '<tr><td colspan="8" class="empty">No riders match</td></tr>'}</tbody></table></div></section>
+      <div class="tablebox" style="max-height:620px"><table><thead><tr>${th}</tr></thead><tbody>${rRows || '<tr><td colspan="10" class="empty">No riders match</td></tr>'}</tbody></table></div></section>
     <section class="stack" style="gap:8px"><div class="row"><h3>Final results by year</h3><span class="spacer"></span>${hy.length ? `<select id="histYear" data-act="histYear" aria-label="Year">${hy.map(y => `<option ${y === hYear ? 'selected' : ''}>${y}</option>`).join('')}</select>` : ''}</div>
       ${hist ? `<div class="hist">${hist}</div>` : '<div class="panel empty">No results yet.</div>'}</section></div>`;
 }
